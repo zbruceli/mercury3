@@ -17,7 +17,7 @@ Read these first, in order:
 4. [docs/FEATURES.md](docs/FEATURES.md) / [docs/ROADMAP.md](docs/ROADMAP.md): feature IDs and current milestone
 5. [docs/BLOG_ALIGNMENT.md](docs/BLOG_ALIGNMENT.md): how results map onto the article
 
-Current phase: **M0 complete (2026-10-20); M1 (harness core) is next.** The scaffolding is in place, the model registry is checked against vendor docs, and the R0 live smoke checks passed 30/30 on all six models. Recordings are in `tests/fixtures/recordings/` (see docs/M0_SMOKE_RESULTS.md for the findings M1 must implement).
+Current phase: **M1 (harness core) is built and passes offline** (2026-10-20): providers, runner, store, cost, stats, and the CLI, with 107 tests and 96% coverage. The live harness smoke (`r0_smoke.yaml`) passed 24/24 for $0.00028 (docs/M0_SMOKE_RESULTS.md §7). Still open for M1: F2.5 (the network baseline probe). See IMPLEMENTATION_PLAN §6 for what was built and how it differs from the plan.
 
 ## Commands
 
@@ -27,14 +27,14 @@ make check                   # ruff + mypy + offline tests + validate-config
 make fmt                     # ruff format + autofix
 make test-live               # live smoke tests: spends real tokens, run only when asked
 uv run dllm-eval validate-config [--strict]   # check configs/models.yaml; --strict fails on stale entries
+
+uv run dllm-eval run configs/experiments/<x>.yaml --dry-run          # estimate only; always do this first
+uv run --env-file .env dllm-eval run configs/experiments/<x>.yaml --live          # spends tokens: ask first
+uv run --env-file .env dllm-eval run <cfg> --live --resume <run_id>  # finish an interrupted run
+uv run dllm-eval analyze <run_id>                                    # offline: arm table + calls.parquet
 ```
 
-Planned for M1 (not implemented yet):
-
-```bash
-uv run dllm-eval run configs/experiments/<x>.yaml --dry-run   # always dry-run first
-uv run dllm-eval analyze <run_id>                             # offline, never calls APIs
-```
+Without `--live`, `run` prints the estimate and exits 2. Tests use the fake provider (`kind: fake`) and never touch the network.
 
 ## Golden rules
 
@@ -71,7 +71,8 @@ uv run dllm-eval analyze <run_id>                             # offline, never c
 ## Code conventions
 
 - Python 3.12, `uv`, `ruff` (format + lint), `mypy --strict` on `src/`, pydantic v2 for every schema and config.
-- Use cases depend only on the `Provider.chat()` interface. Vendor-specific code stays in `src/dllm_eval/providers/`.
+- Use cases depend only on `BaseProvider.chat()` (via `providers.build_provider`). Multi-turn loops append `result.as_message(provider_key)`, which carries the provider-native turn (`Message.raw`: Anthropic thinking blocks, Gemini thought signatures) that must be echoed back.
+- Vendor-specific code stays in `src/dllm_eval/providers/`.
 - Async I/O with per-provider semaphores and rate limiters. No global mutable state.
 - Prompts are versioned constants (e.g. `PROMPT_V1`). Changing a prompt means a new version, never an edit in place.
 - Model-generated code runs **only** inside the Docker sandbox (no network, resource limits, non-root). Never `exec` or `subprocess` it on the host.

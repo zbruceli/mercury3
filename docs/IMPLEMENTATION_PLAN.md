@@ -155,3 +155,48 @@ Draft in `reports/blog/draft.md`, following BLOG_ALIGNMENT §4. Every number lin
 - gpt-oss-120b on Cerebras adds about 64 fixed prompt tokens and spends reasoning tokens even at `low`.
 - Free tier per minute: 1,000 requests, 1M input tokens, 100k output tokens. 100M free tokens one-time.
 - Full doc index for agents: https://docs.inceptionlabs.ai/llms.txt; OpenAPI: https://api.inceptionlabs.ai/openapi.json.
+
+## 6. M1 as built (2026-10-20)
+
+**Modules** (all under `src/dllm_eval/`)
+
+| Module | What it does |
+|---|---|
+| `schemas.py` | `ChatRequest` / `ChatResult` / `Message` / `ToolCall` / `Usage` / `Timing` / `Frame`. `Usage` fields are `None` when the provider did not report them, never a silent 0 (M0 F3) |
+| `experiment.py` | Experiment YAML: arms (model + fixed settings), prompt workload, repeats, seed, budget, concurrency, `fail_on_warning`, warm-up, `record_raw`. `check_against(registry)` rejects unsupported settings before anything runs |
+| `timing.py` | `Stopwatch`, all marks relative to send. `t_first_byte` = response headers received (the SDK returns the stream object then). TTFT = first non-empty text or tool-call delta; thinking deltas don't count |
+| `providers/base.py` | Validation, error classification, full-jitter retries (SDK retries off, so every retry is counted), and a sliding-window rate limiter shared per provider |
+| `providers/openai_compat.py`, `inception.py`, `anthropic.py` | Pure stream assemblers over dumped dicts, plus thin I/O. Mercury knobs go in `extra_body`; Gemini uses `max_tokens` (`budget_param` in models.yaml); Anthropic tool results are merged into one user message |
+| `providers/fake.py` | Deterministic offline provider with scripted failures/warnings/tool calls |
+| `logging_store.py` | Run dir: `manifest.json` (config, frozen pricing, git SHA + dirty flag, package versions) and append-only `calls.jsonl`, with key and secret-value redaction |
+| `runner.py` | Seeded interleaved job matrix, per-provider semaphores, resume, budget guard, dry-run |
+| `cost.py`, `stats.py` | Frozen-price cost (long-context tier, promo vs regular, unknown cache = uncached); percentiles + seeded bootstrap CIs |
+| `analysis/` | `calls.jsonl` -> DataFrame -> per-arm table; latency stats exclude warm-up and retried calls |
+| `cli.py` | `validate-config`, `run` (dry-run always printed; `--live` required to call APIs; `--resume`), `analyze` |
+
+**Error policy.** Error kinds are retry / call-fatal / run-fatal:
+
+| Status | Kind | Runner action |
+|---|---|---|
+| 408, 409, 429, 5xx, 529, connection errors | retry | Retry with backoff; becomes call-fatal after 5 attempts |
+| 429 with `insufficient_quota` | run-fatal | Abort the run (M0 F1) |
+| 401, 402, 403, 404 | run-fatal | Abort the run |
+| Other 4xx | call-fatal | Record and continue |
+
+A provider `warning` aborts the run when `fail_on_warning` is set (M0 F2). A request-validation error or an unexpected exception also aborts it, so a harness bug doesn't burn budget.
+
+**Resume semantics.** A job counts as done only when its latest record has `status: ok`. Anything else is re-run and appended, and analysis uses the latest record per job. Resuming with a changed experiment config is refused.
+
+**Budget guard.** The runner stops launching jobs once actual spend reaches `budget_usd`. In-flight calls can overshoot by at most concurrency x one call's cost.
+
+**Differences from §4 (M1 plan)**
+
+- Added `experiment.py` (experiment schema) and `Message.raw` / `ChatResult.as_message()` for provider-native replay. The R0 recordings showed Gemini thought signatures, which multi-turn tool loops must echo.
+- `dllm-eval smoke` was not added as a separate command. The harness smoke is an ordinary experiment (`configs/experiments/r0_smoke.yaml`); `scripts/smoke_r0.py` stays as the raw capability probe.
+- `pandas` + `pyarrow` were added for F6.1 (`calls.parquet`).
+- **Not done (carried over):** F2.5, the network baseline probe (P1); F1.9, the `inceptionai` SDK cross-check (P2).
+
+**Tests.** 107 offline tests, 96% coverage; providers are 95–100%.
+- Contract tests replay every R0 recording through the production parsers.
+- The I/O-path tests drive the real adapters through a stub SDK client.
+- The fake-provider tests cover the runner and CLI: interleaving, resume, the budget guard, and aborts on warnings and billing errors.

@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime as dt
 from enum import StrEnum
 from pathlib import Path
-from typing import Self
+from typing import Literal, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -20,6 +20,7 @@ class _Strict(BaseModel):
 class ProviderKind(StrEnum):
     OPENAI_COMPAT = "openai_compat"
     ANTHROPIC = "anthropic"
+    FAKE = "fake"  # deterministic offline provider for tests and dry pipeline runs
 
 
 class Architecture(StrEnum):
@@ -57,6 +58,9 @@ class Provider(_Strict):
     kind: ProviderKind
     base_url: str | None = None
     api_key_env: str
+    # Name of the output-budget field on OpenAI-compatible endpoints (Gemini's compat
+    # layer takes max_tokens; verified in R0).
+    budget_param: Literal["max_completion_tokens", "max_tokens"] = "max_completion_tokens"
     tier: str | None = None
     rate_limits: RateLimits | None = None
     docs_url: str

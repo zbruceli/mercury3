@@ -1,0 +1,27 @@
+# R0 through the harness (M1 exit gate): every model at its lowest arm, a few tiny prompts.
+# SPENDS TOKENS (worst case well under $0.05). Dry-run first:
+#   uv run dllm-eval run configs/experiments/r0_smoke.yaml --dry-run
+#   uv run --env-file .env dllm-eval run configs/experiments/r0_smoke.yaml --live
+name: r0-smoke
+description: Harness smoke test, one lowest-reasoning arm per model (TEST_PLAN A3/B5 R0)
+seed: 0
+repeats: 2
+budget_usd: 0.10
+max_concurrency_per_provider: 2
+fail_on_warning: true
+record_raw: true
+
+arms:
+  - {name: instant, model: mercury-3, reasoning_effort: instant, temperature: 0.5, max_completion_tokens: 256, expected_output_tokens: 20}
+  - {name: instant, model: mercury-2.5, reasoning_effort: instant, temperature: 0.5, max_completion_tokens: 256, expected_output_tokens: 20}
+  - {name: thinking-off, model: claude-haiku-5-5, reasoning_effort: low, max_completion_tokens: 256, expected_output_tokens: 20, provider_extras: {thinking: {type: disabled}}}
+  - {name: none, model: gpt-6-luna, reasoning_effort: none, max_completion_tokens: 256, expected_output_tokens: 20}
+  - {name: minimal, model: gemini-3.5-flash-lite, reasoning_effort: minimal, max_completion_tokens: 256, expected_output_tokens: 20}
+  - {name: low, model: gpt-oss-120b-cerebras, reasoning_effort: low, max_completion_tokens: 256, expected_output_tokens: 40}
+
+workload:
+  items:
+    - id: ready
+      messages: [{role: user, content: "Reply with the single word: ready"}]
+    - id: arith
+      messages: [{role: user, content: "What is 17 * 23? Answer with the number only."}]

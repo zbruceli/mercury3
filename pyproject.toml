@@ -7,6 +7,8 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "anthropic>=1.17.0",
     "openai>=3.35.1",
+    "pandas>=3.0.6",
+    "pyarrow>=26.0.0",
     "pydantic>=2.9",
     "pyyaml>=6.0",
     "typer>=0.12",
@@ -18,6 +20,7 @@ dllm-eval = "dllm_eval.cli:app"
 [dependency-groups]
 dev = [
     "mypy>=1.13",
+    "pandas-stubs>=3.0.5.260914",
     "pre-commit>=4.0",
     "pytest>=8.3",
     "pytest-cov>=6.0",
@@ -42,6 +45,10 @@ exclude = ["*.md"]  # doc sketches are intentionally compact
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "PT"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests carry wide fixture tables and compound assertions on purpose.
+"tests/**" = ["E501", "PT018"]
 
 [tool.mypy]
 python_version = "3.12"

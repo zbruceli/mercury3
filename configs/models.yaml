@@ -42,6 +42,7 @@ providers:
     kind: openai_compat
     base_url: https://generativelanguage.googleapis.com/v1beta/openai/
     api_key_env: GEMINI_API_KEY
+    budget_param: max_tokens  # what R0 verified on the compat layer
     rate_limits: null       # depends on the project's tier; fill in from AI Studio
     docs_url: https://ai.google.dev/gemini-api/docs/openai
     verified_on: 2026-10-20
