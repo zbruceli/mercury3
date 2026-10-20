@@ -150,5 +150,5 @@ We chose these two use cases because each one targets a different claimed advant
 - ~~OQ1. Which exact OpenAI and Google model IDs belong in the speed tier on run day?~~ Resolved 2026-10-20: `gpt-6-luna` and `gemini-3.5-flash-lite` (Section 4). Re-verify them before the main runs.
 - OQ5. gpt-oss-120b on Cerebras rejects requests that combine `tools` and `response_format`. For the UC2 strict-schema sub-run, should the control model skip that sub-run, or enforce the `submit_answer` schema through a strict tool definition instead? Decide in M3.
 - OQ2. Should Mercury 2.5 be included for a lineage chart (more tokens, a stronger story)? Default is yes for UC1 only.
-- OQ3. What does `realtime: true` (described as lower TTFT) trade off? Test it as an extra Mercury arm in UC1.
-- OQ4. Does the docs' FAQ statement that the MCP/agent setup uses `mercury-2.5` mean Mercury 3 has tool-calling caveats? Verify with a smoke test in M0.
+- OQ3. What does `realtime: true` (described as lower TTFT) trade off? Test it as an extra Mercury arm in UC1. The R0 smoke test was too small to show a difference.
+- ~~OQ4. Does the docs' FAQ statement that the MCP/agent setup uses `mercury-2.5` mean Mercury 3 has tool-calling caveats?~~ Resolved 2026-10-20: `mercury-3` tool calling and strict JSON schema both work (see [M0_SMOKE_RESULTS.md](M0_SMOKE_RESULTS.md)).

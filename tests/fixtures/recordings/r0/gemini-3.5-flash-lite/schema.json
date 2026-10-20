@@ -1,0 +1,75 @@
+{
+  "request": {
+    "model": "gemini-3.5-flash-lite",
+    "max_tokens": 1024,
+    "reasoning_effort": "minimal",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the capital of France? Answer in the requested JSON format."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "Answer",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "answer": {
+              "type": "string"
+            },
+            "confidence": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "answer",
+            "confidence"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "elapsed_s": 0.6852430840954185,
+  "response": {
+    "id": "gPTXasvKJb_yjMcPiZiniQU",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": "{\n  \"answer\": \"Paris\",\n  \"confidence\": 1.0\n}",
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": null,
+          "extra_content": {
+            "google": {
+              "thought_signature": "EmAKXgFpFH0T+5PntPCEGxfrRS7awvdUfmRTZ1qFoZITBcy0OogRJTuqAXKf1yG0J1S+pCCfSMx1SxK+wTSAJr9gfZESEtrK2Rzv3EzdLd410LruRwWpM2dFtb42mB016lk="
+            }
+          }
+        }
+      }
+    ],
+    "created": 1792537729,
+    "model": "gemini-3.5-flash-lite",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 20,
+      "prompt_tokens": 15,
+      "total_tokens": 35,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": null
+    }
+  }
+}

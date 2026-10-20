@@ -146,5 +146,12 @@ Draft in `reports/blog/draft.md`, following BLOG_ALIGNMENT §4. Every number lin
 - `stream_options: {"include_usage": true}` adds a final usage chunk. `usage.completion_tokens` already includes `reasoning_tokens`, and `prompt_tokens` already includes `cached_tokens`.
 - Extra flags: `realtime` (lower TTFT), `reasoning_summary`, `reasoning_summary_wait`.
 - Errors: 429 rate limit and 503 engine overloaded are retryable; 400 `context_length_exceeded`; 402 billing.
+
+### Cross-provider findings from R0 (2026-10-20, see M0_SMOKE_RESULTS.md)
+
+- OpenAI signals an empty balance as **429 `insufficient_quota`**. Treat it as fatal, not as a rate limit.
+- The Gemini OpenAI-compatible endpoint returns no `completion_tokens_details` or `prompt_tokens_details`. Record reasoning and cached tokens as unknown, not 0.
+- Anthropic reports thinking in `usage.output_tokens_details.thinking_tokens`. Map it to `reasoning_tokens`.
+- gpt-oss-120b on Cerebras adds about 64 fixed prompt tokens and spends reasoning tokens even at `low`.
 - Free tier per minute: 1,000 requests, 1M input tokens, 100k output tokens. 100M free tokens one-time.
 - Full doc index for agents: https://docs.inceptionlabs.ai/llms.txt; OpenAPI: https://api.inceptionlabs.ai/openapi.json.

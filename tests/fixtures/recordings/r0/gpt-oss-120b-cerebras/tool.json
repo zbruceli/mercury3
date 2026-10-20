@@ -1,0 +1,98 @@
+{
+  "request": {
+    "model": "gpt-oss-120b",
+    "max_completion_tokens": 1024,
+    "reasoning_effort": "low",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather in Paris right now? Use the get_weather tool."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get the current weather for a city.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "city"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    ],
+    "tool_choice": "auto"
+  },
+  "elapsed_s": 0.37757554184645414,
+  "response": {
+    "id": "chatcmpl-84ec5d38-e22d-4674-a0f7-9eb5cc2b20c3",
+    "choices": [
+      {
+        "finish_reason": "tool_calls",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": null,
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": [
+            {
+              "id": "6e4aea073",
+              "function": {
+                "arguments": "{\"city\":\"Paris\"}",
+                "name": "get_weather"
+              },
+              "type": "function"
+            }
+          ],
+          "reasoning": "We need to call get_weather with city Paris."
+        }
+      }
+    ],
+    "created": 1792537729,
+    "model": "gpt-oss-120b",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": "fp_a9089f3cce52797e7952",
+    "usage": {
+      "completion_tokens": 34,
+      "prompt_tokens": 136,
+      "total_tokens": 170,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": null,
+        "reasoning_tokens": 10,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "time_info": {
+      "created": 1792537729.894547,
+      "queue_time": 0.0034175180000000013,
+      "prompt_time": 0.001730204,
+      "completion_time": 0.018256424,
+      "total_time": 0.034178972244262695
+    }
+  }
+}

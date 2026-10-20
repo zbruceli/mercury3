@@ -1,0 +1,193 @@
+{
+  "request": {
+    "model": "gpt-oss-120b",
+    "max_completion_tokens": 1024,
+    "reasoning_effort": "low",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with the single word: ready"
+      }
+    ],
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    }
+  },
+  "elapsed_s": 0.1486253747716546,
+  "ttft_s": 0.14828404085710645,
+  "chunks": [
+    {
+      "t": 0.13706279080361128,
+      "chunk": {
+        "id": "chatcmpl-0a921cd9-9929-42e1-8f16-fed7ef65f8e0",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": null,
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537729,
+        "model": "gpt-oss-120b",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": "fp_a9089f3cce52797e7952",
+        "usage": null
+      }
+    },
+    {
+      "t": 0.13716208282858133,
+      "chunk": {
+        "id": "chatcmpl-0a921cd9-9929-42e1-8f16-fed7ef65f8e0",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": null,
+              "function_call": null,
+              "refusal": null,
+              "role": null,
+              "tool_calls": null,
+              "reasoning": "We"
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537729,
+        "model": "gpt-oss-120b",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": "fp_a9089f3cce52797e7952",
+        "usage": null
+      }
+    },
+    {
+      "t": 0.13937545800581574,
+      "chunk": {
+        "id": "chatcmpl-0a921cd9-9929-42e1-8f16-fed7ef65f8e0",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": null,
+              "function_call": null,
+              "refusal": null,
+              "role": null,
+              "tool_calls": null,
+              "reasoning": " just need to reply with \"ready\"."
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537729,
+        "model": "gpt-oss-120b",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": "fp_a9089f3cce52797e7952",
+        "usage": null
+      }
+    },
+    {
+      "t": 0.14828358264639974,
+      "chunk": {
+        "id": "chatcmpl-0a921cd9-9929-42e1-8f16-fed7ef65f8e0",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "ready",
+              "function_call": null,
+              "refusal": null,
+              "role": null,
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537729,
+        "model": "gpt-oss-120b",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": "fp_a9089f3cce52797e7952",
+        "usage": null
+      }
+    },
+    {
+      "t": 0.14842170802876353,
+      "chunk": {
+        "id": "chatcmpl-0a921cd9-9929-42e1-8f16-fed7ef65f8e0",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": null,
+              "function_call": null,
+              "refusal": null,
+              "role": null,
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": "stop",
+            "logprobs": null
+          }
+        ],
+        "created": 1792537729,
+        "model": "gpt-oss-120b",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": "fp_a9089f3cce52797e7952",
+        "usage": {
+          "completion_tokens": 20,
+          "prompt_tokens": 74,
+          "total_tokens": 94,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": 0,
+            "audio_tokens": null,
+            "reasoning_tokens": 9,
+            "rejected_prediction_tokens": 0,
+            "text_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 0,
+            "image_tokens": null,
+            "text_tokens": null
+          }
+        },
+        "time_info": {
+          "created": 1792537729.5382059,
+          "queue_time": 0.003139338000000002,
+          "prompt_time": 0.001403643,
+          "completion_time": 0.00951993,
+          "total_time": 0.0158233642578125
+        }
+      }
+    }
+  ]
+}

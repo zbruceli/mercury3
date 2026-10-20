@@ -1,0 +1,67 @@
+{
+  "request": {
+    "model": "gpt-oss-120b",
+    "max_completion_tokens": 1024,
+    "reasoning_effort": "low",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with the single word: ready"
+      }
+    ]
+  },
+  "elapsed_s": 0.26663191616535187,
+  "response": {
+    "id": "chatcmpl-ae6210db-8574-4351-a915-acfa14a24f19",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": "ready",
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": null,
+          "reasoning": "We just need to respond with single word \"ready\"."
+        }
+      }
+    ],
+    "created": 1792537729,
+    "model": "gpt-oss-120b",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": "fp_a9089f3cce52797e7952",
+    "usage": {
+      "completion_tokens": 22,
+      "prompt_tokens": 74,
+      "total_tokens": 96,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": null,
+        "reasoning_tokens": 11,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "time_info": {
+      "created": 1792537729.3721406,
+      "queue_time": 0.003714097999999999,
+      "prompt_time": 0.001218239,
+      "completion_time": 0.010840293,
+      "total_time": 0.017438888549804688
+    }
+  }
+}

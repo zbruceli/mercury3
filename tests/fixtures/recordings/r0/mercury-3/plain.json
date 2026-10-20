@@ -1,0 +1,64 @@
+{
+  "request": {
+    "model": "mercury-3",
+    "max_completion_tokens": 1024,
+    "extra_body": {
+      "reasoning_effort": "instant"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with the single word: ready"
+      }
+    ]
+  },
+  "elapsed_s": 0.5301429578103125,
+  "response": {
+    "id": "chatcmpl-1f5714aa-15a0-4f2f-b208-3fb16bbe9f91",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": "ready",
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": null,
+          "tool_call_id": null
+        }
+      }
+    ],
+    "created": 1792537701,
+    "model": "mercury-3",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "warning": null,
+    "reasoning_summary": null
+  }
+}

@@ -148,6 +148,8 @@ models:
       OpenAI's smallest current tier and the only one with reasoning_effort "none",
       which gives the "reasoning off" arm. Use the standard service tier; the "fast"
       (formerly priority) tier doubles the price and would be a separate labelled arm.
+      R0 (2026-10-20): passed after credits were added; the first attempt hit 429
+      insufficient_quota, which must be treated as fatal, not retried.
 
   gemini-3.5-flash-lite:
     provider: google
@@ -171,6 +173,8 @@ models:
       off on Gemini 3 models, so "minimal" is the "reasoning off" arm. Runs at "minimal"
       only (no reasoning-on arm; decided 2026-10-20 to cut cost). The OpenAI-compat
       layer is beta. Context caching also has a storage fee that we don't use.
+      R0: the compat endpoint reports no completion/prompt token details, so reasoning
+      and cached tokens are not visible.
 
   gpt-oss-120b-cerebras:
     provider: cerebras

@@ -1,0 +1,96 @@
+{
+  "request": {
+    "model": "gemini-3.5-flash-lite",
+    "max_tokens": 1024,
+    "reasoning_effort": "minimal",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with the single word: ready"
+      }
+    ],
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    }
+  },
+  "elapsed_s": 0.41796041699126363,
+  "ttft_s": 0.41603470779955387,
+  "chunks": [
+    {
+      "t": 0.4160312497988343,
+      "chunk": {
+        "id": "f_TXap3dJYqd-8YPxrj2mA0",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "ready",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537727,
+        "model": "gemini-3.5-flash-lite",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 1,
+          "prompt_tokens": 8,
+          "total_tokens": 9,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        }
+      }
+    },
+    {
+      "t": 0.416466707829386,
+      "chunk": {
+        "id": "f_TXap3dJYqd-8YPxrj2mA0",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": null,
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null,
+              "extra_content": {
+                "google": {
+                  "thought_signature": "EmAKXgFpFH0TgV80Dq7knulhVP07mfEN8vf0vMq/wUAxw73vokmHPXdJkpj7uBoesLnFuB24/KwpFHbRNEwsapN5wRiEAN/UbNehxZWmFx6uL9adac4Tw7JJktRxUTKEXjM="
+                }
+              }
+            },
+            "index": 0,
+            "finish_reason": "stop",
+            "logprobs": null
+          }
+        ],
+        "created": 1792537727,
+        "model": "gemini-3.5-flash-lite",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 1,
+          "prompt_tokens": 8,
+          "total_tokens": 9,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        }
+      }
+    }
+  ]
+}

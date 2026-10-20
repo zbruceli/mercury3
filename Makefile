@@ -1,4 +1,4 @@
-.PHONY: install fmt lint typecheck test test-live check validate-config budget
+.PHONY: install fmt lint typecheck test test-live check validate-config budget smoke-live
 
 install:
 	uv sync
@@ -30,3 +30,7 @@ budget:
 	uv run python scripts/estimate_budget.py configs/budget_assumptions_lean.yaml > docs/budget_tables_lean.md
 
 check: lint typecheck test validate-config
+
+# R0 live smoke checks. SPENDS REAL TOKENS (~3k). Run only with explicit approval.
+smoke-live:
+	uv run --env-file .env python scripts/smoke_r0.py

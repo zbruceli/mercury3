@@ -1,0 +1,83 @@
+{
+  "request": {
+    "model": "gemini-3.5-flash-lite",
+    "max_tokens": 1024,
+    "reasoning_effort": "minimal",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather in Paris right now? Use the get_weather tool."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get the current weather for a city.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "city"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    ],
+    "tool_choice": "auto"
+  },
+  "elapsed_s": 0.614117625169456,
+  "response": {
+    "id": "gPTXarzrBIWL-sAP--W16QM",
+    "choices": [
+      {
+        "finish_reason": "tool_calls",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": null,
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": [
+            {
+              "id": "call_106959",
+              "function": {
+                "arguments": "{\"city\":\"Paris\"}",
+                "name": "get_weather"
+              },
+              "type": "function",
+              "extra_content": {
+                "google": {
+                  "thought_signature": "EmAKXgFpFH0TEXbX9JJcb+FJ0CNkhCaEo4Eglz5u6Ks0DW1xdowu4xHZrbu57PoDEY9xU7RsjrsbfTN8KSPhXtujqLzS2ZXHc4Rj1WmnPyew/7YajdJfrP8CrXr8NZeC4XE="
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "created": 1792537728,
+    "model": "gemini-3.5-flash-lite",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 16,
+      "prompt_tokens": 62,
+      "total_tokens": 78,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": null
+    }
+  }
+}

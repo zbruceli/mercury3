@@ -1,0 +1,65 @@
+{
+  "request": {
+    "model": "mercury-3",
+    "max_completion_tokens": 1024,
+    "extra_body": {
+      "reasoning_effort": "instant"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with the single word: ready"
+      }
+    ],
+    "temperature": 0.2
+  },
+  "elapsed_s": 0.29319429164752364,
+  "response": {
+    "id": "chatcmpl-92a73132-a0cc-48b5-b8f7-e84700be16a2",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": "ready",
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": null,
+          "tool_call_id": null
+        }
+      }
+    ],
+    "created": 1792537706,
+    "model": "mercury-3",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "warning": "Warning: Requested temperature 0.2 is not within [0.5, 1]. Temperature has been set to 1.",
+    "reasoning_summary": null
+  }
+}

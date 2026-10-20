@@ -1,0 +1,12 @@
+{
+  "_note": "Captured in R0 on 2026-10-20 (gpt-6-luna, all checks) before the account had credits. HTTP 429 with insufficient_quota is a billing error, not a rate limit: it must be treated as fatal and never retried (M0_SMOKE_RESULTS F1).",
+  "status_code": 429,
+  "body": {
+    "error": {
+      "message": "You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.",
+      "type": "insufficient_quota",
+      "param": null,
+      "code": "credit_balance_exhausted"
+    }
+  }
+}

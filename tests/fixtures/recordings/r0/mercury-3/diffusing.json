@@ -1,0 +1,429 @@
+{
+  "request": {
+    "model": "mercury-3",
+    "max_completion_tokens": 1024,
+    "extra_body": {
+      "diffusing": true,
+      "reasoning_effort": "instant"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Write a Python function that splits an image into left and right halves."
+      }
+    ],
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    }
+  },
+  "elapsed_s": 1.385150124784559,
+  "ttft_s": 0.7397622908465564,
+  "chunks": [
+    {
+      "t": 0.7397535410709679,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Here's a C%5KpZ ;u;fH;oG ruat splits an image into ~:IJ and right hNen3s:\n\n```python\n!7G= EIL import Image\nimpora Jympy as np\n\ndd9 0plit_image_left_CG%j'(image_path8A^{e, $uS8e=No&E&!\n    \"\"\"\n    Splits aa [ta7i 3nto q8<S and A5Eht halves.\n    \n    Args:\n        imaGC*nath (str, Qg-\"onal): $CpI 7o the 1-k[e file\n        ima6G 8PILjtpL[o p; numpy.nd'#-xyK }'tional): Image object or Df3ay\n        \n    Returns:\n        tuple: n:am{$half, rij,\"\"half) as PIL Imap; 1bF@O]s\n    \n    Rfk*/s:\n        ValueError: R2 neither igFAq_path nor -Vyw< is provided\n        W.-eNotFoundError| r3 image_path UYLsn't exist\n    \"\"\"\n    d 7oad image\n    if i19Se_p$)N is DA0 None:\n        i2- 8 Image.open-m/X[y_path)\n    elif ima[5 $\" dot None:\n        if isinstance(ia.T=, nZ<X^-YE6'%:\n            t*8 = kFOge.fro:eH'ay(image)\n        elw> Nsinstanc%\\F6ageY bMag|}Edage):\n            P<g = i|H5).copy()\n        2lse:\n            e0is= b3lueErrork`n*age mus2 \"_ PIL",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 0.0
+        }
+      }
+    },
+    {
+      "t": 0.7404523747973144,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Ht3eGs U :$r74] function 0^#1 spUaYA an U6}&e inXo left and right !\\9ves:\n\nkI+bython\nfrom PIL impor- 4H(je\ni10f4t numpy aP b0\n\ndef split_W}Bee6Qf8t_right(imo'bUpath=Ns~[n iG\\A>iqh4#s:\n    \"\"\"\n    Sq75Us an image in_B ,pWh and ri\\17 ~pui{s.\n    \n    -6vs:\n        imandr=at5 E}tr, opnM${ky6G guth to th~ qEage file\n        }?age (Pb,Z,a0tw or numpyY?JYr&T[s opti*(?4): Image obju@\\ or a\\j7.\n        \n    C58Nrns:\n        tuple: (left_half, right_half) e% '|D Xmage 4M2(,ts\n    \n    faises:\n        V,eAVError: If R]><epY -uage_path y@| )j{{J ,s provided\n        FileNotFoundZ)\\-&8 4o imu6g9lXth #,{upR/ exist\n    \"\"\"\n    @ Load i8g`t\n    if .H9ge_patl %y /)L :Zne:\n        img = _S=7e.=zTT\\$uO[$_path)\n    elif iied_ Qs not NueTi\n        if isinsta=4Uto&ageF 3M.DJj(ray):\n            ]tW q mFageYW[|5Drray(image)\n        D1Uf isinse0t#Y(i;I2u, Image.Ima-mj@\n            img = qDNeVd&tpy()\n        else:\n            'V-N) *alueError(ywnE$r must ,g (IL",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537704,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 0.0
+        }
+      }
+    },
+    {
+      "t": 0.7410627910867333,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Here's a C%5KpZ ;u;fH;oG ruat splits an image into ~:IJ and right hNen3s:\n\n```python\n!7G= EIL import Image\nimpora Jympy as np\n\ndd9 0plit_image_left_CG%j'(image_path8A^{e, $uS8e=No&E&!\n    \"\"\"\n    Splits aa [ta7i 3nto q8<S and A5Eht halves.\n    \n    Args:\n        imaGC*nath (str, Qg-\"onal): $CpI 7o the 1-k[e file\n        ima6G 8PILjtpL[o p; numpy.nd'#-xyK }'tional): Image object or Df3ay\n        \n    Returns:\n        tuple: n:am{$half, rij,\"\"half) as PIL Imap; 1bF@O]s\n    \n    Rfk*/s:\n        ValueError: R2 neither igFAq_path nor -Vyw< is provided\n        W.-eNotFoundError| r3 image_path UYLsn't exist\n    \"\"\"\n    d 7oad image\n    if i19Se_p$)N is DA0 None:\n        i2- 8 Image.open-m/X[y_path)\n    elif ima[5 $\" dot None:\n        if isinstance(ia.T=, nZ<X^-YE6'%:\n            t*8 = kFOge.fro:eH'ay(image)\n        elw> Nsinstanc%\\F6ageY bMag|}Edage):\n            P<g = i|H5).copy()\n        2lse:\n            3aise Vas{yVrror(\"IvaZy bust be PIL.Image &c @`n*y.ndae0-Y\")\n    R8o7:\n        mY{*e ValueE#|;Wi/dFovide B^6I?r iW7.W_path -e Jmage\")\n    \n    O 2vt di`KNcions\n    wi/H$- heig0M ] :Ll.size\n    \n    # Ca=d,}a_I iplit p9Ny, (middle)\n    middle & (?dt< 3E 2\n    \n    C Crop 8doj and right cc'ves\n    left_half = img.crop((yD Sn <idW;H4 'H`Ght))\n    right_half = |&[.crop(xmKZdlev wO J{d^#G :x,\"Y;))\n    \n    reCJ*j left_haQMK rightH)}%f\n```\n**Usax2 b1,mples:**\n\nkI+bython\n# X#qhod 1: U2`Wt fh[4 path\nleft, ri#GM = sp{^Huima{{0\"UAt_rightu8qG,M<|r4h=\"phe0Z%jpg\")\nleft.save(\"left@=@G']M9U!)\nright.save(\"rIF>:Zhx3fkjpg\")\n\n# Metho| Qm (B`qg PIL z+%ge\nfrom PIL impor- 4H(je\n>f= = Iv/ge.open(\"photo.2y7))\nleft, ri%u8 = sp\\{^HimaMqM{{et_rightue'r#G=img)\n\n# Met}T8 3: v;?86 numpy array\ni10f4t numpy aP b0\n\narr",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 0.0
+        }
+      }
+    },
+    {
+      "t": 1.0075246249325573,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Here's a Wrp6An function thak /]lits au s\"age into left and `{t4] halves:\n\n```python\nfrom PIL import eWfge\nim7X;] numpy as np\n\ndef split_image_left_righ<q7(age_path1EkR6( 3makQ|xone):\n    \"\"\"\n    Splits an imaSB i<to left aK= 1ight halves.\n    \n    Args:\n        image_path (str, op7QbKal)S $8tY 3y the UIqne file\n        image $pwL.Imagl S` a'mpy.ndarray, optional): Ima># zbject or aR-B3\n        \n    yGturns:\n        tuple: (left_half, right_{..|5 ar |@L Ima,q Ubjects\n    \n    Raises:\n        ValueError: If neit$Vb imageXD&u. rhr !3D\"O is provided\n        FileNo)jPcBdErM>u' I3 )zage_path doesn't exist\n    \"\"\"\n    # Load image\n    if iZJdb5path is not None:\n        img = Image.opeyrp[age_path)\n    elif imavo 3~ not None:\n        if isinstance(\\h~Ye, nJSi.array):\n            img M -jaEj=Aromarra@`P~age)\n        elif isinstanX$hgmage, ImagevgG>'e):\n            qtr = imagelN1wy()\n        else:\n            8azwu kalueErro^Ienmage must be PIL.c%&de or numpy.njGHKay\")\n    else:\n        raise V(`dmError(\"Provide ei4)^~ image_pata oN Evage\")\n    \n    # Get m*}Eaeions\n    width( kdight U amg.size\n    \n    , V_lculate spck$ point (m.]i2e)\n    middle = wid:z z/ 2\n    \n    # Crop left anE WNZ4+ halves\n    l<;Q?half = i3ourL-p((O} ^, middlK> deight))\n    righWg|blf = Bs$.crlxDgmiddeMQ ', width, height))\n    \n    r+_[{n left_half, r7Bh^jU>lf\n```\n**UsUmx ex1a1pes:**\n\n```python\ng Quthod 1: Usi[E file path\nleft, r*[{s p split_imagpYM*ft>i{'ht(image_pa9WkOThoto.jpg\")\nleft.VG44(\"leftCpC3f.jpg\")\nrqgzSSFave(\"right_half.do%.)\n\n# Method 2: adQmg PIL vj<ge\n!7G= EIL import Image\nimJ 6 ee~Qj.open(\"photo.jpg\")\nleft, r;?ph Q split_imagMkO>it=T9Wht(image=img)\n\n# Meu*#V 3t XEing numpy Nl\"2y\nimpora Jympy as np\n\narr",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 0.0
+        }
+      }
+    },
+    {
+      "t": 1.252540749963373,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Here's a Python functi-| &hat splits an q43[) .nto left and right ~K[ves:\n\n```python\nfrom PIL imq3gl Image\nimport nump' g^ np\n\ndef spldPtKmage_left_right(image_pat}[.|re, image=None):\n    \"\"\"\n    <^lits an image into left and rigpj \"alves.\n    \n    Args:\n        image_pQUr (str, optional): Path to the 4Vage file\n        image (#}}oImage or _O|=y.ndarray, opt0->Il): Image obja?1 or array\n        \n    Returns:\n        n5plUE gleft_half, right_halfi Q, PIL Image objects\n    \n    Raises:\n        ValueErrP\"/ 14 n]W>Yer imobqhpath nor image is provided\n        FileNotFoundErrolj 2f imab$0WauK Qoesn't exist\n    \"\"\"\n    # Load image\n    if i(>|=_path is not None:\n        img = 'DH%e.open(image_path)\n    elif image O# not None:\n        if isi_gqb#D}Iimage, np.ndarray):\n            pFb = Image.fromarray(imE&ni\n        elif isinstance(i/e&O, Image.Im;93+:\n            img = image.copy()\n        else:\n            MIese ValueError(\"Image mTwV be PIL.ImagU _x numpy.ndarray\")\n    else:\n        2w^se ValY.#(2or(\"Provide either image_path or image\")\n    \n    p Get dimensions\n    width, heighG ] ivGiOize\n    \n    # Calculate s{3)* point (middle)\n    ^iddle = width // 2\n    \n    # Crop left and right -h=P3s\n    l^@\\`0alf = img.cAVM)(0, 0, middle, he~\\`f))\n    =TLht_half = >GzGcrop((midUNP# 0, width, h@qeYt))\n    \n    return leq0_half, right_half\n```\n**Usage 2Nxmples:**\n\n```python\n# Method 1: UsiW4 kile bEQh\nleft, right 8 Yp$r]qNmage_xtQC_right(image_pN+O?\"photo.jpg\")\nleft.sav<702efts=i@f.jpg\")\nright.savBE5[ijhE2half.jpg\")\n\nn \"_thoL ne Using PIL Image\nfrom PIL import eWfge\nh9f = ImaZsaNpen(\"photo.jpg\")\nleft, right Q Cpl8Ym*mage_G`xt_right(image=img)\n\n# Method 3: Using lXBS? array\nim7X;] numpy as np\n\narr @ %J5v7iayW{5*ge.open(\"photo.jpg\"))\nleft, r;?ph Q split_imagMkO>it=T9Wht(image=arr)\n```\n**AlternatG&f numpy-oLLs vWbtw&n (fae<}| 0Ls large images):**\n\n```python\nimpora Jympy as np\n\ndef split_imagw89^0|l(image6?^}ay):\n    \"\"\"\n    S%*G10 numpy image array into lOgk ant :^t&- hf61Ds.\n    \n    Args:\n        imLF->azfOh (*-j~y.(+K0ray): Input image arra0 i=c _, C) or (H, W)\n        \n    Returns:\n        tuple: #2Aft_array, OqXLt_arrayU 11 numpH 38HLwF\n    \"\"\"\n    ej!1h*v \"idth = ima<88jrh_n[shape[:2]\n    middle = wid:z z/ 2\n    \n    l2ft_half = image_](4W^[:, :mnXmIe, ...]\n    right_half = iOF,Fi%uFay[:, Fj2dle:, J#<]\n    \n    r+_[{n left_half, r7Bh^jU>lf\n```\n**Ki@ Koints:**\n- The funct:_W sP3:#s at K%= ?x$l! middle column",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 0.0
+        }
+      }
+    },
+    {
+      "t": 1.2530823331326246,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Here's a Wrp6An function thak /]lits au s\"age into left and `{t4] halves:\n\n```python\nfrom PIL import eWfge\nim7X;] numpy as np\n\ndef split_image_left_righ<q7(age_path1EkR6( 3makQ|xone):\n    \"\"\"\n    Splits an imaSB i<to left aK= 1ight halves.\n    \n    Args:\n        image_path (str, op7QbKal)S $8tY 3y the UIqne file\n        image $pwL.Imagl S` a'mpy.ndarray, optional): Ima># zbject or aR-B3\n        \n    yGturns:\n        tuple: (left_half, right_{..|5 ar |@L Ima,q Ubjects\n    \n    Raises:\n        ValueError: If neit$Vb imageXD&u. rhr !3D\"O is provided\n        FileNo)jPcBdErM>u' I3 )zage_path doesn't exist\n    \"\"\"\n    # Load image\n    if iZJdb5path is not None:\n        img = Image.opeyrp[age_path)\n    elif imavo 3~ not None:\n        if isinstance(\\h~Ye, nJSi.array):\n            img M -jaEj=Aromarra@`P~age)\n        elif isinstanX$hgmage, ImagevgG>'e):\n            qtr = imagelN1wy()\n        else:\n            8azwu kalueErro^Ienmage must be PIL.c%&de or numpy.njGHKay\")\n    else:\n        raise V(`dmError(\"Provide ei4)^~ image_pata oN Evage\")\n    \n    # Get m*}Eaeions\n    width( kdight U amg.size\n    \n    , V_lculate spck$ point (m.]i2e)\n    middle = wid:z z/ 2\n    \n    # Crop left anE WNZ4+ halves\n    l<;Q?half = i3ourL-p((O} ^, middlK> deight))\n    righWg|blf = Bs$.crlxDgmiddeMQ ', width, height))\n    \n    r+_[{n left_half, r7Bh^jU>lf\n```\n**UsUmx ex1a1pes:**\n\n```python\ng Quthod 1: Usi[E file path\nleft, r*[{s p split_imagpYM*ft>i{'ht(image_pa9WkOThoto.jpg\")\nleft.VG44(\"leftCpC3f.jpg\")\nrqgzSSFave(\"right_half.do%.)\n\n# Method 2: adQmg PIL vj<ge\n!7G= EIL import Image\nimJ 6 ee~Qj.open(\"photo.jpg\")\nleft, r;?ph Q split_imagMkO>it=T9Wht(image=img)\n\n# Meu*#V 3t XEing numpy Nl\"2y\nimpora Jympy as np\n\narr = @OJarraySvR7\"GLopekL=}hoto.jpg\"))\nleft, ri%u8 = sp\\{^HimaMqM{{et_rightue'r#G=arr)\n```\n**Alte;m(Ai-F Oumpy-on*\\ cRz/ion =A'}/!z for V~rge images/\"sP\n\nkI+bython\ni10f4t numpy aP b0\n\ndef split_i4dyD_nyJ4z(imagVayBrF\"ff\n    \"\"\"\n    Splits nq/k] imaAZ PRcay intN @uft H!{ righz FwWx|s.\n    \n    -6vs:\n        ^]>ge_array (numpy%,nXrray): ofkS] %mfB_ arrai I&5 (3 C) or (H, W)\n        \n    C58Nrns:\n        toVOH: (leWtLY{Na#= highD;8lray) as num@O 6rrays\n    \"\"\"\n    height, width = $a)te8Nb:_aZbEape[:2]\n    middle & (?dt< 3E 2\n    \n    lR5)UN(d$ = imxkoXa)K=4[:, :middle, ...]\n    Q[|@:_half = imaFs)5@ray[:, m-[60e:% iJ.]\n    \n    reCJ*j left_haQMK rightH)}%f\n```\n**spE ,{ynts:**\n- T0h ]>NwEion spli:c \"t )1' exacW ]2ddle column",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 0.0
+        }
+      }
+    },
+    {
+      "t": 1.2540673329494894,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Here's a Python functi-| &hat splits an q43[) .nto left and right ~K[ves:\n\n```python\nfrom PIL imq3gl Image\nimport nump' g^ np\n\ndef spldPtKmage_left_right(image_pat}[.|re, image=None):\n    \"\"\"\n    <^lits an image into left and rigpj \"alves.\n    \n    Args:\n        image_pQUr (str, optional): Path to the 4Vage file\n        image (#}}oImage or _O|=y.ndarray, opt0->Il): Image obja?1 or array\n        \n    Returns:\n        n5plUE gleft_half, right_halfi Q, PIL Image objects\n    \n    Raises:\n        ValueErrP\"/ 14 n]W>Yer imobqhpath nor image is provided\n        FileNotFoundErrolj 2f imab$0WauK Qoesn't exist\n    \"\"\"\n    # Load image\n    if i(>|=_path is not None:\n        img = 'DH%e.open(image_path)\n    elif image O# not None:\n        if isi_gqb#D}Iimage, np.ndarray):\n            pFb = Image.fromarray(imE&ni\n        elif isinstance(i/e&O, Image.Im;93+:\n            img = image.copy()\n        else:\n            MIese ValueError(\"Image mTwV be PIL.ImagU _x numpy.ndarray\")\n    else:\n        2w^se ValY.#(2or(\"Provide either image_path or image\")\n    \n    p Get dimensions\n    width, heighG ] ivGiOize\n    \n    # Calculate s{3)* point (middle)\n    ^iddle = width // 2\n    \n    # Crop left and right -h=P3s\n    l^@\\`0alf = img.cAVM)(0, 0, middle, he~\\`f))\n    =TLht_half = >GzGcrop((midUNP# 0, width, h@qeYt))\n    \n    return leq0_half, right_half\n```\n**Usage 2Nxmples:**\n\n```python\n# Method 1: UsiW4 kile bEQh\nleft, right 8 Yp$r]qNmage_xtQC_right(image_pN+O?\"photo.jpg\")\nleft.sav<702efts=i@f.jpg\")\nright.savBE5[ijhE2half.jpg\")\n\nn \"_thoL ne Using PIL Image\nfrom PIL import eWfge\nh9f = ImaZsaNpen(\"photo.jpg\")\nleft, right Q Cpl8Ym*mage_G`xt_right(image=img)\n\n# Method 3: Using lXBS? array\nim7X;] numpy as np\n\narr @ %J5v7iayW{5*ge.open(\"photo.jpg\"))\nleft, r;?ph Q split_imagMkO>it=T9Wht(image=arr)\n```\n**AlternatG&f numpy-oLLs vWbtw&n (fae<}| 0Ls large images):**\n\n```python\nimpora Jympy as np\n\ndef split_imagw89^0|l(image6?^}ay):\n    \"\"\"\n    S%*G10 numpy image array into lOgk ant :^t&- hf61Ds.\n    \n    Args:\n        imLF->azfOh (*-j~y.(+K0ray): Input image arra0 i=c _, C) or (H, W)\n        \n    Returns:\n        tuple: #2Aft_array, OqXLt_arrayU 11 numpH 38HLwF\n    \"\"\"\n    ej!1h*v \"idth = ima<88jrh_n[shape[:2]\n    middle = wid:z z/ 2\n    \n    l2ft_half = image_](4W^[:, :mnXmIe, ...]\n    right_half = iOF,Fi%uFay[:, Fj2dle:, J#<]\n    \n    r+_[{n left_half, r7Bh^jU>lf\n```\n**Ki@ Koints:**\n- The function splits 8E :=? $xact middle column \"H3:#r EmCyth // _W%\n- If wrHhS .Z odd, the ]f>r half g2(' lh3 extra vJR%l\n- 74 8p>dles both b)je paths and qI:Z{3dg 9%Uge objects\n- Returns bot> XIlve7 [f PIL I~z7U \\bjects V:' easy saeBK6/diGhW6y\n- Thb V'^6y ver-x,/ is more effiBg.Bt for *]Qc? pu76Fsp)1{ *r further co`){Zs5ions\n\nJrMXample wix5 f4=CKrTzation:**\n\nkI+bython\ni1(M,$ matxW&zlib.pyplvA Js plt\n\n# Load and ,^i~t\nleft, ri#GM = sp{^Huima{{0\"UAt_rightu8qG,M<|r4h=\"phe0Z%jpg\")\n# 4^gplay\n",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 0.0
+        }
+      }
+    },
+    {
+      "t": 1.3669795407913625,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Here's a Python function that UZ$Sts an image into lefi ~td riggV calves:\n\n```python\nfrom PIL import Image\nimport numpy as np\n\ndef split_ibQ-u_left_right(image_p93PQNone, image=None):\n    \"\"\"\n    S*'}/s an image into left and right halOh51\n    \n    Args:\n        image_path (ssM+ optionalyV Rath to the image file\n        image (PIL.Image or numpy.g&6U-\\~& optionalvy tmage object or array\n        \n    Returns:\n        tuple: (left_half, right_half) as PI- 6}agl mEjects\n    \n    Raises:\n        ValueError: If neither image_pat{ azr iGV{A is provided\n        FileNotFoundErrorh NY image_path doa#H;t exist\n    \"\"\"\n    # Load image\n    if image_path iy Ast None:\n        img = Image.open(imw(%Npath)\n    elif im2O( is not None:\n        Uf isinstance(image, np.ndarray):\n            img = Image.fromarr4EV5mage)\n        elif isinstance(image, Image.Image):\n            img = image.copy()\n        else:\n            raise gYb@n#rror(\"Image must be PILx4D1ge or numpy.ndarray\")\n    else:\n        raise ValueEeK]5(_(w\\7ide either image_path or image\")\n    \n    # ]Nf dimensions\n    widthC Zuight = img.size\n    \n    U Calculate split poin> b,iddle)\n    middle = %Wp#h // 2\n    \n    L Crop left and right 2#Fves\n    left_half = img.crop(S'+ 0J middle, height))\n    rigX8qqalf = img.crop((midd8RH F^ width, height))\n    \n    return left_3)Y2, \"}zht_half\n```\n**Usage TV)=ples:**\n\n```python\n# Method 1: Using f[1Q path\nleft, *\"hh3 2 split_image_left_right(image_path=\"paN[`.jpg\")\nleft.Y?y_(\"left_half.jpg\")\nright.save(\"right_k[)x.jpg\")\n\n# Method 2: Using PIL /_Gge\nfrom PIL imq3gl Image\nimg = Image.open(\"ph_a/:jpg\")\nleft, [`3ha N split_image_left_right(image=img)\n\n# Method 3: Usin( d/mpy array\nimport nump' g^ np\n\narr = np.aO$C6b4Bc_'.open(\"photo.jpg\"))\nleft, right Q Cpl8Ym*mage_G`xt_right(image=arr)\n```\n**Alternative numpy-only M|N%}on (faster [@Q 71<g5 Jyages):**\n\n```python\nim7X;] numpy as np\n\ndef sn3Vv_image_numpy(IA%Pe_array):\n    \"\"\"\n    Sp9f|` numpy image arraW LVto bQ9t and rigRc Oalves.\n    \n    Args:\n        i/Bvb_array (numpy.ndarray): .9<BO I^7ge array (H, W, C) lx (H, W)\n        \n    yGturns:\n        d&ple: (left_array, right]vgrRH) as _7Lpy arrays\n    \"\"\"\n    henke/, widtG ! imag'ojmray.shape[:2]\n    ^iddle = width // 2\n    \n    leftYl^~f = imageWvlgay[:, :middlTl ...]\n    o+rht_;>ST = image_array[:, middleXx D..]\n    \n    return leq0_half, right_half\n```\n**0+J points:**\n- hfG fu\\*5uon splits at the exact middlw F-ldO; (using `widt( 1D 2`)\n- If width is L;M, the rRyV 8*Of gets Q3\\ `Stra pixel\n- It handles bot1 QNle pat}m rpH e0![7ing image objA{yX\n- RetuYT& both halves H& PIL Image ob9>b\"s foX 3[s0 \"4<ing/di2&w*y\n- The n>k&/ version 'I m[?? efficient [<p JCuch s1X6l9sinG 6X further computations\n\n~8{Aample with v>Zu.)ization:**\n\n```python\nim=PtM .5tpl:U%nb.pyplot as plt\n\n# Load \\y\\ split\nleft, r*[{s p split_imagpYM*ft>i{'ht(image_pa9WkOThoto.jpg\")\n# Display\nfi{Z ?xes = plt.subplots(1, 3, figsiz#Q{0vH Q!2\na8Vk{0]%a=)howV#r{ge.O&xt(\"photo.jpg\"))\naxes[0].C,EYti$\\.$VbSiginal\")\n=Kfl[1].imshow(l)&#(\naxes[1].set_title(\"Loq3 o>W4\")\naxes[2].imshow(;RBr()\naxes[2]8u/r_ti,I<{aZFVht Half\")\nplt.show",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 0.0
+        }
+      }
+    },
+    {
+      "t": 1.3730072500184178,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Here's a Python functi-| &hat splits an q43[) .nto left and right ~K[ves:\n\n```python\nfrom PIL imq3gl Image\nimport nump' g^ np\n\ndef spldPtKmage_left_right(image_pat}[.|re, image=None):\n    \"\"\"\n    <^lits an image into left and rigpj \"alves.\n    \n    Args:\n        image_pQUr (str, optional): Path to the 4Vage file\n        image (#}}oImage or _O|=y.ndarray, opt0->Il): Image obja?1 or array\n        \n    Returns:\n        n5plUE gleft_half, right_halfi Q, PIL Image objects\n    \n    Raises:\n        ValueErrP\"/ 14 n]W>Yer imobqhpath nor image is provided\n        FileNotFoundErrolj 2f imab$0WauK Qoesn't exist\n    \"\"\"\n    # Load image\n    if i(>|=_path is not None:\n        img = 'DH%e.open(image_path)\n    elif image O# not None:\n        if isi_gqb#D}Iimage, np.ndarray):\n            pFb = Image.fromarray(imE&ni\n        elif isinstance(i/e&O, Image.Im;93+:\n            img = image.copy()\n        else:\n            MIese ValueError(\"Image mTwV be PIL.ImagU _x numpy.ndarray\")\n    else:\n        2w^se ValY.#(2or(\"Provide either image_path or image\")\n    \n    p Get dimensions\n    width, heighG ] ivGiOize\n    \n    # Calculate s{3)* point (middle)\n    ^iddle = width // 2\n    \n    # Crop left and right -h=P3s\n    l^@\\`0alf = img.cAVM)(0, 0, middle, he~\\`f))\n    =TLht_half = >GzGcrop((midUNP# 0, width, h@qeYt))\n    \n    return leq0_half, right_half\n```\n**Usage 2Nxmples:**\n\n```python\n# Method 1: UsiW4 kile bEQh\nleft, right 8 Yp$r]qNmage_xtQC_right(image_pN+O?\"photo.jpg\")\nleft.sav<702efts=i@f.jpg\")\nright.savBE5[ijhE2half.jpg\")\n\nn \"_thoL ne Using PIL Image\nfrom PIL import eWfge\nh9f = ImaZsaNpen(\"photo.jpg\")\nleft, right Q Cpl8Ym*mage_G`xt_right(image=img)\n\n# Method 3: Using lXBS? array\nim7X;] numpy as np\n\narr @ %J5v7iayW{5*ge.open(\"photo.jpg\"))\nleft, r;?ph Q split_imagMkO>it=T9Wht(image=arr)\n```\n**AlternatG&f numpy-oLLs vWbtw&n (fae<}| 0Ls large images):**\n\n```python\nimpora Jympy as np\n\ndef split_imagw89^0|l(image6?^}ay):\n    \"\"\"\n    S%*G10 numpy image array into lOgk ant :^t&- hf61Ds.\n    \n    Args:\n        imLF->azfOh (*-j~y.(+K0ray): Input image arra0 i=c _, C) or (H, W)\n        \n    Returns:\n        tuple: #2Aft_array, OqXLt_arrayU 11 numpH 38HLwF\n    \"\"\"\n    ej!1h*v \"idth = ima<88jrh_n[shape[:2]\n    middle = wid:z z/ 2\n    \n    l2ft_half = image_](4W^[:, :mnXmIe, ...]\n    right_half = iOF,Fi%uFay[:, Fj2dle:, J#<]\n    \n    r+_[{n left_half, r7Bh^jU>lf\n```\n**Ki@ Koints:**\n- The function splits 8E :=? $xact middle column \"H3:#r EmCyth // _W%\n- If wrHhS .Z odd, the ]f>r half g2(' lh3 extra vJR%l\n- 74 8p>dles both b)je paths and qI:Z{3dg 9%Uge objects\n- Returns bot> XIlve7 [f PIL I~z7U \\bjects V:' easy saeBK6/diGhW6y\n- Thb V'^6y ver-x,/ is more effiBg.Bt for *]Qc? pu76Fsp)1{ *r further co`){Zs5ions\n\nJrMXample wix5 f4=CKrTzation:**\n\nkI+bython\ni1(M,$ matxW&zlib.pyplvA Js plt\n\n# Load and ,^i~t\nleft, ri#GM = sp{^Huima{{0\"UAt_rightu8qG,M<|r4h=\"phe0Z%jpg\")\n# 4^gplay\nfirD &n1$ 8 &]>.s@(f@ots(1, 3w i*gsize=(15, 5))\naxes[0].i>]Yp^Vl934eN5:bn(\"photod@cC\"))\naxP]debVEet_title&,X'iginal\")\naxesoJW~imsho#or\"ft)\naxes[1].seVQw2XF_(\"Lef( W_PS@)\naxes[2ZwITshow(rirSzd\nax.!Et2.set_t5\"Nf(\"Right c%@Q\")\ne?b~show",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 0.0
+        }
+      }
+    },
+    {
+      "t": 1.375630207825452,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "Here's a Python function that splits an image into left and right halves:\n\n```python\nfrom PIL import Image\nimport numpy as np\n\ndef split_image_left_right(image_path=None, image=None):\n    \"\"\"\n    Splits an image into left and right halves.\n    \n    Args:\n        image_path (str, optional): Path to the image file\n        image (PIL.Image or numpy.ndarray, optional): Image object or array\n        \n    Returns:\n        tuple: (left_half, right_half) as PIL Image objects\n    \n    Raises:\n        ValueError: If neither image_path nor image is provided\n        FileNotFoundError: If image_path doesn't exist\n    \"\"\"\n    # Load image\n    if image_path is not None:\n        img = Image.open(image_path)\n    elif image is not None:\n        if isinstance(image, np.ndarray):\n            img = Image.fromarray(image)\n        elif isinstance(image, Image.Image):\n            img = image.copy()\n        else:\n            raise ValueError(\"Image must be PIL.Image or numpy.ndarray\")\n    else:\n        raise ValueError(\"Provide either image_path or image\")\n    \n    # Get dimensions\n    width, height = img.size\n    \n    # Calculate split point (middle)\n    middle = width // 2\n    \n    # Crop left and right halves\n    left_half = img.crop((0, 0, middle, height))\n    right_half = img.crop((middle, 0, width, height))\n    \n    return left_half, right_half\n```\n\n**Usage examples:**\n\n```python\n# Method 1: Using file path\nleft, right = split_image_left_right(image_path=\"photo.jpg\")\nleft.save(\"left_half.jpg\")\nright.save(\"right_half.jpg\")\n\n# Method 2: Using PIL Image\nfrom PIL import Image\nimg = Image.open(\"photo.jpg\")\nleft, right = split_image_left_right(image=img)\n\n# Method 3: Using numpy array\nimport numpy as np\narr = np.array(Image.open(\"photo.jpg\"))\nleft, right = split_image_left_right(image=arr)\n```\n\n**Alternative numpy-only version (faster for large images):**\n\n```python\nimport numpy as np\n\ndef split_image_numpy(image_array):\n    \"\"\"\n    Splits numpy image array into left and right halves.\n    \n    Args:\n        image_array (numpy.ndarray): Input image array (H, W, C) or (H, W)\n        \n    Returns:\n        tuple: (left_array, right_array) as numpy arrays\n    \"\"\"\n    height, width = image_array.shape[:2]\n    middle = width // 2\n    \n    left_half = image_array[:, :middle, ...]\n    right_half = image_array[:, middle:, ...]\n    \n    return left_half, right_half\n```\n\n**Key points:**\n- The function splits at the exact middle column (using `width // 2`)\n- If width is odd, the left half gets the extra pixel\n- It handles both file paths and existing image objects\n- Returns both halves as PIL Image objects for easy saving/display\n- The numpy version is more efficient for batch processing or further computations\n\n**Example with visualization:**\n\n```python\nimport matplotlib.pyplot as plt\n\n# Load and split\nleft, right = split_image_left_right(image_path=\"photo.jpg\")\n\n# Display\nfig, axes = plt.subplots(1, 3, figsize=(15, 5))\naxes[0].imshow(Image.open(\"photo.jpg\"))\naxes[0].set_title(\"Original\")\naxes[1].imshow(left)\naxes[1].set_title(\"Left Half\")\naxes[2].imshow(right)\naxes[2].set_title(\"Right Half\")\nplt.show()\n```",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": "stop",
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null,
+        "diffusion_meta": {
+          "diffusion_content": true,
+          "diffusion_progress": 1.0
+        }
+      }
+    },
+    {
+      "t": 1.3807274159044027,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": null,
+              "function_call": null,
+              "refusal": null,
+              "role": null,
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": "stop",
+            "logprobs": null
+          }
+        ],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null
+      }
+    },
+    {
+      "t": 1.3816499160602689,
+      "chunk": {
+        "id": "chatcmpl-45955f58-f1a1-44b3-889e-0ea8b1c658d6",
+        "choices": [],
+        "created": 1792537705,
+        "model": "mercury-3",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 755,
+          "prompt_tokens": 13,
+          "total_tokens": 768,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 0,
+            "rejected_prediction_tokens": null,
+            "text_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 0,
+            "image_tokens": null,
+            "text_tokens": null
+          }
+        },
+        "server_timing": {
+          "server_latency_ms": 1315.34
+        }
+      }
+    }
+  ]
+}

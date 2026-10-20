@@ -1,0 +1,835 @@
+[
+  {
+    "model": "mercury-3",
+    "check": "plain",
+    "ok": true,
+    "elapsed_s": 0.53,
+    "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3",
+    "content": "ready",
+    "tool_calls": [],
+    "finish_reason": "stop"
+  },
+  {
+    "model": "mercury-3",
+    "check": "stream",
+    "ok": true,
+    "elapsed_s": 0.269,
+    "ttft_s": 0.268,
+    "n_chunks": 3,
+    "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3"
+  },
+  {
+    "model": "mercury-3",
+    "check": "tool",
+    "ok": true,
+    "elapsed_s": 0.329,
+    "usage": {
+      "completion_tokens": 53,
+      "prompt_tokens": 285,
+      "total_tokens": 338,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 9,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3",
+    "content": "I'll get the current weather for Paris for you.\n\n",
+    "tool_calls": [
+      {
+        "arguments": "{\"city\": \"Paris\"}",
+        "name": "get_weather"
+      }
+    ],
+    "finish_reason": "tool_calls"
+  },
+  {
+    "model": "mercury-3",
+    "check": "schema",
+    "ok": true,
+    "elapsed_s": 0.342,
+    "usage": {
+      "completion_tokens": 33,
+      "prompt_tokens": 192,
+      "total_tokens": 225,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3",
+    "content": "{\"answer\": \"Paris\", \"confidence\": 1.0}",
+    "tool_calls": [],
+    "finish_reason": "stop",
+    "schema_valid": true
+  },
+  {
+    "model": "mercury-3",
+    "check": "effort_instant",
+    "ok": true,
+    "elapsed_s": 0.349,
+    "usage": {
+      "completion_tokens": 4,
+      "prompt_tokens": 13,
+      "total_tokens": 17,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3",
+    "content": "391",
+    "tool_calls": [],
+    "finish_reason": "stop"
+  },
+  {
+    "model": "mercury-3",
+    "check": "effort_low",
+    "ok": true,
+    "elapsed_s": 0.477,
+    "usage": {
+      "completion_tokens": 60,
+      "prompt_tokens": 13,
+      "total_tokens": 73,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 56,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3",
+    "content": "391",
+    "tool_calls": [],
+    "finish_reason": "stop"
+  },
+  {
+    "model": "mercury-3",
+    "check": "effort_medium",
+    "ok": true,
+    "elapsed_s": 0.307,
+    "usage": {
+      "completion_tokens": 18,
+      "prompt_tokens": 13,
+      "total_tokens": 31,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 13,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 1,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3",
+    "content": "391",
+    "tool_calls": [],
+    "finish_reason": "stop"
+  },
+  {
+    "model": "mercury-3",
+    "check": "effort_high",
+    "ok": true,
+    "elapsed_s": 0.285,
+    "usage": {
+      "completion_tokens": 23,
+      "prompt_tokens": 13,
+      "total_tokens": 36,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 19,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 1,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3",
+    "content": "391",
+    "tool_calls": [],
+    "finish_reason": "stop"
+  },
+  {
+    "model": "mercury-3",
+    "check": "diffusing",
+    "ok": true,
+    "elapsed_s": 1.385,
+    "ttft_s": 0.74,
+    "n_chunks": 12,
+    "usage": {
+      "completion_tokens": 755,
+      "prompt_tokens": 13,
+      "total_tokens": 768,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3",
+    "frames": 10,
+    "first_frame": "Here's a C%5KpZ ;u;fH;oG ruat splits an image into ~:IJ and right hNen3s:\n\n```py",
+    "last_frame_len": 3127
+  },
+  {
+    "model": "mercury-3",
+    "check": "temperature_out_of_range",
+    "ok": true,
+    "elapsed_s": 0.293,
+    "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3",
+    "content": "ready",
+    "tool_calls": [],
+    "finish_reason": "stop",
+    "warning": "Warning: Requested temperature 0.2 is not within [0.5, 1]. Temperature has been set to 1."
+  },
+  {
+    "model": "mercury-3",
+    "check": "realtime",
+    "ok": true,
+    "elapsed_s": 0.28,
+    "ttft_s": 0.274,
+    "n_chunks": 3,
+    "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-3"
+  },
+  {
+    "model": "mercury-2.5",
+    "check": "plain",
+    "ok": true,
+    "elapsed_s": 0.368,
+    "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-2.5",
+    "content": "ready",
+    "tool_calls": [],
+    "finish_reason": "stop"
+  },
+  {
+    "model": "mercury-2.5",
+    "check": "stream",
+    "ok": true,
+    "elapsed_s": 0.224,
+    "ttft_s": 0.219,
+    "n_chunks": 3,
+    "usage": {
+      "completion_tokens": 5,
+      "prompt_tokens": 10,
+      "total_tokens": 15,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "mercury-2.5"
+  },
+  {
+    "model": "claude-haiku-5-5",
+    "check": "plain",
+    "ok": true,
+    "elapsed_s": 1.027,
+    "usage": {
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "inference_geo": "global",
+      "input_tokens": 16,
+      "output_tokens": 4,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": null,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "server_model": "claude-haiku-5-5",
+    "content": "ready",
+    "tool_calls": [],
+    "finish_reason": "end_turn"
+  },
+  {
+    "model": "claude-haiku-5-5",
+    "check": "stream",
+    "ok": true,
+    "elapsed_s": 0.647,
+    "ttft_s": 0.646,
+    "n_chunks": 6,
+    "usage": {
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "input_tokens": 16,
+      "output_tokens": 5,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": null
+    },
+    "server_model": "claude-haiku-5-5"
+  },
+  {
+    "model": "claude-haiku-5-5",
+    "check": "tool",
+    "ok": true,
+    "elapsed_s": 3.236,
+    "usage": {
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "inference_geo": "global",
+      "input_tokens": 397,
+      "output_tokens": 50,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": null,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "server_model": "claude-haiku-5-5",
+    "content": "",
+    "tool_calls": [
+      {
+        "name": "get_weather",
+        "input": {
+          "city": "Paris"
+        }
+      }
+    ],
+    "finish_reason": "tool_use"
+  },
+  {
+    "model": "claude-haiku-5-5",
+    "check": "schema",
+    "ok": true,
+    "elapsed_s": 1.612,
+    "usage": {
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "inference_geo": "global",
+      "input_tokens": 239,
+      "output_tokens": 28,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": null,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "server_model": "claude-haiku-5-5",
+    "content": "{\"answer\": \"The capital of France is Paris.\", \"confidence\": 1.0}",
+    "tool_calls": [],
+    "finish_reason": "end_turn",
+    "schema_valid": true
+  },
+  {
+    "model": "claude-haiku-5-5",
+    "check": "effort_medium_adaptive",
+    "ok": true,
+    "elapsed_s": 0.674,
+    "usage": {
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "inference_geo": "global",
+      "input_tokens": 25,
+      "output_tokens": 3,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": null,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "server_model": "claude-haiku-5-5",
+    "content": "391",
+    "tool_calls": [],
+    "finish_reason": "end_turn"
+  },
+  {
+    "model": "gemini-3.5-flash-lite",
+    "check": "plain",
+    "ok": true,
+    "elapsed_s": 0.85,
+    "usage": {
+      "completion_tokens": 1,
+      "prompt_tokens": 8,
+      "total_tokens": 9,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": null
+    },
+    "server_model": "gemini-3.5-flash-lite",
+    "content": "ready",
+    "tool_calls": [],
+    "finish_reason": "stop"
+  },
+  {
+    "model": "gemini-3.5-flash-lite",
+    "check": "stream",
+    "ok": true,
+    "elapsed_s": 0.418,
+    "ttft_s": 0.416,
+    "n_chunks": 2,
+    "usage": {
+      "completion_tokens": 1,
+      "prompt_tokens": 8,
+      "total_tokens": 9,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": null
+    },
+    "server_model": "gemini-3.5-flash-lite"
+  },
+  {
+    "model": "gemini-3.5-flash-lite",
+    "check": "tool",
+    "ok": true,
+    "elapsed_s": 0.614,
+    "usage": {
+      "completion_tokens": 16,
+      "prompt_tokens": 62,
+      "total_tokens": 78,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": null
+    },
+    "server_model": "gemini-3.5-flash-lite",
+    "content": "",
+    "tool_calls": [
+      {
+        "arguments": "{\"city\":\"Paris\"}",
+        "name": "get_weather"
+      }
+    ],
+    "finish_reason": "tool_calls"
+  },
+  {
+    "model": "gemini-3.5-flash-lite",
+    "check": "schema",
+    "ok": true,
+    "elapsed_s": 0.685,
+    "usage": {
+      "completion_tokens": 20,
+      "prompt_tokens": 15,
+      "total_tokens": 35,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": null
+    },
+    "server_model": "gemini-3.5-flash-lite",
+    "content": "{\n  \"answer\": \"Paris\",\n  \"confidence\": 1.0\n}",
+    "tool_calls": [],
+    "finish_reason": "stop",
+    "schema_valid": true
+  },
+  {
+    "model": "gpt-oss-120b-cerebras",
+    "check": "plain",
+    "ok": true,
+    "elapsed_s": 0.267,
+    "usage": {
+      "completion_tokens": 22,
+      "prompt_tokens": 74,
+      "total_tokens": 96,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": null,
+        "reasoning_tokens": 11,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "gpt-oss-120b",
+    "content": "ready",
+    "tool_calls": [],
+    "finish_reason": "stop"
+  },
+  {
+    "model": "gpt-oss-120b-cerebras",
+    "check": "stream",
+    "ok": true,
+    "elapsed_s": 0.149,
+    "ttft_s": 0.148,
+    "n_chunks": 5,
+    "usage": {
+      "completion_tokens": 20,
+      "prompt_tokens": 74,
+      "total_tokens": 94,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": null,
+        "reasoning_tokens": 9,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "gpt-oss-120b"
+  },
+  {
+    "model": "gpt-oss-120b-cerebras",
+    "check": "tool",
+    "ok": true,
+    "elapsed_s": 0.378,
+    "usage": {
+      "completion_tokens": 34,
+      "prompt_tokens": 136,
+      "total_tokens": 170,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": null,
+        "reasoning_tokens": 10,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "gpt-oss-120b",
+    "content": "",
+    "tool_calls": [
+      {
+        "arguments": "{\"city\":\"Paris\"}",
+        "name": "get_weather"
+      }
+    ],
+    "finish_reason": "tool_calls"
+  },
+  {
+    "model": "gpt-oss-120b-cerebras",
+    "check": "schema",
+    "ok": true,
+    "elapsed_s": 0.166,
+    "usage": {
+      "completion_tokens": 42,
+      "prompt_tokens": 212,
+      "total_tokens": 254,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": null,
+        "reasoning_tokens": 21,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "gpt-oss-120b",
+    "content": "{\"answer\":\"Paris\",\"confidence\":1.0}",
+    "tool_calls": [],
+    "finish_reason": "stop",
+    "schema_valid": true
+  },
+  {
+    "model": "gpt-6-luna",
+    "check": "plain",
+    "ok": true,
+    "elapsed_s": 1.594,
+    "usage": {
+      "completion_tokens": 4,
+      "prompt_tokens": 13,
+      "total_tokens": 17,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "gpt-6-luna",
+    "content": "ready",
+    "tool_calls": [],
+    "finish_reason": "stop"
+  },
+  {
+    "model": "gpt-6-luna",
+    "check": "stream",
+    "ok": true,
+    "elapsed_s": 1.026,
+    "ttft_s": 1.024,
+    "n_chunks": 4,
+    "usage": {
+      "completion_tokens": 4,
+      "prompt_tokens": 13,
+      "total_tokens": 17,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "gpt-6-luna"
+  },
+  {
+    "model": "gpt-6-luna",
+    "check": "tool",
+    "ok": true,
+    "elapsed_s": 2.278,
+    "usage": {
+      "completion_tokens": 17,
+      "prompt_tokens": 141,
+      "total_tokens": 158,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "gpt-6-luna",
+    "content": "",
+    "tool_calls": [
+      {
+        "arguments": "{\"city\":\"Paris\"}",
+        "name": "get_weather"
+      }
+    ],
+    "finish_reason": "tool_calls"
+  },
+  {
+    "model": "gpt-6-luna",
+    "check": "schema",
+    "ok": true,
+    "elapsed_s": 2.527,
+    "usage": {
+      "completion_tokens": 15,
+      "prompt_tokens": 52,
+      "total_tokens": 67,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "server_model": "gpt-6-luna",
+    "content": "{\"answer\":\"Paris\",\"confidence\":1}",
+    "tool_calls": [],
+    "finish_reason": "stop",
+    "schema_valid": true
+  }
+]

@@ -1,0 +1,64 @@
+{
+  "request": {
+    "model": "mercury-3",
+    "max_completion_tokens": 4096,
+    "extra_body": {
+      "reasoning_effort": "medium"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is 17 * 23? Answer with the number only."
+      }
+    ]
+  },
+  "elapsed_s": 0.307437791954726,
+  "response": {
+    "id": "chatcmpl-3bef7551-d998-472e-b8ae-6356239d26f8",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": "391",
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": null,
+          "tool_call_id": null
+        }
+      }
+    ],
+    "created": 1792537704,
+    "model": "mercury-3",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 18,
+      "prompt_tokens": 13,
+      "total_tokens": 31,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 13,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 1,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "warning": null,
+    "reasoning_summary": null
+  }
+}

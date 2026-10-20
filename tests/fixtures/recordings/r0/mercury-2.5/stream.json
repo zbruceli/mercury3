@@ -1,0 +1,118 @@
+{
+  "request": {
+    "model": "mercury-2.5",
+    "max_completion_tokens": 1024,
+    "extra_body": {
+      "reasoning_effort": "instant"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with the single word: ready"
+      }
+    ],
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    }
+  },
+  "elapsed_s": 0.22389225009828806,
+  "ttft_s": 0.2187114590778947,
+  "chunks": [
+    {
+      "t": 0.21870708419010043,
+      "chunk": {
+        "id": "chatcmpl-f1e308b3-fe0c-41e8-8a1f-130d603ee0fe",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": "ready",
+              "function_call": null,
+              "refusal": null,
+              "role": "assistant",
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": null,
+            "logprobs": null
+          }
+        ],
+        "created": 1792537706,
+        "model": "mercury-2.5",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null,
+        "reasoning_summary": null
+      }
+    },
+    {
+      "t": 0.22279791720211506,
+      "chunk": {
+        "id": "chatcmpl-f1e308b3-fe0c-41e8-8a1f-130d603ee0fe",
+        "choices": [
+          {
+            "delta": {
+              "audio": null,
+              "content": null,
+              "function_call": null,
+              "refusal": null,
+              "role": null,
+              "tool_calls": null
+            },
+            "index": 0,
+            "finish_reason": "stop",
+            "logprobs": null
+          }
+        ],
+        "created": 1792537706,
+        "model": "mercury-2.5",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": null
+      }
+    },
+    {
+      "t": 0.22323987539857626,
+      "chunk": {
+        "id": "chatcmpl-f1e308b3-fe0c-41e8-8a1f-130d603ee0fe",
+        "choices": [],
+        "created": 1792537706,
+        "model": "mercury-2.5",
+        "object": "chat.completion.chunk",
+        "moderation": null,
+        "obfuscation": null,
+        "service_tier": null,
+        "system_fingerprint": null,
+        "usage": {
+          "completion_tokens": 5,
+          "prompt_tokens": 10,
+          "total_tokens": 15,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 0,
+            "rejected_prediction_tokens": null,
+            "text_tokens": null
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": null,
+            "cache_write_tokens": null,
+            "cached_tokens": 0,
+            "image_tokens": null,
+            "text_tokens": null
+          }
+        },
+        "server_timing": {
+          "server_latency_ms": 136.69
+        }
+      }
+    }
+  ]
+}

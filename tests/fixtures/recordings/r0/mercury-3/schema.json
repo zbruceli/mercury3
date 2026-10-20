@@ -1,0 +1,87 @@
+{
+  "request": {
+    "model": "mercury-3",
+    "max_completion_tokens": 1024,
+    "extra_body": {
+      "reasoning_effort": "instant"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the capital of France? Answer in the requested JSON format."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "Answer",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "answer": {
+              "type": "string"
+            },
+            "confidence": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "answer",
+            "confidence"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "elapsed_s": 0.34214045759290457,
+  "response": {
+    "id": "chatcmpl-ac556ce8-988e-4eee-b34c-cc53b65d59e5",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": "{\"answer\": \"Paris\", \"confidence\": 1.0}",
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": null,
+          "tool_call_id": null
+        }
+      }
+    ],
+    "created": 1792537702,
+    "model": "mercury-3",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 33,
+      "prompt_tokens": 192,
+      "total_tokens": 225,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "warning": null,
+    "reasoning_summary": null
+  }
+}

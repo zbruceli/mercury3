@@ -17,7 +17,7 @@ Read these first, in order:
 4. [docs/FEATURES.md](docs/FEATURES.md) / [docs/ROADMAP.md](docs/ROADMAP.md): feature IDs and current milestone
 5. [docs/BLOG_ALIGNMENT.md](docs/BLOG_ALIGNMENT.md): how results map onto the article
 
-Current phase: **M0, project setup.** The scaffolding is in place, and the model registry is filled in and checked against vendor docs (2026-10-20). Still to do: the first manual API call to each provider, plus the Mercury 3 tool-calling check (PRD OQ4). Both need API keys and the user's go-ahead.
+Current phase: **M0 complete (2026-10-20); M1 (harness core) is next.** The scaffolding is in place, the model registry is checked against vendor docs, and the R0 live smoke checks passed 30/30 on all six models. Recordings are in `tests/fixtures/recordings/` (see docs/M0_SMOKE_RESULTS.md for the findings M1 must implement).
 
 ## Commands
 
@@ -55,7 +55,8 @@ uv run dllm-eval analyze <run_id>                             # offline, never c
 - Streaming chunks are **blocks**, not tokens. Compute throughput from server `usage` (`stream_options.include_usage: true`), never from chunk counts.
 - With `diffusing: true`, **each chunk is the full current text**. Replace the text on each chunk; don't append. Use diffusing mode only for visualization, never for latency numbers.
 - `completion_tokens` already includes `reasoning_tokens`; `prompt_tokens` already includes `cached_tokens`. Don't double-count.
-- Retry 429/500/502/503 with exponential backoff and jitter. Don't retry 400/401/402/404.
+- Retry 429/500/502/503 with exponential backoff and jitter. Don't retry 400/401/402/404. **Exception: a 429 whose error type is `insufficient_quota` (OpenAI's empty-balance error) is fatal. Never retry it.**
+- `mercury-3` may emit a short text preamble alongside `tool_calls`; agent loops must accept both in one turn.
 - Text-only input; no embeddings endpoint; FIM and next-edit belong to `mercury-edit-2`, not `mercury-3`.
 
 ## Measurement best practices

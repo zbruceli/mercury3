@@ -1,0 +1,90 @@
+{
+  "request": {
+    "model": "gpt-oss-120b",
+    "max_completion_tokens": 1024,
+    "reasoning_effort": "low",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the capital of France? Answer in the requested JSON format."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "Answer",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "answer": {
+              "type": "string"
+            },
+            "confidence": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "answer",
+            "confidence"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "elapsed_s": 0.1662355838343501,
+  "response": {
+    "id": "chatcmpl-169828db-5b1b-4b3a-a739-719ef7b3364d",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "content": "{\"answer\":\"Paris\",\"confidence\":1.0}",
+          "refusal": null,
+          "role": "assistant",
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "tool_calls": null,
+          "reasoning": "We need to output JSON with answer and confidence. Answer \"Paris\". confidence maybe 1.0."
+        }
+      }
+    ],
+    "created": 1792537730,
+    "model": "gpt-oss-120b",
+    "object": "chat.completion",
+    "metadata": null,
+    "moderation": null,
+    "service_tier": null,
+    "system_fingerprint": "fp_a9089f3cce52797e7952",
+    "usage": {
+      "completion_tokens": 42,
+      "prompt_tokens": 212,
+      "total_tokens": 254,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": null,
+        "reasoning_tokens": 21,
+        "rejected_prediction_tokens": 0,
+        "text_tokens": null
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": 0,
+        "image_tokens": null,
+        "text_tokens": null
+      }
+    },
+    "time_info": {
+      "created": 1792537730.0636208,
+      "queue_time": 0.0029851700000000023,
+      "prompt_time": 0.002750298,
+      "completion_time": 0.019535098,
+      "total_time": 0.02695775032043457
+    }
+  }
+}
