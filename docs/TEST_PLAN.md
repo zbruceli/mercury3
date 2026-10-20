@@ -79,11 +79,13 @@ Coverage target: ≥85% on `providers/`, `timing`, `metrics`, `cost`, and `scori
 5. A second person (or a fresh Claude session) can reproduce the chart from the run directory.
 
 ### B5. Planned runs
+Token figures are the pre-pilot estimate for Mercury 3 + 2.5, before the 25% contingency. See [BUDGET_ESTIMATE.md](BUDGET_ESTIMATE.md) (regenerate with `make budget`).
+
 | Run | Use case | Models | Items | Repeats | Est. Mercury tokens |
 |---|---|---|---|---|---|
-| R0 smoke | all | all | — | 1 | <50k |
-| R1 pilot | UC1 + UC2 | all | 10 + 10 | 3 | ~0.5M |
-| R2 UC1 main | UC1 | all + Mercury 2.5 | 542 (HE+ + MBPP+) + ~100 LCB | 5 | ~8M |
-| R3 UC1 length sweep | UC1 | all | 30 | 30 timing | ~2M |
-| R4 UC2 main | UC2 | all | 150 stratified | 3 | ~4M |
-| R5 diffusion capture | P2 / blog GIF | Mercury 3 | 5 prompts | 3 | <0.2M |
+| R0 smoke | all | all | — | 1 | ~14k |
+| R1 pilot | UC1 + UC2 | all | 10 + 10 | 3 | ~2.3M |
+| R2 UC1 main | UC1 | all + Mercury 2.5 | 542 (HE+ + MBPP+) + ~100 LCB | 5 | ~41M |
+| R3 UC1 length sweep | UC1 | all | 30 | 3 (30 samples per bucket) | ~1.1M |
+| R4 UC2 main | UC2 | all | 150 stratified | 3 | ~33M |
+| R5 diffusion capture | P2 / blog GIF | Mercury 3 | 5 prompts | 3 | ~18k |

@@ -1,0 +1,77 @@
+# Token assumptions behind docs/BUDGET_ESTIMATE.md (TEST_PLAN B5 runs R0-R5).
+# These are pre-pilot GUESSES. After R1 (pilot), replace them with measured medians
+# and regenerate:  make budget
+#
+# Reasoning is modelled as a normalised tier so different vendors' knobs compare:
+#   off    = Mercury instant, Luna none, Flash-Lite minimal, Haiku thinking disabled
+#   low/medium/high = the vendor's own level of that name (gpt-oss has no "off": its lowest is low)
+
+contingency: 0.25        # retries, warm-up discards, re-runs, provider-default temperature arms
+
+# Arms per model, as {arm_name: reasoning_tier}. Matches PRD R3:
+# all Mercury 3 efforts; each baseline at its "off/minimal" setting plus one "on" setting.
+arms:
+  mercury-3:             {instant: off, low: low, medium: medium, high: high}
+  mercury-2.5:           {low: low, medium: medium}
+  claude-haiku-5-5:      {thinking-off: off, medium: medium}
+  gpt-6-luna:            {none: off, medium: medium}
+  gemini-3.5-flash-lite: {minimal: off, medium: medium}
+  gpt-oss-120b-cerebras: {low: low, medium: medium}
+
+# Hidden reasoning tokens per call (UC1) or per agent turn (UC2), by tier.
+reasoning_tokens:
+  uc1_evalplus:  {off: 0, low: 300,  medium: 1200, high: 3000}
+  uc1_lcb:       {off: 0, low: 1500, medium: 5000, high: 12000}
+  uc1_length:    {off: 0, low: 300,  medium: 1200, high: 3000}
+  uc2_turn:      {off: 0, low: 150,  medium: 600,  high: 1500}
+
+runs:
+  R0_smoke:
+    # Fixed per model: ~6 short calls (plain, stream, tool, schema, + Mercury diffusing/efforts).
+    flat_tokens_per_model: {input: 3000, output: 4000}
+
+  R1_pilot:
+    uc1: {items: 10, repeats: 3, workload: uc1_evalplus}
+    uc2: {tasks: 10, repeats: 3}
+    all_arms: true
+
+  R2_uc1_main:
+    workloads:
+      uc1_evalplus: {items: 542, repeats: 5, input: 300, visible_output: 250}   # HumanEval+ 164 + MBPP+ 378
+      uc1_lcb:      {items: 100, repeats: 5, input: 600, visible_output: 500}
+    all_arms: true
+
+  R3_uc1_length:
+    # 30 prompts (10 per bucket) x 3 repeats = 30 timing samples per bucket per arm.
+    # Mean visible output across buckets: (256 + 2000 + 8000) / 3, about 3,400.
+    workload: uc1_length
+    items: 30
+    repeats: 3
+    input: 400
+    visible_output: 3400
+    # Lowest arm per model only, plus Mercury 3 low and low+realtime (PRD OQ3).
+    arms:
+      mercury-3: {instant: off, low: low, low-realtime: low}
+      claude-haiku-5-5: {thinking-off: off}
+      gpt-6-luna: {none: off}
+      gemini-3.5-flash-lite: {minimal: off}
+      gpt-oss-120b-cerebras: {low: low}
+
+  R4_uc2_main:
+    tasks: 150
+    repeats: 3
+    turns: 5                   # mean turns per task (cap is 8)
+    base_input: 1500           # system prompt + tool schemas + question + evidence
+    growth_per_turn: 600       # previous assistant turn + tool result appended to the context
+    visible_output_per_turn: 150
+    cached_fraction: 0.6       # prefix-cache hit share of input tokens from turn 2 onward
+    exclude_models: [mercury-2.5]   # UC1 only (PRD OQ2)
+    # Strict-schema sub-run (F5.6): lowest arm per model, 1 repeat.
+    strict_subrun: {tasks: 150, repeats: 1, exclude_models: [mercury-2.5, gpt-oss-120b-cerebras]}
+
+  R5_diffusion_capture:
+    model: mercury-3
+    prompts: 5
+    repeats: 3
+    input: 200
+    visible_output: 1000
