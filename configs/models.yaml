@@ -1,0 +1,131 @@
+# Model registry. Single source of truth for model ids, endpoints, prices, and limits.
+# Rules (CLAUDE.md #7): never hard-code these values in source; update `verified_on`
+# whenever an entry is re-checked against vendor docs. An entry can only be
+# `enabled: true` once model_id, pricing, and verified_on are all filled in.
+# Prices are USD per 1M tokens.
+
+schema_version: 1
+
+providers:
+  inception:
+    kind: openai_compat
+    base_url: https://api.inceptionlabs.ai/v1
+    api_key_env: INCEPTION_API_KEY
+    tier: free
+    rate_limits:            # free tier, per minute
+      requests_per_min: 1000
+      input_tokens_per_min: 1000000
+      output_tokens_per_min: 100000
+    docs_url: https://docs.inceptionlabs.ai/get-started/rate-limits
+    verified_on: 2026-10-20
+
+  anthropic:
+    kind: anthropic
+    api_key_env: ANTHROPIC_API_KEY
+    docs_url: https://docs.anthropic.com/en/docs/about-claude/models
+    verified_on: null       # TODO(M0): confirm tier + rate limits
+
+  openai:
+    kind: openai_compat
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    docs_url: https://platform.openai.com/docs/models
+    verified_on: null       # TODO(M0)
+
+  google:
+    kind: openai_compat
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/   # TODO(M0): confirm
+    api_key_env: GEMINI_API_KEY
+    docs_url: https://ai.google.dev/gemini-api/docs/openai
+    verified_on: null       # TODO(M0)
+
+  groq:
+    kind: openai_compat
+    base_url: https://api.groq.com/openai/v1
+    api_key_env: GROQ_API_KEY
+    docs_url: https://console.groq.com/docs/models
+    verified_on: null       # TODO(M0): or swap for Cerebras
+
+models:
+  mercury-3:
+    provider: inception
+    model_id: mercury-3
+    architecture: diffusion
+    role: primary
+    enabled: true
+    context_window: 1000000
+    max_output_tokens: 131072
+    temperature_range: [0.5, 1.0]     # out-of-range is silently reset to 1 + `warning`
+    reasoning_efforts: [instant, low, medium, high]
+    supports: {streaming: true, tools: true, structured_outputs: true, diffusing: true}
+    pricing:                          # launch promo (50% off)
+      input: 0.10
+      cached_input: 0.01
+      output: 0.35
+    pricing_regular:
+      input: 0.20
+      cached_input: 0.02
+      output: 0.70
+    verified_on: 2026-10-20
+    notes: >-
+      Docs disagree on default reasoning_effort (schema: medium, guide: low); always set it.
+      Default max_completion_tokens depends on effort; always set it.
+      PRD OQ4: confirm tool calling works on mercury-3 (FAQ references mercury-2.5).
+
+  mercury-2.5:
+    provider: inception
+    model_id: mercury-2.5
+    architecture: diffusion
+    role: lineage
+    enabled: true
+    context_window: 260000
+    max_output_tokens: 65536
+    temperature_range: [0.5, 1.0]
+    reasoning_efforts: [instant, low, medium, high]
+    supports: {streaming: true, tools: true, structured_outputs: true, diffusing: true}
+    pricing:
+      input: 0.20
+      cached_input: 0.02
+      output: 0.75
+    verified_on: 2026-10-20
+    notes: UC1 only (PRD OQ2), for the lineage chart.
+
+  claude-haiku-5-5:
+    provider: anthropic
+    model_id: claude-haiku-5-5
+    architecture: autoregressive
+    role: baseline
+    enabled: false                    # TODO(M0): fill pricing + limits from Anthropic docs
+    supports: {streaming: true, tools: true, structured_outputs: true}
+    pricing: null
+    verified_on: null
+
+  openai-fast:
+    provider: openai
+    model_id: null                    # TODO(M0): pick the current mini/fast tier (PRD OQ1)
+    architecture: autoregressive
+    role: baseline
+    enabled: false
+    supports: {streaming: true, tools: true, structured_outputs: true}
+    pricing: null
+    verified_on: null
+
+  gemini-flash:
+    provider: google
+    model_id: null                    # TODO(M0): pick the current Flash tier (PRD OQ1)
+    architecture: autoregressive
+    role: baseline
+    enabled: false
+    supports: {streaming: true, tools: true, structured_outputs: true}
+    pricing: null
+    verified_on: null
+
+  fast-hw-control:
+    provider: groq
+    model_id: null                    # TODO(M0): open-weight AR model on fast hardware (PRD R13)
+    architecture: autoregressive
+    role: hardware_control
+    enabled: false
+    supports: {streaming: true, tools: true, structured_outputs: false}
+    pricing: null
+    verified_on: null

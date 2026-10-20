@@ -17,14 +17,21 @@ Read these first, in order:
 4. [docs/FEATURES.md](docs/FEATURES.md) / [docs/ROADMAP.md](docs/ROADMAP.md): feature IDs and current milestone
 5. [docs/BLOG_ALIGNMENT.md](docs/BLOG_ALIGNMENT.md): how results map onto the article
 
-Current phase: **M0, project setup. No implementation yet.**
+Current phase: **M0, project setup.** The scaffolding and model registry are in place. Baseline model verification and the first manual API calls are still to do.
 
-## Commands (once M0 scaffolding lands)
+## Commands
 
 ```bash
-uv sync                      # install
-make check                   # ruff + mypy + unit/contract tests (offline)
+uv sync                      # install (Python 3.12, pinned in .python-version)
+make check                   # ruff + mypy + offline tests + validate-config
+make fmt                     # ruff format + autofix
 make test-live               # live smoke tests: spends real tokens, run only when asked
+uv run dllm-eval validate-config [--strict]   # check configs/models.yaml; --strict fails on stale entries
+```
+
+Planned for M1 (not implemented yet):
+
+```bash
 uv run dllm-eval run configs/experiments/<x>.yaml --dry-run   # always dry-run first
 uv run dllm-eval analyze <run_id>                             # offline, never calls APIs
 ```
