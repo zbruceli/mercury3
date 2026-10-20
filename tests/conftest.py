@@ -49,6 +49,19 @@ FAKE_REGISTRY: dict[str, Any] = {
 }
 
 
+@pytest.fixture(autouse=True)
+def _offline_cli(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Safety net for every test: the CLI sees a clean git tree and never probes the network.
+    Tests of the guard or the probe override these with their own monkeypatch."""
+    from dllm_eval import cli
+
+    async def no_probe(*args: Any, **kwargs: Any) -> list[Any]:
+        return []
+
+    monkeypatch.setattr(cli, "git_state", lambda _root: {"sha": "test", "dirty": False})
+    monkeypatch.setattr(cli, "probe_all", no_probe)
+
+
 @pytest.fixture
 def fake_registry() -> ModelRegistry:
     return ModelRegistry.model_validate(FAKE_REGISTRY)

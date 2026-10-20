@@ -68,3 +68,24 @@ def to_markdown(rows: list[dict[str, Any]]) -> str:
             f"{reasoning} | {r['cost_usd']:.6f} |"
         )
     return "\n".join(lines)
+
+
+def probe_markdown(probes: list[dict[str, Any]]) -> str:
+    """One row per probe record (start, resume, periodic) from probes.jsonl."""
+
+    def ms(v: float | None) -> str:
+        return "—" if v is None else f"{v * 1000:.0f}"
+
+    lines = [
+        "| Provider | When | Label | OK samples | DNS | Connect (~RTT) | TLS | TTFB | Total |",
+        "|---|---|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for p in probes:
+        m = p["median"]
+        ok = sum(1 for s in p["samples"] if s.get("error") is None)
+        lines.append(
+            f"| {p['provider']} | {p['at']} | {p['label']} | {ok}/{len(p['samples'])} | "
+            f"{ms(m['dns_s'])} | {ms(m['connect_s'])} | {ms(m['tls_s'])} | {ms(m['ttfb_s'])} | "
+            f"{ms(m['total_s'])} |"
+        )
+    return "\n".join(lines)

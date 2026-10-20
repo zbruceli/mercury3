@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import datetime as dt
 import random
 import time
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -18,6 +19,8 @@ from dllm_eval.providers import BaseProvider, ErrorKind, ProviderError, RateLimi
 from dllm_eval.schemas import ChatRequest
 
 ProviderFactory = Callable[..., BaseProvider]
+# Returns probe records (ProviderProbe dumps) for the given label; see probe.probe_all.
+Prober = Callable[[str], Awaitable[list[dict[str, Any]]]]
 
 
 @dataclass(frozen=True)
@@ -126,6 +129,7 @@ async def run_experiment(
     run_id: str,
     *,
     provider_factory: ProviderFactory = build_provider,
+    prober: Prober | None = None,
     log: Callable[[str], None] = print,
 ) -> RunSummary:
     exp.check_against(registry)
@@ -235,5 +239,24 @@ async def run_experiment(
                 }
             )
 
-    await asyncio.gather(*(work(j) for j in jobs))
+    async def reprobe(interval: float) -> None:
+        assert prober is not None
+        while True:
+            await asyncio.sleep(interval)
+            try:
+                for rec in await prober("periodic"):
+                    store.append_probe(rec)
+            except Exception as e:  # a failed probe must never stop the run
+                log(f"network probe failed: {type(e).__name__}: {e}")
+
+    probe_task = None
+    if prober is not None and exp.network_probe and exp.network_probe_interval_s:
+        probe_task = asyncio.create_task(reprobe(exp.network_probe_interval_s))
+    try:
+        await asyncio.gather(*(work(j) for j in jobs))
+    finally:
+        if probe_task is not None:
+            probe_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await probe_task
     return summary

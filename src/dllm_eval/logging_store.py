@@ -74,13 +74,16 @@ def build_manifest(
     registry: ModelRegistry,
     model_keys: Iterable[str],
     repo_root: Path,
+    *,
+    git: dict[str, Any] | None = None,
+    network_probe: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     keys = sorted(set(model_keys))
     provider_keys = sorted({registry.models[k].provider for k in keys})
     return {
         "run_id": run_id,
         "created_at": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
-        "git": git_state(repo_root),
+        "git": git if git is not None else git_state(repo_root),
         "python": sys.version.split()[0],
         "platform": platform.platform(),
         "packages": package_versions(),
@@ -91,12 +94,15 @@ def build_manifest(
             k: registry.providers[k].model_dump(mode="json", exclude={"api_key_env"})
             for k in provider_keys
         },
+        # Start-of-run network baseline (F2.5); periodic probes go to probes.jsonl.
+        "network_probe": network_probe or [],
     }
 
 
 class RunStore:
     MANIFEST = "manifest.json"
     CALLS = "calls.jsonl"
+    PROBES = "probes.jsonl"
 
     def __init__(self, run_dir: Path, secrets: Iterable[str] = ()) -> None:
         self.dir = run_dir
@@ -124,18 +130,35 @@ class RunStore:
         return result
 
     def append_call(self, record: dict[str, Any]) -> None:
+        self._append(self.calls_path, record)
+
+    @property
+    def probes_path(self) -> Path:
+        return self.dir / self.PROBES
+
+    def _append(self, path: Path, record: dict[str, Any]) -> None:
         line = json.dumps(redact(record, self.secrets), default=str)
-        with self.calls_path.open("a") as f:
+        with path.open("a") as f:
             f.write(line + "\n")
             f.flush()
 
-    def iter_calls(self) -> Iterator[dict[str, Any]]:
-        if not self.calls_path.exists():
+    def append_probe(self, record: dict[str, Any]) -> None:
+        self._append(self.probes_path, record)
+
+    @staticmethod
+    def _iter(path: Path) -> Iterator[dict[str, Any]]:
+        if not path.exists():
             return
-        with self.calls_path.open() as f:
+        with path.open() as f:
             for line in f:
                 if line.strip():
                     yield json.loads(line)
+
+    def iter_calls(self) -> Iterator[dict[str, Any]]:
+        return self._iter(self.calls_path)
+
+    def iter_probes(self) -> Iterator[dict[str, Any]]:
+        return self._iter(self.probes_path)
 
     def latest_by_job(self) -> dict[str, dict[str, Any]]:
         """Last record per job_id (a resumed job appends a newer record; nothing is edited)."""

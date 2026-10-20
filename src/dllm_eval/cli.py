@@ -8,14 +8,15 @@ import datetime as dt
 import json
 import os
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 from pydantic import ValidationError
 
 from dllm_eval.config import DEFAULT_MODELS_PATH, ProviderKind, load_registry
 from dllm_eval.experiment import load_experiment
-from dllm_eval.logging_store import RunStore, build_manifest, secret_values
+from dllm_eval.logging_store import RunStore, build_manifest, git_state, secret_values
+from dllm_eval.probe import probe_all
 from dllm_eval.runner import dry_run, run_experiment
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -71,6 +72,10 @@ def run(
     models: Annotated[Path, typer.Option(help="Path to models.yaml")] = DEFAULT_MODELS_PATH,
     runs_dir: Annotated[Path, typer.Option(help="Where run directories go")] = DEFAULT_RUNS_DIR,
     resume: Annotated[str | None, typer.Option(help="Resume this run id")] = None,
+    allow_dirty: Annotated[
+        bool,
+        typer.Option(help="Run --live with uncommitted changes (recorded in the manifest)"),
+    ] = False,
 ) -> None:
     """Run an experiment. Always prints the dry-run estimate; spends tokens only with --live."""
     try:
@@ -112,6 +117,32 @@ def run(
         )
         raise typer.Exit(1)
 
+    # TEST_PLAN B1: real runs need a clean tree so the manifest's git SHA is the code that ran.
+    git = git_state(REPO_ROOT)
+    if (git["sha"] is None or git["dirty"]) and not allow_dirty:
+        reason = "not a git checkout" if git["sha"] is None else "uncommitted changes"
+        typer.echo(
+            f"refusing to run --live: {reason}. Commit or stash first, or pass --allow-dirty "
+            "(the manifest records it).",
+            err=True,
+        )
+        raise typer.Exit(1)
+    git = {**git, "allow_dirty": allow_dirty}
+
+    # F2.5 / PRD R8: network baseline before the first job (free GET .../models per provider).
+    async def prober(label: str) -> list[dict[str, Any]]:
+        found = await probe_all(registry, used, samples=exp.network_probe_samples, label=label)
+        return [pr.model_dump(mode="json") for pr in found]
+
+    start_probes: list[dict[str, Any]] = []
+    if exp.network_probe:
+        start_probes = asyncio.run(prober("resume" if resume else "start"))
+        for pr in start_probes:
+            m = pr["median"]
+            rtt = "—" if m["connect_s"] is None else f"{m['connect_s'] * 1000:.0f} ms"
+            ttfb = "—" if m["ttfb_s"] is None else f"{m['ttfb_s'] * 1000:.0f} ms"
+            typer.echo(f"network probe {pr['provider']}: connect {rtt}, ttfb {ttfb}")
+
     exp_dump = exp.model_dump(mode="json", by_alias=True)
     run_id = resume or f"{exp.name}-{dt.datetime.now(dt.UTC):%Y%m%dT%H%M%SZ}"
     store = RunStore(runs_dir / run_id, secrets=secret_values(registry))
@@ -125,11 +156,29 @@ def run(
             )
             raise typer.Exit(1)
     else:
-        store.create(
-            build_manifest(run_id, exp_dump, registry, [a.model for a in exp.arms], REPO_ROOT)
+        manifest = build_manifest(
+            run_id,
+            exp_dump,
+            registry,
+            [a.model for a in exp.arms],
+            REPO_ROOT,
+            git=git,
+            network_probe=start_probes,
         )
+        store.create(manifest)
+    for pr in start_probes:  # every probe, start/resume/periodic, also lands in probes.jsonl
+        store.append_probe(pr)
 
-    summary = asyncio.run(run_experiment(exp, registry, store, run_id, log=typer.echo))
+    summary = asyncio.run(
+        run_experiment(
+            exp,
+            registry,
+            store,
+            run_id,
+            prober=prober if exp.network_probe else None,
+            log=typer.echo,
+        )
+    )
     typer.echo(json.dumps(dataclasses.asdict(summary), indent=2))
     typer.echo(f"run dir: {store.dir}")
     if summary.aborted or summary.errors:
@@ -144,7 +193,7 @@ def analyze(
 ) -> None:
     """Summarise a run from its logs only. Never calls an API."""
     from dllm_eval.analysis.load import load_calls
-    from dllm_eval.analysis.tables import arm_summary, to_markdown
+    from dllm_eval.analysis.tables import arm_summary, probe_markdown, to_markdown
 
     store = RunStore(runs_dir / run_id)
     if not store.exists():
@@ -153,6 +202,9 @@ def analyze(
     df = load_calls(store)
     rows = arm_summary(df, seed=store.read_manifest()["experiment"].get("seed", 0))
     typer.echo(to_markdown(rows))
+    probes = list(store.iter_probes())
+    if probes:
+        typer.echo("\nNetwork baseline (median of samples, ms):\n" + probe_markdown(probes))
     dest = out_dir / run_id
     dest.mkdir(parents=True, exist_ok=True)
     df.to_parquet(dest / "calls.parquet", index=False)

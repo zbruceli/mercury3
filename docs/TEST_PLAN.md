@@ -48,9 +48,9 @@ Coverage target: ≥85% on `providers/`, `timing`, `metrics`, `cost`, and `scori
 ### B1. Pre-flight checklist (before every real run)
 - [ ] `dllm-eval smoke` passes for all models in the config
 - [ ] Model IDs and prices in `configs/models.yaml` were re-verified within 7 days (`verified_on` field)
-- [ ] Network baseline captured; same host/region as previous runs
+- [ ] Network baseline captured (automatic at the start of every `--live` run; check the probe table from `analyze`); same host/region as previous runs
 - [ ] Dry-run cost is within budget; budget guard is set
-- [ ] Git working tree clean (SHA recorded in the manifest)
+- [ ] Git working tree clean (enforced by `run --live`; `--allow-dirty` is recorded in the manifest)
 
 ### B2. Pilot runs
 - 10 items × all models × 3 repeats for each use case.

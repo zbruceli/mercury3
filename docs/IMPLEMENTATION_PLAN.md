@@ -172,7 +172,8 @@ Draft in `reports/blog/draft.md`, following BLOG_ALIGNMENT §4. Every number lin
 | `runner.py` | Seeded interleaved job matrix, per-provider semaphores, resume, budget guard, dry-run |
 | `cost.py`, `stats.py` | Frozen-price cost (long-context tier, promo vs regular, unknown cache = uncached); percentiles + seeded bootstrap CIs |
 | `analysis/` | `calls.jsonl` -> DataFrame -> per-arm table; latency stats exclude warm-up and retried calls |
-| `cli.py` | `validate-config`, `run` (dry-run always printed; `--live` required to call APIs; `--resume`), `analyze` |
+| `probe.py` | Network baseline (F2.5): times DNS / TCP connect / TLS / TTFB of an authenticated `GET .../models` per provider, 3 samples each, run one provider at a time. The probe is free and records only timings and status, never headers |
+| `cli.py` | `validate-config`, `run` (dry-run always printed; `--live` required to call APIs; `--resume`; clean-tree guard with `--allow-dirty`), `analyze` (arm table plus network baseline) |
 
 **Error policy.** Error kinds are retry / call-fatal / run-fatal:
 
@@ -194,9 +195,11 @@ A provider `warning` aborts the run when `fail_on_warning` is set (M0 F2). A req
 - Added `experiment.py` (experiment schema) and `Message.raw` / `ChatResult.as_message()` for provider-native replay. The R0 recordings showed Gemini thought signatures, which multi-turn tool loops must echo.
 - `dllm-eval smoke` was not added as a separate command. The harness smoke is an ordinary experiment (`configs/experiments/r0_smoke.yaml`); `scripts/smoke_r0.py` stays as the raw capability probe.
 - `pandas` + `pyarrow` were added for F6.1 (`calls.parquet`).
-- **Not done (carried over):** F2.5, the network baseline probe (P1); F1.9, the `inceptionai` SDK cross-check (P2).
+- F2.5 landed after the first M1 commit, as a hand-rolled HTTP/1.1 probe over asyncio streams so each phase can be timed separately. Start and resume probes go in the manifest and `probes.jsonl`. With `network_probe_interval_s` set, the runner re-probes in the background, and a failed probe never stops a run.
+- Clean-tree guard: `run --live` refuses a dirty or non-git tree unless `--allow-dirty` is passed. The manifest records `git.allow_dirty`.
+- **Not done:** F1.9, the `inceptionai` SDK cross-check (P2).
 
-**Tests.** 107 offline tests, 96% coverage; providers are 95–100%.
+**Tests.** 127 offline tests, 96% coverage; providers are 95–100% and `probe.py` 96%. An autouse fixture keeps every test offline: a clean git tree, and `probe_all` is a no-op unless a test overrides it.
 - Contract tests replay every R0 recording through the production parsers.
 - The I/O-path tests drive the real adapters through a stub SDK client.
 - The fake-provider tests cover the runner and CLI: interleaving, resume, the budget guard, and aborts on warnings and billing errors.

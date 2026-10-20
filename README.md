@@ -6,7 +6,7 @@ A harness for benchmarking Inception Labs **Mercury 3** (a diffusion LLM) agains
 
 The results will feed a follow-up to *What is Diffusion LLM and why it matters* (The Low End Disruptor, Feb 2025).
 
-**Status:** M0 done. M1 harness core is built; its live smoke passed 24/24. The network baseline probe (F2.5) is still open.
+**Status:** M0 and M1 done (harness core, live smoke 24/24). M2 (UC1 code generation) is next. Per-feature status: [docs/FEATURES.md](docs/FEATURES.md).
 
 | Doc | Contents |
 |---|---|

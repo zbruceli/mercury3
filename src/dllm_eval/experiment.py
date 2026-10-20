@@ -62,6 +62,11 @@ class Experiment(_Strict):
     fail_on_warning: bool = True  # PRD R2: any `warning` means an arm is misconfigured
     warmup_calls_per_arm: int = Field(default=0, ge=0)  # marked, then excluded from latency stats
     record_raw: bool = False  # keep every raw chunk/event in calls.jsonl (large)
+    # Network baseline (F2.5, PRD R8): probe each provider before the first job, and
+    # optionally every N seconds while jobs run. Probes are free (GET .../models).
+    network_probe: bool = True
+    network_probe_samples: int = Field(default=3, gt=0)
+    network_probe_interval_s: float | None = Field(default=None, gt=0)
     stream: bool = True
     arms: list[Arm]
     workload: PromptWorkload

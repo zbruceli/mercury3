@@ -16,9 +16,10 @@ class FakeProvider(BaseProvider):
       fake_fail: list of statuses to raise on successive attempts, e.g. [503, 503]
       fake_warning: a warning string to return (tests fail_on_warning)
       fake_tool: name of a tool to "call" with {"q": <last user text>}
+      fake_delay_s: seconds each call takes (real asyncio.sleep; tests periodic probing)
     """
 
-    ALLOWED_EXTRAS = frozenset({"fake_fail", "fake_warning", "fake_tool"})
+    ALLOWED_EXTRAS = frozenset({"fake_fail", "fake_warning", "fake_tool", "fake_delay_s"})
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -52,7 +53,8 @@ class FakeProvider(BaseProvider):
             ]
         prompt_chars = sum(len(m.content or "") for m in req.messages)
         out_tokens = min(req.max_completion_tokens, max(1, len(text) // 4))
-        await asyncio.sleep(0)  # yield like a real call; not the injected backoff sleep
+        # yield like a real call; deliberately not the injected backoff sleep
+        await asyncio.sleep(float(req.provider_extras.get("fake_delay_s", 0)))
         return ChatResult(
             content=text,
             tool_calls=tool_calls,
