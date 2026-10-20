@@ -9,4 +9,5 @@ __pycache__/
 htmlcov/
 data/
 results/runs/
+results/analysis/
 .DS_Store
