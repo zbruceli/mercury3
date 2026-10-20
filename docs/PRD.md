@@ -47,7 +47,7 @@ Vendor speed claims are measured in isolation: raw tokens/s on a single request.
 | dLLM (lineage, optional) | `mercury-2.5` | Shows generation-over-generation progress for the blog. |
 | AR baseline A | Anthropic **Claude Haiku 5.5** (`claude-haiku-5-5`) | Anthropic's fastest tier. Effort `low`–`max`; thinking can be disabled at `high` or below. |
 | AR baseline B | OpenAI **GPT-6 Luna** (`gpt-6-luna`) | OpenAI's smallest current tier. Reasoning `none`–`max`. |
-| AR baseline C | Google **Gemini 3.5 Flash-Lite** (`gemini-3.5-flash-lite`) | Google's fastest stable tier. Thinking can't be fully turned off; `minimal` is the lowest. |
+| AR baseline C | Google **Gemini 3.5 Flash-Lite** (`gemini-3.5-flash-lite`) | Google's fastest stable tier. Thinking can't be fully turned off; `minimal` is the lowest. **Runs at `minimal` only** (no reasoning-on arm) to cut cost. |
 | AR control (fast hardware) | **gpt-oss-120b on Cerebras** | Open-weight AR model on the fastest AR hardware (~3,000 tok/s listed). Separates *architecture* speed from *hardware* speed (Section 6.4). |
 
 All baseline IDs, prices, and limits are pinned in `configs/models.yaml` with a "verified on" date. Never hard-code them in source.
@@ -107,7 +107,7 @@ We chose these two use cases because each one targets a different claimed advant
 ### 6.1 Fairness
 - R1. Identical prompts, tool definitions, `max_completion_tokens` budgets, and stop conditions across models. Any provider-specific adaptation must be documented in the run config.
 - R2. **Temperature.** Mercury 3 accepts only 0.5–1.0. Primary arm: every model at 0.5 where the provider allows it, otherwise the provider default, recorded in the run config. Every response's `warning` field is logged and checked.
-- R3. **Reasoning parity.** Sweep all four Mercury efforts. Run each AR baseline at its "off/minimal" setting and one "on" setting. Report reasoning tokens separately from visible tokens.
+- R3. **Reasoning parity.** Sweep all four Mercury efforts. Run each AR baseline at its "off/minimal" setting and one "on" setting. The exception is Gemini 3.5 Flash-Lite, which runs `minimal` only because of its output price (BUDGET_ESTIMATE §7). Report reasoning tokens separately from visible tokens.
 - R4. **Always set `reasoning_effort` explicitly.** The docs disagree on the Mercury 3 default: the API schema says `medium`, while the Reasoning Efforts page says `low`.
 
 ### 6.2 Measurement
@@ -127,7 +127,7 @@ We chose these two use cases because each one targets a different claimed advant
 
 ## 7. Constraints and assumptions
 
-- Budget: Inception gives a one-time credit of 100M free tokens, shared across models. The pre-pilot estimate for the full plan is about 97M Mercury tokens and about $69 for AR baselines. See [BUDGET_ESTIMATE.md](BUDGET_ESTIMATE.md); it gets recalibrated after R1. Spend on AR baselines is capped by the `budget_usd` guard in each run config (default $150 total).
+- Budget: Inception gives a one-time credit of 100M free tokens, shared across models. The pre-pilot estimate for the full plan is about 97M Mercury tokens and about $41 for AR baselines. See [BUDGET_ESTIMATE.md](BUDGET_ESTIMATE.md); it gets recalibrated after R1. Spend on AR baselines is capped by the `budget_usd` guard in each run config (default $150 total).
 - Rate limits (free tier, per minute): 1,000 requests, 1M input tokens, 100k output tokens. The runner must throttle and back off on 429/503.
 - Mercury 3 price (launch promo, verified 2026-10-20): $0.10 per 1M input tokens, $0.01 per 1M cached input tokens, $0.35 per 1M output tokens. Regular price: $0.20 / $0.02 / $0.70. The promo will end, so the blog reports both prices.
 - Mercury models accept text input only. There is no embeddings endpoint and no `seed`.

@@ -168,7 +168,8 @@ models:
       Google's fastest stable tier, and the closest to Mercury on price. gemini-3.8-flash
       ($0.75/$3.75 until 2026-12-31, then $1.50/$7.50) is stronger but 2-3x the price;
       add it as a separate arm only if the blog needs it. Thinking can't be fully turned
-      off on Gemini 3 models, so "minimal" is the "reasoning off" arm. The OpenAI-compat
+      off on Gemini 3 models, so "minimal" is the "reasoning off" arm. Runs at "minimal"
+      only (no reasoning-on arm; decided 2026-10-20 to cut cost). The OpenAI-compat
       layer is beta. Context caching also has a storage fee that we don't use.
 
   gpt-oss-120b-cerebras:

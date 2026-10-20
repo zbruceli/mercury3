@@ -10,13 +10,14 @@
 contingency: 0.25        # retries, warm-up discards, re-runs, provider-default temperature arms
 
 # Arms per model, as {arm_name: reasoning_tier}. Matches PRD R3:
-# all Mercury 3 efforts; each baseline at its "off/minimal" setting plus one "on" setting.
+# all Mercury 3 efforts; each baseline at its "off/minimal" setting plus one "on" setting,
+# except Gemini, which runs its lowest setting only (decided 2026-10-20 to cut cost).
 arms:
   mercury-3:             {instant: off, low: low, medium: medium, high: high}
   mercury-2.5:           {low: low}                       # LEAN: one lineage arm
   claude-haiku-5-5:      {thinking-off: off, medium: medium}
   gpt-6-luna:            {none: off, medium: medium}
-  gemini-3.5-flash-lite: {minimal: off, medium: medium}
+  gemini-3.5-flash-lite: {minimal: off}                    # lowest arm only (decided 2026-10-20: cost)
   gpt-oss-120b-cerebras: {low: low, medium: medium}
 
 # Hidden reasoning tokens per call (UC1) or per agent turn (UC2), by tier.

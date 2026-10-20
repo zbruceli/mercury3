@@ -16,13 +16,13 @@ Contingency applied to totals: +25%
 | R1 pilot | `mercury-2.5` | 18k | 0k | 60k | 78k | $0.05 |
 | R1 pilot | `claude-haiku-5-5` | 0.83M | 0.43M | 0.19M | 1.01M | $0.14 |
 | R1 pilot | `gpt-6-luna` | 0.83M | 0.43M | 0.19M | 1.01M | $0.14 |
-| R1 pilot | `gemini-3.5-flash-lite` | 0.83M | 0.43M | 0.19M | 1.01M | $0.60 |
+| R1 pilot | `gemini-3.5-flash-lite` | 0.41M | 0.22M | 30k | 0.44M | $0.14 |
 | R1 pilot | `gpt-oss-120b-cerebras` | 0.83M | 0.43M | 0.22M | 1.05M | $0.45 |
 | R2 UC1 main | `mercury-3` | 4.45M | 0k | 25.16M | 29.61M | $9.25 |
 | R2 UC1 main | `mercury-2.5` | 2.23M | 0k | 9.17M | 11.40M | $7.32 |
 | R2 UC1 main | `claude-haiku-5-5` | 2.23M | 0k | 7.61M | 9.83M | $4.03 |
 | R2 UC1 main | `gpt-6-luna` | 2.23M | 0k | 7.61M | 9.83M | $4.03 |
-| R2 UC1 main | `gemini-3.5-flash-lite` | 2.23M | 0k | 7.61M | 9.83M | $19.69 |
+| R2 UC1 main | `gemini-3.5-flash-lite` | 1.11M | 0k | 0.93M | 2.04M | $2.65 |
 | R2 UC1 main | `gpt-oss-120b-cerebras` | 2.23M | 0k | 9.17M | 11.40M | $7.66 |
 | R3 UC1 length | `mercury-3` | 0.11M | 0k | 0.97M | 1.08M | $0.35 |
 | R3 UC1 length | `claude-haiku-5-5` | 36k | 0k | 0.31M | 0.34M | $0.16 |
@@ -32,7 +32,7 @@ Contingency applied to totals: +25%
 | R4 UC2 main | `mercury-3` | 26.32M | 14.04M | 6.53M | 32.85M | $3.65 |
 | R4 UC2 main | `claude-haiku-5-5` | 14.18M | 7.56M | 2.14M | 16.31M | $1.81 |
 | R4 UC2 main | `gpt-6-luna` | 14.18M | 7.56M | 2.14M | 16.31M | $1.81 |
-| R4 UC2 main | `gemini-3.5-flash-lite` | 14.18M | 7.56M | 2.14M | 16.31M | $7.56 |
+| R4 UC2 main | `gemini-3.5-flash-lite` | 8.10M | 4.32M | 0.45M | 8.55M | $2.39 |
 | R4 UC2 main | `gpt-oss-120b-cerebras` | 12.15M | 6.48M | 2.36M | 14.51M | $6.02 |
 | R5 diffusion | `mercury-3` | 3k | 0k | 15k | 18k | $0.01 |
 
@@ -44,11 +44,11 @@ Contingency applied to totals: +25%
 | `mercury-2.5` | 14.35M | 11.54M | $9.22 | $9.22 |
 | `claude-haiku-5-5` | 34.39M | 12.80M | $7.66 | $7.66 |
 | `gpt-6-luna` | 34.39M | 12.80M | $7.66 | $7.66 |
-| `gemini-3.5-flash-lite` | 34.39M | 12.80M | $35.78 | $35.78 |
+| `gemini-3.5-flash-lite` | 14.23M | 2.15M | $7.46 | $7.46 |
 | `gpt-oss-120b-cerebras` | 34.16M | 15.11M | $18.00 | $18.00 |
-| **All** | | | **$95.26** | **$112.21** |
+| **All** | | | **$66.94** | **$83.89** |
 
 ### Budget check
 
 - Inception (Mercury 3 + 2.5): **96.61M tokens**, 97% of the 100M free credit.
-- Paid baselines (Anthropic, OpenAI, Google, Cerebras): **$69.10**.
+- Paid baselines (Anthropic, OpenAI, Google, Cerebras): **$40.78**.
