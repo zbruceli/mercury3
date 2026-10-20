@@ -35,9 +35,22 @@ class Role(StrEnum):
 
 
 class RateLimits(_Strict):
+    """Per-minute limits. Providers publish different token splits, so each is optional."""
+
     requests_per_min: int = Field(gt=0)
-    input_tokens_per_min: int = Field(gt=0)
-    output_tokens_per_min: int = Field(gt=0)
+    input_tokens_per_min: int | None = Field(default=None, gt=0)
+    output_tokens_per_min: int | None = Field(default=None, gt=0)
+    total_tokens_per_min: int | None = Field(default=None, gt=0)
+
+    @model_validator(mode="after")
+    def _has_a_token_limit(self) -> Self:
+        if (
+            self.input_tokens_per_min is None
+            and self.output_tokens_per_min is None
+            and self.total_tokens_per_min is None
+        ):
+            raise ValueError("rate_limits needs at least one token limit")
+        return self
 
 
 class Provider(_Strict):
@@ -56,6 +69,13 @@ class Pricing(_Strict):
     input: float = Field(ge=0)
     cached_input: float = Field(ge=0)
     output: float = Field(ge=0)
+
+
+class LongContextPricing(_Strict):
+    """Higher prices for requests whose prompt exceeds threshold_tokens."""
+
+    threshold_tokens: int = Field(gt=0)
+    pricing: Pricing
 
 
 class Supports(_Strict):
@@ -78,6 +98,7 @@ class Model(_Strict):
     supports: Supports = Field(default_factory=Supports)
     pricing: Pricing | None = None
     pricing_regular: Pricing | None = None
+    long_context: LongContextPricing | None = None
     verified_on: dt.date | None = None
     notes: str | None = None
 

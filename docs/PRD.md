@@ -45,12 +45,14 @@ Vendor speed claims are measured in isolation: raw tokens/s on a single request.
 |---|---|---|
 | dLLM (primary) | `mercury-3` @ `instant`, `low`, `medium`, `high` | Temperature range 0.5–1.0 (out-of-range values are silently reset to 1 and return a `warning`). No `seed`. |
 | dLLM (lineage, optional) | `mercury-2.5` | Shows generation-over-generation progress for the blog. |
-| AR baseline A | Anthropic **Claude Haiku 5.5** (`claude-haiku-5-5`) | Speed/cost tier of a frontier lab. |
-| AR baseline B | OpenAI small/fast tier (mini class) | Confirm the exact model ID in M0. |
-| AR baseline C | Google Gemini Flash tier | Confirm the exact model ID in M0. |
-| AR control (fast hardware) | An open-weight AR model on a speed-optimized host (e.g. Groq/Cerebras) | Separates *architecture* speed from *hardware* speed (Section 6.4). |
+| AR baseline A | Anthropic **Claude Haiku 5.5** (`claude-haiku-5-5`) | Anthropic's fastest tier. Effort `low`–`max`; thinking can be disabled at `high` or below. |
+| AR baseline B | OpenAI **GPT-6 Luna** (`gpt-6-luna`) | OpenAI's smallest current tier. Reasoning `none`–`max`. |
+| AR baseline C | Google **Gemini 3.5 Flash-Lite** (`gemini-3.5-flash-lite`) | Google's fastest stable tier. Thinking can't be fully turned off; `minimal` is the lowest. |
+| AR control (fast hardware) | **gpt-oss-120b on Cerebras** | Open-weight AR model on the fastest AR hardware (~3,000 tok/s listed). Separates *architecture* speed from *hardware* speed (Section 6.4). |
 
 All baseline IDs, prices, and limits are pinned in `configs/models.yaml` with a "verified on" date. Never hard-code them in source.
+
+**Selection rule (resolved 2026-10-20):** each AR baseline is the vendor's cheapest and fastest current tier, the closest match to Mercury 3 on price. At list price, Haiku 5.5 and GPT-6 Luna cost about the same as Mercury 3's regular price ($0.10 in / $0.50 out for prompts under their long-context thresholds). Flash-Lite costs more ($0.30 / $2.50). Gemini 3.8 Flash is stronger but 2–3x the price of Flash-Lite, so it is left out unless the blog needs a higher-quality Google point.
 
 ## 5. Use cases
 
@@ -125,7 +127,7 @@ We chose these two use cases because each one targets a different claimed advant
 
 ## 7. Constraints and assumptions
 
-- Budget: Inception gives a one-time credit of 100M free tokens, shared across models. UC1 + UC2 are estimated at ≤15M Mercury tokens. Spend on AR baselines is capped by the `budget_usd` guard in each run config (default $150 total).
+- Budget: Inception gives a one-time credit of 100M free tokens, shared across models. The pre-pilot estimate for the full plan is about 97M Mercury tokens and about $69 for AR baselines. See [BUDGET_ESTIMATE.md](BUDGET_ESTIMATE.md); it gets recalibrated after R1. Spend on AR baselines is capped by the `budget_usd` guard in each run config (default $150 total).
 - Rate limits (free tier, per minute): 1,000 requests, 1M input tokens, 100k output tokens. The runner must throttle and back off on 429/503.
 - Mercury 3 price (launch promo, verified 2026-10-20): $0.10 per 1M input tokens, $0.01 per 1M cached input tokens, $0.35 per 1M output tokens. Regular price: $0.20 / $0.02 / $0.70. The promo will end, so the blog reports both prices.
 - Mercury models accept text input only. There is no embeddings endpoint and no `seed`.
@@ -145,7 +147,8 @@ We chose these two use cases because each one targets a different claimed advant
 
 ## 10. Open questions
 
-- OQ1. Which exact OpenAI and Google model IDs belong in the speed tier on run day? Resolve in M0.
+- ~~OQ1. Which exact OpenAI and Google model IDs belong in the speed tier on run day?~~ Resolved 2026-10-20: `gpt-6-luna` and `gemini-3.5-flash-lite` (Section 4). Re-verify them before the main runs.
+- OQ5. gpt-oss-120b on Cerebras rejects requests that combine `tools` and `response_format`. For the UC2 strict-schema sub-run, should the control model skip that sub-run, or enforce the `submit_answer` schema through a strict tool definition instead? Decide in M3.
 - OQ2. Should Mercury 2.5 be included for a lineage chart (more tokens, a stronger story)? Default is yes for UC1 only.
 - OQ3. What does `realtime: true` (described as lower TTFT) trade off? Test it as an extra Mercury arm in UC1.
 - OQ4. Does the docs' FAQ statement that the MCP/agent setup uses `mercury-2.5` mean Mercury 3 has tool-calling caveats? Verify with a smoke test in M0.

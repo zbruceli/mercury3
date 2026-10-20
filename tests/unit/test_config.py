@@ -60,6 +60,15 @@ def test_repo_mercury3_matches_documented_constraints() -> None:
     assert m.pricing_regular is not None
 
 
+def test_repo_baselines_cover_prd_roles() -> None:
+    enabled = load_registry(REPO_MODELS).enabled_models()
+    roles = {m.role.value for m in enabled.values()}
+    assert roles == {"primary", "lineage", "baseline", "hardware_control"}
+    baselines = [m for m in enabled.values() if m.role.value == "baseline"]
+    assert len(baselines) == 3
+    assert all(m.architecture is Architecture.AUTOREGRESSIVE for m in baselines)
+
+
 def test_minimal_registry_is_valid() -> None:
     assert list(_registry().enabled_models()) == ["mercury-3"]
 
@@ -97,6 +106,38 @@ def test_inverted_temperature_range_rejected() -> None:
 def test_negative_price_rejected() -> None:
     with pytest.raises(ValidationError):
         _registry(lambda d: d["models"]["mercury-3"]["pricing"].update({"output": -1}))
+
+
+def test_long_context_pricing_parses() -> None:
+    def mutate(d: dict[str, Any]) -> None:
+        d["models"]["mercury-3"]["long_context"] = {
+            "threshold_tokens": 100000,
+            "pricing": {"input": 0.5, "cached_input": 0.05, "output": 2.5},
+        }
+
+    lc = _registry(mutate).models["mercury-3"].long_context
+    assert lc is not None
+    assert lc.threshold_tokens == 100000
+    assert lc.pricing.output == 2.5
+
+
+def test_rate_limits_accept_total_only() -> None:
+    def mutate(d: dict[str, Any]) -> None:
+        d["providers"]["inception"]["rate_limits"] = {
+            "requests_per_min": 10,
+            "total_tokens_per_min": 1000,
+        }
+
+    rl = _registry(mutate).providers["inception"].rate_limits
+    assert rl is not None
+    assert rl.total_tokens_per_min == 1000
+
+
+def test_rate_limits_require_a_token_limit() -> None:
+    with pytest.raises(ValidationError, match="at least one token limit"):
+        _registry(
+            lambda d: d["providers"]["inception"].update({"rate_limits": {"requests_per_min": 10}})
+        )
 
 
 def test_stale_entries() -> None:

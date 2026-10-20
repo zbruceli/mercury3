@@ -8,7 +8,7 @@ IDs are stable. Reference them in commits, tests, and the implementation plan.
 |---|---|---|
 | F1.1 | `Provider` interface: `chat(request) -> stream of Chunk` plus a final `Usage`. Every provider maps into one shared `ChatRequest` / `ChatResult` schema | P0 |
 | F1.2 | Inception adapter (`mercury-3`, `mercury-2.5`) using the OpenAI SDK with `base_url=https://api.inceptionlabs.ai/v1`. Passes `reasoning_effort`, `diffusing`, and `realtime` through `extra_body` | P0 |
-| F1.3 | OpenAI-compatible adapter (OpenAI, Gemini OpenAI-compat endpoint, Groq/Cerebras control) | P0 |
+| F1.3 | OpenAI-compatible adapter (OpenAI, Gemini OpenAI-compat endpoint, Cerebras control) | P0 |
 | F1.4 | Anthropic adapter (Claude Haiku 5.5) using the native SDK, with native tool use | P0 |
 | F1.5 | Normalised tool-call representation across OpenAI and Anthropic formats | P0 |
 | F1.6 | Retry with exponential backoff and jitter on 429/500/502/503. Retries are logged and excluded from latency stats | P0 |

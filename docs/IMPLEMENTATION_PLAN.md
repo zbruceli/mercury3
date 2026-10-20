@@ -25,7 +25,7 @@ mercury3/
 ├── README.md
 ├── pyproject.toml / uv.lock
 ├── Makefile                      # check, test, test-live, smoke, fmt
-├── .env.example                  # INCEPTION_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, GROQ_API_KEY
+├── .env.example                  # INCEPTION_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, CEREBRAS_API_KEY
 ├── configs/
 │   ├── models.yaml               # model ids, endpoints, prices, limits, verified_on
 │   └── experiments/
@@ -41,7 +41,7 @@ mercury3/
 │   ├── schemas.py                # ChatRequest, Chunk, ChatResult, Usage, ToolCall, Timing
 │   ├── providers/
 │   │   ├── base.py               # Provider protocol, retry, rate limit
-│   │   ├── openai_compat.py      # OpenAI, Gemini-compat, Groq/Cerebras
+│   │   ├── openai_compat.py      # OpenAI, Gemini-compat, Cerebras
 │   │   ├── inception.py          # subclass of openai_compat: extra_body params, diffusing frames
 │   │   └── anthropic.py
 │   ├── timing.py
@@ -96,7 +96,7 @@ Every use case depends only on `Provider.chat`. Nothing outside `providers/` kno
 ### M0: Setup (≈1 day)
 1. `git init`, `uv init --package dllm_eval`, add dev tooling, Makefile, pre-commit, `.env.example`.
 2. Create provider accounts and keys; put them in `.env` (never committed).
-3. Fill in `configs/models.yaml` from the vendors' docs, with a `verified_on` date. Resolve PRD OQ1 (baseline IDs).
+3. Fill in `configs/models.yaml` from the vendors' docs, with a `verified_on` date. PRD OQ1 (baseline IDs) resolved 2026-10-20.
 4. Manually curl each provider. Check Mercury tool calling and strict JSON schema on `mercury-3` (PRD OQ4). Save the raw responses as contract fixtures.
 
 ### M1: Harness core (≈4 days)

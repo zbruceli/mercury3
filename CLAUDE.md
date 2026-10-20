@@ -17,7 +17,7 @@ Read these first, in order:
 4. [docs/FEATURES.md](docs/FEATURES.md) / [docs/ROADMAP.md](docs/ROADMAP.md): feature IDs and current milestone
 5. [docs/BLOG_ALIGNMENT.md](docs/BLOG_ALIGNMENT.md): how results map onto the article
 
-Current phase: **M0, project setup.** The scaffolding and model registry are in place. Baseline model verification and the first manual API calls are still to do.
+Current phase: **M0, project setup.** The scaffolding is in place, and the model registry is filled in and checked against vendor docs (2026-10-20). Still to do: the first manual API call to each provider, plus the Mercury 3 tool-calling check (PRD OQ4). Both need API keys and the user's go-ahead.
 
 ## Commands
 

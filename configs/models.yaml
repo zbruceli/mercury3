@@ -2,7 +2,11 @@
 # Rules (CLAUDE.md #7): never hard-code these values in source; update `verified_on`
 # whenever an entry is re-checked against vendor docs. An entry can only be
 # `enabled: true` once model_id, pricing, and verified_on are all filled in.
-# Prices are USD per 1M tokens.
+# Prices are USD per 1M tokens. `pricing` is what we are billed today; `pricing_regular`
+# is the list price after a promo ends; `long_context` applies above a prompt-length threshold.
+#
+# Baseline selection (PRD §4, OQ1, resolved 2026-10-20): each AR baseline is the
+# vendor's cheapest/fastest current tier, closest to Mercury 3 on price.
 
 schema_version: 1
 
@@ -12,7 +16,7 @@ providers:
     base_url: https://api.inceptionlabs.ai/v1
     api_key_env: INCEPTION_API_KEY
     tier: free
-    rate_limits:            # free tier, per minute
+    rate_limits:            # free tier
       requests_per_min: 1000
       input_tokens_per_min: 1000000
       output_tokens_per_min: 100000
@@ -22,29 +26,37 @@ providers:
   anthropic:
     kind: anthropic
     api_key_env: ANTHROPIC_API_KEY
-    docs_url: https://docs.anthropic.com/en/docs/about-claude/models
-    verified_on: null       # TODO(M0): confirm tier + rate limits
+    rate_limits: null       # depends on the account's usage tier; fill in from the Console
+    docs_url: https://platform.claude.com/docs/en/about-claude/models
+    verified_on: 2026-10-20
 
   openai:
     kind: openai_compat
     base_url: https://api.openai.com/v1
     api_key_env: OPENAI_API_KEY
-    docs_url: https://platform.openai.com/docs/models
-    verified_on: null       # TODO(M0)
+    rate_limits: null       # depends on the account's usage tier; fill in from the dashboard
+    docs_url: https://developers.openai.com/api/docs/models
+    verified_on: 2026-10-20
 
   google:
     kind: openai_compat
-    base_url: https://generativelanguage.googleapis.com/v1beta/openai/   # TODO(M0): confirm
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
     api_key_env: GEMINI_API_KEY
+    rate_limits: null       # depends on the project's tier; fill in from AI Studio
     docs_url: https://ai.google.dev/gemini-api/docs/openai
-    verified_on: null       # TODO(M0)
+    verified_on: 2026-10-20
 
-  groq:
+  cerebras:
     kind: openai_compat
-    base_url: https://api.groq.com/openai/v1
-    api_key_env: GROQ_API_KEY
-    docs_url: https://console.groq.com/docs/models
-    verified_on: null       # TODO(M0): or swap for Cerebras
+    base_url: https://api.cerebras.ai/v1
+    api_key_env: CEREBRAS_API_KEY
+    tier: developer         # pay as you go; the free trial is far too small (5 RPM)
+    rate_limits:            # developer tier, gpt-oss-120b
+      requests_per_min: 1000
+      input_tokens_per_min: 1000000   # "uncached" TPM
+      total_tokens_per_min: 3000000
+    docs_url: https://inference-docs.cerebras.ai/support/rate-limits
+    verified_on: 2026-10-20
 
 models:
   mercury-3:
@@ -78,7 +90,7 @@ models:
     architecture: diffusion
     role: lineage
     enabled: true
-    context_window: 260000
+    context_window: 260000            # docs: "260K"
     max_output_tokens: 65536
     temperature_range: [0.5, 1.0]
     reasoning_efforts: [instant, low, medium, high]
@@ -95,37 +107,90 @@ models:
     model_id: claude-haiku-5-5
     architecture: autoregressive
     role: baseline
-    enabled: false                    # TODO(M0): fill pricing + limits from Anthropic docs
+    enabled: true
+    context_window: 1000000
+    max_output_tokens: 128000
+    reasoning_efforts: [low, medium, high, xhigh, max]   # output_config.effort
     supports: {streaming: true, tools: true, structured_outputs: true}
-    pricing: null
-    verified_on: null
+    pricing:                          # prompts up to 100K tokens; cached_input = cache hit
+      input: 0.10
+      cached_input: 0.01
+      output: 0.50
+    long_context:
+      threshold_tokens: 100000
+      pricing: {input: 0.50, cached_input: 0.05, output: 2.50}
+    verified_on: 2026-10-20
+    notes: >-
+      Default effort is medium. Adaptive thinking is on by default; thinking
+      {"type": "disabled"} is allowed at high effort or below, which gives the
+      "reasoning off" arm (PRD R3). Cache writes cost extra (5m: $0.125, 1h: $0.20).
+      inference_geo=US adds a 1.1x multiplier, so use the default global routing.
 
-  openai-fast:
+  gpt-6-luna:
     provider: openai
-    model_id: null                    # TODO(M0): pick the current mini/fast tier (PRD OQ1)
+    model_id: gpt-6-luna
     architecture: autoregressive
     role: baseline
-    enabled: false
+    enabled: true
+    context_window: 1050000
+    max_output_tokens: 128000
+    reasoning_efforts: [none, low, medium, high, xhigh, max]
     supports: {streaming: true, tools: true, structured_outputs: true}
-    pricing: null
-    verified_on: null
+    pricing:                          # standard tier, prompts up to 272K tokens
+      input: 0.10
+      cached_input: 0.01
+      output: 0.50
+    long_context:
+      threshold_tokens: 272000
+      pricing: {input: 0.20, cached_input: 0.02, output: 0.75}
+    verified_on: 2026-10-20
+    notes: >-
+      OpenAI's smallest current tier and the only one with reasoning_effort "none",
+      which gives the "reasoning off" arm. Use the standard service tier; the "fast"
+      (formerly priority) tier doubles the price and would be a separate labelled arm.
 
-  gemini-flash:
+  gemini-3.5-flash-lite:
     provider: google
-    model_id: null                    # TODO(M0): pick the current Flash tier (PRD OQ1)
+    model_id: gemini-3.5-flash-lite
     architecture: autoregressive
     role: baseline
-    enabled: false
+    enabled: true
+    context_window: 1048576
+    max_output_tokens: 65536
+    reasoning_efforts: [minimal, low, medium, high]   # OpenAI-compat reasoning_effort
     supports: {streaming: true, tools: true, structured_outputs: true}
-    pricing: null
-    verified_on: null
+    pricing:
+      input: 0.30
+      cached_input: 0.03
+      output: 2.50
+    verified_on: 2026-10-20
+    notes: >-
+      Google's fastest stable tier, and the closest to Mercury on price. gemini-3.8-flash
+      ($0.75/$3.75 until 2026-12-31, then $1.50/$7.50) is stronger but 2-3x the price;
+      add it as a separate arm only if the blog needs it. Thinking can't be fully turned
+      off on Gemini 3 models, so "minimal" is the "reasoning off" arm. The OpenAI-compat
+      layer is beta. Context caching also has a storage fee that we don't use.
 
-  fast-hw-control:
-    provider: groq
-    model_id: null                    # TODO(M0): open-weight AR model on fast hardware (PRD R13)
+  gpt-oss-120b-cerebras:
+    provider: cerebras
+    model_id: gpt-oss-120b
     architecture: autoregressive
     role: hardware_control
-    enabled: false
-    supports: {streaming: true, tools: true, structured_outputs: false}
-    pricing: null
-    verified_on: null
+    enabled: true
+    context_window: 131000            # developer tier ("131k"); 65k on the free trial
+    max_output_tokens: 40000          # developer tier ("40k"); 32k on the free trial
+    reasoning_efforts: [low, medium, high]
+    supports: {streaming: true, tools: true, structured_outputs: true}
+    pricing:                          # no cache discount: cached tokens bill at the input rate
+      input: 0.35
+      cached_input: 0.35
+      output: 0.75
+    verified_on: 2026-10-20
+    notes: >-
+      PRD R13 control: an open-weight AR model on the fastest AR hardware (about 3000 tok/s
+      listed, vs. about 500 for the same model on Groq). Default effort is medium and
+      reasoning can't be turned off, so "low" is the lowest arm. Rejects requests
+      that combine tools and response_format, which affects the UC2 strict-schema
+      sub-run. The output limit (40k) is below the other models, so cap
+      max_completion_tokens to fit. Pricing comes from the model page; the pricing page
+      did not render.
