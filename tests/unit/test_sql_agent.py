@@ -473,6 +473,24 @@ def test_provider_error_keeps_partial_trace(
     assert t.turns == []
 
 
+def test_luna_tools_only_without_reasoning(repo_registry: ModelRegistry) -> None:
+    exp = Experiment.model_validate(
+        {
+            "name": "x", "budget_usd": 1,
+            "arms": [{"name": "medium", "model": "gpt-6-luna", "reasoning_effort": "medium",
+                      "max_completion_tokens": 100}],
+            "workload": {"kind": "sql_agent", "prompt_version": "uc2-v1", "ids_file": "x"},
+        }
+    )  # fmt: skip
+    with pytest.raises(ValueError, match="only at reasoning_effort"):
+        exp.check_against(repo_registry)
+    p = build_provider("gpt-6-luna", repo_registry, client=object())
+    req = agent.build_request(exp.arms[0], exp.workload, [], stream=True)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="tools need reasoning_effort"):
+        p.validate(req)
+    p.validate(req.model_copy(update={"reasoning_effort": "none"}))
+
+
 def test_cerebras_cannot_run_strict_subrun(repo_registry: ModelRegistry) -> None:
     exp = Experiment.model_validate(
         {

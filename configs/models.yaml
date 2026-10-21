@@ -136,7 +136,9 @@ models:
     context_window: 1050000
     max_output_tokens: 128000
     reasoning_efforts: [none, low, medium, high, xhigh, max]
-    supports: {streaming: true, tools: true, structured_outputs: true}
+    # Chat Completions takes function tools only with reasoning off (UC2 pilot, 2026-10-21:
+    # "use /v1/responses or set reasoning_effort to 'none'"). UC2 drops the medium arm.
+    supports: {streaming: true, tools: true, structured_outputs: true, tools_reasoning_efforts: [none]}
     pricing:                          # standard tier, prompts up to 272K tokens
       input: 0.10
       cached_input: 0.01
@@ -151,6 +153,8 @@ models:
       (formerly priority) tier doubles the price and would be a separate labelled arm.
       R0 (2026-10-20): passed after credits were added; the first attempt hit 429
       insufficient_quota, which must be treated as fatal, not retried.
+      M3 (2026-10-21): on /v1/chat/completions, function tools are refused unless
+      reasoning_effort is "none" (400, "use /v1/responses"), so UC2 has no Luna medium arm.
 
   gemini-3.5-flash-lite:
     provider: google

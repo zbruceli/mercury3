@@ -88,6 +88,9 @@ class Supports(_Strict):
     structured_outputs: bool = False
     # tools and response_format in one request (gpt-oss on Cerebras refuses: PRD OQ5)
     tools_with_structured_outputs: bool = True
+    # reasoning efforts at which tools work (None = all). GPT-6 Luna on chat completions
+    # takes function tools only at "none" (M3 UC2 pilot, 2026-10-21)
+    tools_reasoning_efforts: list[str] | None = None
     diffusing: bool = False
 
 

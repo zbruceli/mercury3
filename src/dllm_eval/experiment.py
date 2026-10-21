@@ -134,6 +134,15 @@ class Experiment(_Strict):
                     raise ValueError(
                         f"arm {arm.id}: temperature {arm.temperature} outside [{lo}, {hi}]"
                     )
+            allowed = model.supports.tools_reasoning_efforts
+            if (
+                isinstance(self.workload, SqlAgentWorkload)
+                and allowed is not None
+                and arm.reasoning_effort not in allowed
+            ):
+                raise ValueError(
+                    f"arm {arm.id}: {arm.model} supports tools only at reasoning_effort {allowed}"
+                )
             if (
                 isinstance(self.workload, SqlAgentWorkload)
                 and self.workload.answer_mode == "response_format"

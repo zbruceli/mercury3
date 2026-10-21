@@ -238,6 +238,30 @@ def test_openai_streamed_tool_call_deltas_are_joined() -> None:
     assert asm.usage.reasoning_tokens is None  # no details object -> unknown
 
 
+def test_parallel_calls_streamed_at_one_index_stay_separate() -> None:
+    """Gemini's compat layer streams each parallel call whole, all at index 0 (R1 UC2 pilot:
+    two describe_table calls were merged into 'describe_tabledescribe_table')."""
+    asm = OpenAIStreamAssembler()
+    sig = {"google": {"thought_signature": "s1"}}
+    chunks = [
+        {"choices": [{"delta": {"tool_calls": [{"index": 0, "id": "a", "type": "function", "extra_content": sig,
+                                                 "function": {"name": "describe_table", "arguments": '{"name":"bond"}'}}]}}]},
+        {"choices": [{"delta": {"tool_calls": [{"index": 0, "id": "b", "type": "function",
+                                                 "function": {"name": "describe_table", "arguments": '{"name":"molecule"}'}}]}}]},
+        {"choices": [{"delta": {"tool_calls": [{"id": "c", "function": {"name": "list_tables", "arguments": "{}"}}]},
+                      "finish_reason": "tool_calls"}]},
+    ]  # fmt: skip
+    for i, c in enumerate(chunks):
+        asm.feed(i * 0.1, c)
+    calls = asm.build_tool_calls()
+    assert [(c.id, c.name, c.parsed()) for c in calls] == [
+        ("a", "describe_table", {"name": "bond"}),
+        ("b", "describe_table", {"name": "molecule"}),
+        ("c", "list_tables", {}),
+    ]
+    assert calls[0].extra == {"extra_content": sig} and calls[1].extra == {}
+
+
 def test_anthropic_streamed_tool_and_thinking() -> None:
     asm = AnthropicStreamAssembler()
     events = [

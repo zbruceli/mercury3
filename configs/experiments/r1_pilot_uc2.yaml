@@ -1,4 +1,4 @@
-# R1 pilot, UC2 part (TEST_PLAN B2): 10 BIRD Mini-Dev questions x 3 repeats x 11 arms = 330
+# R1 pilot, UC2 part (TEST_PLAN B2): 10 BIRD Mini-Dev questions x 3 repeats x 10 arms = 300
 # agent tasks. Purpose: check the loop on every provider (tool-call formats, echoed
 # thinking/signatures, preambles), audit traces, and measure turns and tokens to size R4.
 #   uv run dllm-eval run configs/experiments/r1_pilot_uc2.yaml --dry-run
@@ -18,7 +18,9 @@ workload:
   sql_timeout_s: 5
   row_cap: 50
 
-# --- arms: UC1 arms minus Mercury 2.5 (PRD R3; BUDGET_ESTIMATE §2.1) --------------------
+# --- arms: UC1 arms minus Mercury 2.5 (PRD R3; BUDGET_ESTIMATE §2.1) and minus GPT-6 Luna
+# medium: OpenAI's chat completions refuses function tools unless reasoning_effort is "none"
+# (UC2 pilot 2026-10-21; decided with the user to drop the arm, not add a Responses adapter).
 # One output budget per turn for every arm (PRD R1; 32,768 as in UC1). Temperature 0.5 where
 # the provider accepts it (PRD R2); Claude Haiku 5.5 and GPT-6 Luna run at provider default.
 # Default service tier everywhere. expected_output_tokens is per TURN (BUDGET_ESTIMATE §2.2:
@@ -31,7 +33,6 @@ arms:
   - {name: thinking-off, model: claude-haiku-5-5, reasoning_effort: low, max_completion_tokens: 32768, expected_output_tokens: 150, provider_extras: {thinking: {type: disabled}}}
   - {name: medium, model: claude-haiku-5-5, reasoning_effort: medium, max_completion_tokens: 32768, expected_output_tokens: 750}
   - {name: none, model: gpt-6-luna, reasoning_effort: none, max_completion_tokens: 32768, expected_output_tokens: 150}
-  - {name: medium, model: gpt-6-luna, reasoning_effort: medium, max_completion_tokens: 32768, expected_output_tokens: 750}
   - {name: minimal, model: gemini-3.5-flash-lite, reasoning_effort: minimal, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 150}
   - {name: low, model: gpt-oss-120b-cerebras, reasoning_effort: low, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 300}
   - {name: medium, model: gpt-oss-120b-cerebras, reasoning_effort: medium, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 750}

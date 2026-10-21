@@ -52,6 +52,7 @@ class OpenAIStreamAssembler:
         self.parts: list[str] = []
         self.frames: list[Frame] = []
         self.tool_calls: dict[int, dict[str, Any]] = {}
+        self._slot_of: dict[int, int] = {}  # wire index -> slot, when ids show a new call
         self.finish_reason: str | None = None
         self.usage: Usage = Usage()
         self.server_model: str | None = None
@@ -82,9 +83,19 @@ class OpenAIStreamAssembler:
                     self.parts.append(text)
             for tc in delta.get("tool_calls") or []:
                 has_content = True
-                slot = self.tool_calls.setdefault(
-                    tc.get("index", 0), {"id": None, "name": "", "arguments": "", "extra": {}}
-                )
+                wire = tc.get("index", 0)
+                key = self._slot_of.get(wire, wire)
+                slot = self.tool_calls.get(key)
+                if slot is not None and tc.get("id") and slot["id"] and tc["id"] != slot["id"]:
+                    # Gemini streams parallel calls as complete calls that all say index 0;
+                    # a new id at a used index is a new call, not more of the old one.
+                    key = max(self.tool_calls) + 1
+                    self._slot_of[wire] = key
+                    slot = None
+                if slot is None:
+                    slot = self.tool_calls[key] = {
+                        "id": None, "name": "", "arguments": "", "extra": {},
+                    }  # fmt: skip
                 slot["id"] = tc.get("id") or slot["id"]
                 fn = tc.get("function") or {}
                 slot["name"] += fn.get("name") or ""

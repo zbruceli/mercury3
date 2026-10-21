@@ -207,6 +207,12 @@ class BaseProvider(ABC):
             raise ValueError(f"{self.model_key}: tools not supported")
         if req.response_format and not m.supports.structured_outputs:
             raise ValueError(f"{self.model_key}: structured outputs not supported")
+        allowed = m.supports.tools_reasoning_efforts
+        if req.tools and allowed is not None and req.reasoning_effort not in allowed:
+            raise ValueError(
+                f"{self.model_key}: tools need reasoning_effort in {allowed}, "
+                f"not {req.reasoning_effort!r}"
+            )
         if req.tools and req.response_format and not m.supports.tools_with_structured_outputs:
             raise ValueError(f"{self.model_key}: tools with response_format not supported")
 
