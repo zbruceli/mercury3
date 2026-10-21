@@ -6,7 +6,7 @@ service_tier: "Standard API tiers (no paid priority)"
 runs:
   uc1: r2-uc1-main-20261021T034053Z
   uc1_length: r3-uc1-length-20261021T152238Z
-  uc2: r4-uc2-main-20261021T165313Z
+  uc2: r4c-uc2-full-20261021T214456Z  # all 496 scorable questions (was R4, 150; switched 2026-10-21)
   uc2_strict: r4b-uc2-strict-20261021T170547Z
   diffusion: r5-diffusion-capture-20261021T181518Z
 manual_tags: reports/failure_tags.csv

@@ -24,7 +24,7 @@ Current phase (2026-10-21): **M0–M4 complete; M5 blog draft written and fact-c
 - **M4 (analysis and assets):** `dllm-eval report` builds every blog asset into `reports/` from configs/report.yaml: figures 1–4 with CSVs, reliability table, failure modes and gallery, decision matrix, and the 16:9 diffusion GIF from R5 ($0.0079). Gate passed with open items. docs/M4_ANALYSIS_RESULTS.md.
 
 Open items carried into M5 (decide with the user; M4_ANALYSIS_RESULTS §7):
-- UC2 EX precision: R4c (all 496 questions, `r4c-uc2-full-20261021T214456Z`, $21.78) brings paired differences to ±2–3 points (M3_UC2_RESULTS §6.5). The blog assets and draft still cite R4; decide whether to switch them to R4c.
+- UC2 EX precision: R4c (all 496 questions, `r4c-uc2-full-20261021T214456Z`, $21.78) brings paired differences to ±2–3 points (M3_UC2_RESULTS §6.5). `reports/` was regenerated from R4c on 2026-10-21; the M5 session updates the draft's UC2 numbers.
 - ~~Harness fix: non-API exceptions inside a provider call are retried as connection errors.~~ Done 2026-10-21: only SDK and transport errors are classified; anything else stops the run as `internal_error` (ROADMAP_AND_PLAN §7).
 
 ## Commands

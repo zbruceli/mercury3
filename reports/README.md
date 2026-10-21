@@ -9,7 +9,7 @@ BLOG_ALIGNMENT §5; findings and caveats are in docs/M4_ANALYSIS_RESULTS.md.
 | --- | --- | --- | --- |
 | uc1 | `r2-uc1-main-20261021T034053Z` | `07dce9e` | 2026-10-21 |
 | uc1_length | `r3-uc1-length-20261021T152238Z` | `b9d80e6` | 2026-10-21 |
-| uc2 | `r4-uc2-main-20261021T165313Z` | `91c7204` | 2026-10-21 |
+| uc2 | `r4c-uc2-full-20261021T214456Z` | `1cada9b` | 2026-10-21 |
 | uc2_strict | `r4b-uc2-strict-20261021T170547Z` | `3c4b5fc` | 2026-10-21 |
 | diffusion | `r5-diffusion-capture-20261021T181518Z` |  |  |
 

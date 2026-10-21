@@ -241,7 +241,7 @@ Two behaviours show up, and neither appears in tool mode:
 
 ## 9. Open items
 
-- ~~**EX precision (TEST_PLAN B4).**~~ **Resolved 2026-10-21 by R4c (§6.5):** paired differences are ±2.0–3.0 points; per-arm EX stays at ±4. The blog assets (`configs/report.yaml`) and the draft still cite R4; switching them to R4c is a separate decision. Original note: Per-arm EX CIs are ±7–8 points against a 3-point target. More repeats won't fix it, because the width comes from question-to-question variance. Options for M4/M5:
+- ~~**EX precision (TEST_PLAN B4).**~~ **Resolved 2026-10-21 by R4c (§6.5):** paired differences are ±2.0–3.0 points; per-arm EX stays at ±4. The blog assets (`configs/report.yaml`) were switched to R4c on 2026-10-21 (M4_ANALYSIS_RESULTS note); the draft is updated by the M5 session. Original note: Per-arm EX CIs are ±7–8 points against a 3-point target. More repeats won't fix it, because the width comes from question-to-question variance. Options for M4/M5:
   - Report paired differences (±4–6 points), as in §6.1.
   - Or extend R4 to all 496 scorable questions, about 3.3× the cost (~$21) and ~60M Mercury tokens. Needs a user decision.
 - ~~**Harness hardening (follow-up).** Non-API exceptions inside a provider call (here a `TypeError` in stream parsing) are classified as retryable connection errors.~~ **Done 2026-10-21:** they now stop the run as `internal_error` on the first attempt (ROADMAP_AND_PLAN §7).

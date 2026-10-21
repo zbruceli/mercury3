@@ -130,69 +130,67 @@ ly", "evidently", "obviously", "clearly",
         "purportedly", "profess
 ```
 
-## 5. In the agent loop: deliberating over data that isn't there
+## 5. In the agent loop: one answer expected, many found
 
-`mercury-3:instant/bird/1500/1` in run `r4-uc2-main-20261021T165313Z` · tag `budget_out` (an agent turn hit the output cap)
+`mercury-3:instant/bird/866/0` in run `r4c-uc2-full-20261021T214456Z` · tag `budget_out` (an agent turn hit the output cap)
 
-**What happened.** The question asks about September 2013, but the transactions table only covers August 2012. Mercury 3 `instant` noticed this correctly by turn 6, then kept reasoning in visible text in turn 8 ('Let me reconsider…') until the 32,768-token cap: ~146,000 characters, and 63 s for the task. 7 of 900 Mercury 3 `instant`/`low` tasks ended in a budget-out turn; no AR arm had any.
+**What happened.** Asked which driver set a 0:01:27 lap in race 161, Mercury 3 `instant` found that the hint's pattern (`time LIKE '1:27%'`) matches 82 laps by several drivers (the tool showed the first 50), and that an exact `= '1:27'` match returns nothing. Expecting a single player, it kept reasoning in visible text in turn 6 ('Let me reconsider…', 93 times) until the 32,768-token cap: ~127,000 characters, and 54 s for the task. 31 of 2,976 Mercury 3 `instant`/`low` tasks ended in a budget-out turn; no AR arm had any.
 
-**Facts.** outcome: budget_out · turns: 8 · task time: 62.8 s · EX: False
+**Facts.** outcome: budget_out · turns: 6 · task time: 53.9 s · EX: False
 
 **Prompt (excerpt).**
 
 ```text
-Database: debit_card_specializing
+Database: formula_1
 
-Question: Please list the product description of the products consumed in September, 2013.
+Question: Who was the player that got the lap time of 0:01:27 in the race No. 161? Show his introduction website.
 
-Hint: September 2013 refers to 201309; The first 4 strings of the Date values in the yearmonth table can represent year; The 5th and 6th string of the date can refer to month.
+Hint: player and driver are synonyms; the lap time of 0:0M:SS refers to lapTime.time LIKE 'M:SS%';race number refers to raceId; introduction website of the drivers refers to url;
 ```
 
 **Trace.**
 
   1. list_tables→ok
   2. describe_table→ok, describe_table→ok, describe_table→ok
-  3. run_sql→ok · says "Let me check the transactions table for September 2013. The Date column is in format YYYY-MM-DD. Let me query for products consumed in September 2013."
-  4. run_sql→ok, run_sql→ok · says "No results. Let me check the yearmonth table for September 2013, and also check the date formats more carefully."
-  5. run_sql→ok, run_sql→ok · says "The yearmonth table has Date as '201309' format (YYYYMM). The transactions table has Date in 'YYYY-MM-DD' format. Let me check what dates exist in the transacti…"
-  6. run_sql→ok, run_sql→ok · says "Interesting. The transactions_1k table only has dates from 2012-08. The yearmonth table has September 2013 data. Let me check if there are more transaction tabl…"
-  7. run_sql→ok, run_sql→ok · says "The transactions_1k table only has data from 2012-08. But the yearmonth table has data for 201309. Let me check if there are more transaction tables or if the q…"
-  8. no tool call · says "The transactions_1k table only has data from August 2012. The question asks about September 2013. Let me reconsider. Maybe the yearmonth table is the key here. …"
+  3. run_sql→ok · says "The question asks about lap time of 0:01:27 in race No. 161. The lap time format "0:01:27" - let me think about this. The hint says "the lap time of 0:0M:SS ref…"
+  4. run_sql→ok · says "The query returned many results. The question asks about "the player that got the lap time of 0:01:27". This is a specific lap time. Let me think about this mor…"
+  5. run_sql→ok · says "There are many different time values. The question asks about "the lap time of 0:01:27". Let me reconsider the format. "0:01:27" - maybe this is actually in the…"
+  6. no tool call · says "No exact match for '1:27'. Let me reconsider the question. "0:01:27" - maybe the format interpretation is wrong. Let me check if there are times stored in the f…"
 
 **Model output (excerpt).**
 
 ```text
-The transactions_1k table only has data from August 2012. The question asks about September 2013. 
+No exact match for '1:27'. Let me reconsider the question. 
 
-Let me reconsider. Maybe the yearmonth table is the key here. The yearmonth table has CustomerID, Date (YYYYMM), and Consumption. The question asks for product descriptions of products consumed in September 2013.
+"0:01:27" - maybe the format interpretation is wrong. Let me check if there are times stored in the format "0:01:27" in the database. Let me check what formats exist.
 
-But how do I connect yearmonth to products? The yearmonth table doesn't have ProductID. 
+Actually, let me reconsider. The hint says "the lap time of 0:0M:SS refers to lapTime.time LIKE 'M:SS%'". So 0:01:27 → M=01, SS=27 → '1:27%'. That's what I did.
 
-Wait, maybe I need to look at this differently. Let me check if there are other transaction tabl
+But the question asks "Who was the player that got the lap time of 0:01:27". Maybe it's asking about a specif
 
-[… 146,077 characters omitted …]
+[… 126,555 characters omitted …]
 
-nd I need to find products consumed in September 2013 by looking at the transactions for the customers who consumed in September 2013.
+ are many results. Let me think about what makes this specific. Maybe the question is about a specific lap number.
 
-But the transactions_1k only has August 2012 data. So this doesn
+Actually, let me reconsider. Maybe the question is asking about a specific lap where
 ```
 
 ## 6. The right answer, written as prose instead of a tool call
 
-`gpt-oss-120b-cerebras:low/bird/1403/2` in run `r4-uc2-main-20261021T165313Z` · tag `turn_cap_prose` (8 turns without an answer, replying in prose instead of tools)
+`gpt-oss-120b-cerebras:low/bird/824/2` in run `r4c-uc2-full-20261021T214456Z` · tag `turn_cap_prose` (8 turns without an answer, replying in prose instead of tools)
 
-**What happened.** gpt-oss on Cerebras found its query, then replied with the answer as JSON text instead of calling `submit_answer`, twice, ignoring the nudge to use a tool, and ran out of turns. It is the fastest model per call, but behaviour like this (237 malformed tasks at `low`, 16.7% turn cap) is why its per-call lead mostly disappears per task.
+**What happened.** gpt-oss on Cerebras found the right query (it returns exactly the gold rows), then replied with it as JSON text instead of calling `submit_answer`, twice, ignoring the nudge to use a tool, and ran out of turns. It is the fastest model per call, but behaviour like this (773 malformed tasks at `low`, 14.3% turn cap) is why its per-call lead mostly disappears per task.
 
-**Facts.** outcome: turn_cap · turns: 8 · task time: 3.4 s · EX: False
+**Facts.** outcome: turn_cap · turns: 8 · task time: 1.7 s · EX: False
 
 **Prompt (excerpt).**
 
 ```text
-Database: student_club
+Database: superhero
 
-Question: Indicate the name of the closed event whose cost has exceeded the budget the most.
+Question: Identify superheroes who can control wind and list their names in alphabetical order.
 
-Hint: closed events refers to event_name where status = 'Closed'; exceed the budget the most refers to MIN(remaining) where remaining < 0
+Hint: superheroes refers to superhero_name; can control wind refers to power_name = 'Wind Control';
 ```
 
 **Trace.**
@@ -200,27 +198,27 @@ Hint: closed events refers to event_name where status = 'Closed'; exceed the bud
   1. list_tables→ok
   2. describe_table→ok
   3. describe_table→ok
-  4. run_sql→ok
+  4. describe_table→ok
   5. run_sql→ok
   6. run_sql→ok
-  7. no tool call · says "{ "sql": "SELECT e.event_name FROM budget b JOIN event e ON b.link_to_event = e.event_id WHERE b.remaining < 0 AND e.status = 'Closed' ORDER BY b.remaining ASC …" · (nudged to use a tool)
-  8. no tool call · says "{ "sql": "SELECT e.event_name FROM budget b JOIN event e ON b.link_to_event = e.event_id WHERE b.remaining < 0 AND e.status = 'Closed' ORDER BY b.remaining ASC …" · (nudged to use a tool)
+  7. no tool call · says "{ "sql": "SELECT s.superhero_name FROM superhero s JOIN hero_power hp ON s.id = hp.hero_id JOIN superpower sp ON hp.power_id = sp.id WHERE sp.power_name = 'Wind…" · (nudged to use a tool)
+  8. no tool call · says "{ "sql": "SELECT s.superhero_name FROM superhero s JOIN hero_power hp ON s.id = hp.hero_id JOIN superpower sp ON hp.power_id = sp.id WHERE sp.power_name = 'Wind…" · (nudged to use a tool)
 
 **Model output (excerpt).**
 
 ```text
 {
-  "sql": "SELECT e.event_name FROM budget b JOIN event e ON b.link_to_event = e.event_id WHERE b.remaining < 0 AND e.status = 'Closed' ORDER BY b.remaining ASC LIMIT 1;"
+  "sql": "SELECT s.superhero_name FROM superhero s JOIN hero_power hp ON s.id = hp.hero_id JOIN superpower sp ON hp.power_id = sp.id WHERE sp.power_name = 'Wind Control' ORDER BY s.superhero_name;"
 }
 ```
 
 ## 7. Exploring one table at a time until the turns run out
 
-`gemini-3.5-flash-lite:minimal/bird/240/1` in run `r4-uc2-main-20261021T165313Z` · tag `turn_cap_exploring` (8 turns without an answer, still exploring)
+`gemini-3.5-flash-lite:minimal/bird/240/2` in run `r4c-uc2-full-20261021T214456Z` · tag `turn_cap_exploring` (8 turns without an answer, still exploring)
 
-**What happened.** Gemini 3.5 Flash-Lite spends turns on schema exploration (several `describe_table` calls in separate turns, plus a failed query) and reaches the 8-turn cap before submitting. It hit the cap on 30.9% of tasks, the most of any arm, which is why its 0.63 s calls become a 4.4 s task.
+**What happened.** Gemini 3.5 Flash-Lite spends turns on schema exploration (four `describe_table` calls in separate turns, plus a `PRAGMA table_list` the read-only sandbox refuses). It reaches the right query in turn 7, re-runs a variant in turn 8, and hits the 8-turn cap without submitting. It hit the cap on 28.8% of tasks, the most of any arm, which is why its 0.63 s calls become a 4.4 s task.
 
-**Facts.** outcome: turn_cap · turns: 8 · task time: 4.8 s · EX: False
+**Facts.** outcome: turn_cap · turns: 8 · task time: 4.3 s · EX: False
 
 **Prompt (excerpt).**
 
@@ -304,4 +302,4 @@ Hint: in 2009 refers to year = 2009; Only the time of the champion shows in the 
 
 ---
 
-*Source: run r2-uc1-main-20261021T034053Z (commit 07dce9e, 2026-10-21); run r4-uc2-main-20261021T165313Z (commit 91c7204, 2026-10-21); run r4b-uc2-strict-20261021T170547Z (commit 3c4b5fc, 2026-10-21). Models: mercury-3, mercury-2.5, claude-haiku-5-5, gpt-6-luna, gemini-3.5-flash-lite, gpt-oss-120b. Standard API tiers (no paid priority); client one macOS arm64 host, US West; prices as listed 2026-10-20. As of 2026-10-21.*
+*Source: run r2-uc1-main-20261021T034053Z (commit 07dce9e, 2026-10-21); run r4c-uc2-full-20261021T214456Z (commit 1cada9b, 2026-10-21); run r4b-uc2-strict-20261021T170547Z (commit 3c4b5fc, 2026-10-21). Models: mercury-3, mercury-2.5, claude-haiku-5-5, gpt-6-luna, gemini-3.5-flash-lite, gpt-oss-120b. Standard API tiers (no paid priority); client one macOS arm64 host, US West; prices as listed 2026-10-20. As of 2026-10-21.*

@@ -9,6 +9,8 @@
 | Tokens / spend | **R5: $0.0079** (30 Mercury 3 calls; dry-run expected $0.013). Everything else offline |
 | Answer | All 8 assets exist. Every number in the blog can now be regenerated with one offline command, `uv run dllm-eval report`, which writes all assets into [reports/](../reports/README.md) with a dated "as of" footnote on each |
 
+> **Update 2026-10-21: UC2 assets now come from R4c.** `configs/report.yaml` points `uc2` at `r4c-uc2-full-20261021T214456Z` (all 496 scorable questions; M3_UC2_RESULTS §6.5) instead of R4 (150 questions). Regenerated with `dllm-eval report`: fig2, fig3 (right panel), fig4 (right panel), the reliability table, the UC2 failure modes, gallery cases 5–7 (new R4c examples with notes checked against the traces), and the decision matrix. The decision-matrix generator now handles several arms qualifying, lists arms significantly *behind* Mercury 3 `low`, and derives the agent-cost runner-up from the data. With R4c, paired EX differences have CIs of ±2–3 points, which meets B4. The UC2 numbers below this note are R4's, kept as the record of the original gate.
+
 ## 1. Gate checklist
 
 The exit gate from ROADMAP_AND_PLAN §1: every item in the BLOG_ALIGNMENT §5 asset checklist exists and passes TEST_PLAN B4.
