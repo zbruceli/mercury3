@@ -15,7 +15,9 @@ The results will feed a follow-up to *What is Diffusion LLM and why it matters* 
 | [docs/FEATURES.md](docs/FEATURES.md) | Prioritised feature list |
 | [docs/TEST_PLAN.md](docs/TEST_PLAN.md) | Software tests and experiment protocol |
 | [docs/BUDGET_ESTIMATE.md](docs/BUDGET_ESTIMATE.md) | Token and cost estimate for the planned runs (`make budget`) |
-| [docs/M0_SMOKE_RESULTS.md](docs/M0_SMOKE_RESULTS.md) | R0 live smoke results and API findings |
+| [docs/M0_SMOKE_RESULTS.md](docs/M0_SMOKE_RESULTS.md) | M0: R0 live smoke results and API findings |
+| [docs/M1_SMOKE_RESULTS.md](docs/M1_SMOKE_RESULTS.md) | M1: harness core gate (offline tests, fake pipeline, live harness smoke) |
+| [docs/templates/MILESTONE_RESULTS.md](docs/templates/MILESTONE_RESULTS.md) | Template for each milestone's results doc |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Milestones and gates |
 | [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Stack, layout, interfaces, Mercury API notes |
 | [CLAUDE.md](CLAUDE.md) | Working rules for this repo |

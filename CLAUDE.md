@@ -84,6 +84,7 @@ Without `--live`, `run` prints the estimate and exits 2. Every live run first pr
 ## Working style for Claude in this repo
 
 - Before starting work, check ROADMAP.md for the current milestone, and don't build ahead of it unless asked.
+- When a milestone's gate runs, write `docs/M<n>_<TOPIC>_RESULTS.md` from docs/templates/MILESTONE_RESULTS.md: the gate checklist with evidence, offline and live runs, findings, open items, and where the evidence lives. Take every number from a run id or a command, never from memory.
 - When a feature lands, set its **Done** cell in docs/FEATURES.md to `true` and update the status line in the same commit. `make check` fails if the counts don't match the table (`tests/unit/test_features_doc.py`).
 - When a doc decision changes (stack, metric definition, model set), update the relevant doc in the same change.
 - When the vendor docs disagree with these notes, trust the live docs, then update this file and IMPLEMENTATION_PLAN §5 with the date.

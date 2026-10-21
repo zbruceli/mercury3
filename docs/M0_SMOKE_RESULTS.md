@@ -58,25 +58,6 @@ Prompt (same style as the original article's animation): *write a Python functio
 1. ~~**You:** add credits to the OpenAI account, then re-run Luna.~~ Done 2026-10-20, 4/4 passed.
 2. **M1:** implement F1 (fatal `insufficient_quota`), F2 (fail on `warning`), F3 (unknown-not-zero usage fields), and F5 (thinking-token mapping). Turn these recordings into contract tests (TEST_PLAN A2).
 
-## 7. Harness re-run: M1 gate (2026-10-20)
+## 7. Harness re-run
 
-The same capability smoke, run through the M1 harness (`dllm-eval run configs/experiments/r0_smoke.yaml --live`).
-
-| | |
-|---|---|
-| Run id | `r0-smoke-20261020T233834Z` (local only: `results/runs/` is gitignored) |
-| Jobs | 24: 6 models × 2 prompts × 2 repeats, lowest reasoning arm each |
-| Result | **24/24 ok**: 0 errors, 0 retries, 0 warnings, no abort |
-| Spend | **$0.00028**. The runner total matches the per-arm sum from `analyze` |
-| Answers | All correct (`ready`, `391`). The server-reported model id matched the config every time |
-| Secrets | None of the 5 API keys appear in `calls.jsonl` or `manifest.json` |
-
-**What it verified end to end:**
-- Every adapter's live streaming path, with timing marks.
-- The run itself: it interleaved models, recorded raw chunks, froze a manifest (pricing snapshot, git SHA, package versions), and redacted keys.
-- `analyze` output: the parquet file and the per-arm table. Gemini's reasoning tokens show as `unknown` (M0 F3), and gpt-oss reports 51 reasoning tokens even at `low` (M0 F4).
-- Mercury 3 and 2.5 accepted `temperature: 0.5` with no `warning`.
-
-**Notes**
-- The manifest recorded `git.dirty: true`, because M1 wasn't committed yet. TEST_PLAN B1 requires a clean tree for real runs, but today the CLI only records this and doesn't enforce it.
-- Each arm has only 4 calls with 4–8-token answers. Latency and tok/s are plumbing checks, not results. Don't quote them.
+Moved to [M1_SMOKE_RESULTS.md](M1_SMOKE_RESULTS.md) §3.2. Each milestone now has its own results doc.

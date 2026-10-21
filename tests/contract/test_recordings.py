@@ -144,3 +144,39 @@ def test_openai_insufficient_quota_is_run_fatal() -> None:
         e.body = shaped  # type: ignore[attr-defined]
         status, etype = error_details(e)
         assert classify(status, etype) is ErrorKind.RUN_FATAL
+
+
+@pytest.mark.parametrize("effort", ["instant", "low", "medium", "high"])
+def test_mercury_effort_recordings(effort: str) -> None:
+    f = oai.parse_response(load(R0 / "mercury-3" / f"effort_{effort}.json")["response"])
+    assert f["content"].strip() == "391"
+    assert f["usage"].reasoning_tokens is not None  # reported at every effort (M0 F6)
+    if effort == "instant":
+        assert f["usage"].reasoning_tokens == 0
+
+
+def test_mercury_realtime_stream() -> None:
+    asm = replay_openai(load(R0 / "mercury-3" / "realtime.json"))
+    assert asm.content == "ready"
+    assert asm.usage.output_tokens == 5
+
+
+@pytest.mark.parametrize("check", ["plain", "effort_medium_adaptive"])
+def test_anthropic_nonstream_recordings(check: str) -> None:
+    f = anth.parse_response(load(R0 / "claude-haiku-5-5" / f"{check}.json")["response"])
+    assert f["content"].strip().lower() in {"ready", "391"}
+    assert f["usage"].reasoning_tokens is not None
+    assert f["finish_reason"] == "end_turn"
+
+
+def test_every_r0_recording_is_replayed() -> None:
+    """Guard: adding a recording without a contract test fails here."""
+    covered = {
+        *(f"{m}/{c}" for m in OPENAI_COMPAT_MODELS for c in ("stream", "plain")),
+        *(f"{m}/{c}" for m in OPENAI_COMPAT_MODELS if m != "mercury-2.5" for c in ("tool", "schema")),
+        *(f"mercury-3/effort_{e}" for e in ("instant", "low", "medium", "high")),
+        "mercury-3/diffusing", "mercury-3/temperature_out_of_range", "mercury-3/realtime",
+        *(f"claude-haiku-5-5/{c}" for c in ("stream", "tool", "schema", "plain", "effort_medium_adaptive")),
+    }  # fmt: skip
+    on_disk = {f"{p.parent.name}/{p.stem}" for p in R0.glob("*/*.json")}
+    assert on_disk == covered
