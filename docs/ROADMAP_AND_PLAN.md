@@ -1,8 +1,54 @@
-# Implementation plan
+# Roadmap and implementation plan
 
-Status: **planned, not started.** This file describes *how* to build what [FEATURES.md](FEATURES.md) lists, in the order given in [ROADMAP.md](ROADMAP.md).
+**Status (2026-10-20):** M0 ✅ · M1 ✅ · **M2 (UC1 code generation) is next.** Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
 
-## 1. Tech stack (decisions)
+This doc covers *when* (§1, the roadmap) and *how* (§2–§7, the implementation plan) to build what [FEATURES.md](FEATURES.md) lists.
+
+| § | Contents |
+|---|---|
+| 1 | Roadmap: milestones, gates, risks |
+| 2 | Tech stack decisions |
+| 3 | Repository layout |
+| 4 | Core interfaces |
+| 5 | Work breakdown per milestone |
+| 6 | Mercury API notes and cross-provider findings |
+| 7 | M1 as built, and how it differs from the plan |
+
+## 1. Roadmap
+
+Original plan: start the week of **2026-10-26** and finish in about 6 weeks, part-time. In practice M0 and M1 both finished on 2026-10-20, ahead of that start, so the bars below show planned durations, not dates. Each milestone ends with a gate that must pass before the next one starts, and each gate's evidence goes in a `docs/M<n>_<TOPIC>_RESULTS.md` doc ([template](templates/MILESTONE_RESULTS.md)).
+
+```
+Week:        1        2        3        4        5        6
+M0 Setup   ███
+M1 Core    ███████
+M2 UC1          ██████████
+M3 UC2                   ██████████
+M4 Analysis                       ███████
+M5 Blog                                 ███████
+```
+
+| Milestone | Scope | Features | Exit gate |
+|---|---|---|---|
+| **M0: Project setup and API verification** (wk 1) ✅ done 2026-10-20 ([results](M0_SMOKE_RESULTS.md)) | Accounts/keys for all providers; verify model IDs, prices, and limits; resolve PRD OQ1/OQ4; repo scaffolding (uv, ruff, pytest, pre-commit) | — | `configs/models.yaml` filled with `verified_on`; a manual curl to each provider works; CI-style `make check` passes on an empty package |
+| **M1: Harness core** (wk 1–2) ✅ done 2026-10-20 ([results](M1_SMOKE_RESULTS.md)) | Provider layer, timing, logging, runner, budget guard, cost engine, CLI skeleton | F1.1–F1.8, F2.1–F2.5, F3.1–F3.6, F6.1–F6.3 | A1 + A2 + A4 pass; R0 smoke passes; one end-to-end mini run produces a manifest and a calls.jsonl |
+| **M2: UC1 code generation** (wk 2–3) | Datasets, sandbox, scoring, length sweep; R1 pilot, then R2 and R3 | F4.x, F6.4 (Pareto) | Pilot reviewed; R2/R3 complete; Pareto chart regenerates offline; CI targets met |
+| **M3: UC2 SQL agent** (wk 3–4) | BIRD subset, tools, agent loop, scorers, strict-schema sub-run; R4 | F5.x, F6.4 (speed-up chart) | R4 complete; traces replayable; reliability table produced |
+| **M4: Analysis and assets** (wk 5) | Statistics, cost tables (promo and regular), diffusion GIF (R5), failure tagging, decision matrix | F2.6, F6.5–F6.7, F7.2 (optional) | Every item in the BLOG_ALIGNMENT asset checklist exists and passes B4 |
+| **M5: Blog article** (wk 6) | Draft following the BLOG_ALIGNMENT outline; fact-check every number against its run ID; publish the repo/results | — | Every number in the draft is footnoted with a run ID; a reproducibility check is done from a clean clone |
+| **Stretch** (after M5 or in parallel with M4) | Reversal probe, FIM/next-edit addendum | F7.1, F7.3 | Separate mini-report |
+
+### Risks
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Mercury promo pricing ends mid-project | Cost story changes | Report both prices; frozen price snapshot per run |
+| Model IDs or behaviour change during the study | Results not comparable | Pin IDs; record the server-returned model; finish each use case's main run within one week |
+| Rate limits (free tier: 100k output tok/min) | Slow runs | Throttle; upgrade to pay-as-you-go if needed |
+| Baseline API spend overruns | Budget | Budget guard; dry-run estimates; pilot first |
+| Sandbox security (executing model code) | Host compromise | Docker, no network, resource limits, non-root, read-only FS |
+| Mercury tool-calling quirks (FAQ references `mercury-2.5` for MCP) | UC2 blocked | Verify in M0; fall back to documenting the limitation as a finding |
+
+## 2. Tech stack (decisions)
 
 | Concern | Choice | Why |
 |---|---|---|
@@ -17,7 +63,7 @@ Status: **planned, not started.** This file describes *how* to build what [FEATU
 | Sandbox | Docker (`python:3.12-slim`, `--network none`, cpu/mem/pids limits, read-only rootfs, tmpfs work dir) | Safe execution of model-generated code |
 | Quality | `ruff` (lint + format), `mypy --strict` on `src/`, `pytest`, `pytest-cov`, `pre-commit` | Standard |
 
-## 2. Repository layout (target)
+## 3. Repository layout (target)
 
 ```
 mercury3/
@@ -60,7 +106,7 @@ mercury3/
 └── reports/                      # generated charts, tables, blog assets
 ```
 
-## 3. Core interfaces (sketch)
+## 4. Core interfaces (sketch)
 
 ```python
 class ChatRequest(BaseModel):
@@ -91,7 +137,7 @@ class Provider(Protocol):
 
 Every use case depends only on `Provider.chat`. Nothing outside `providers/` knows which vendor it is talking to.
 
-## 4. Work breakdown
+## 5. Work breakdown
 
 ### M0: Setup (≈1 day)
 1. `git init`, `uv init --package dllm_eval`, add dev tooling, Makefile, pre-commit, `.env.example`.
@@ -135,7 +181,7 @@ Every use case depends only on `Provider.chat`. Nothing outside `providers/` kno
 ### M5: Blog (≈3 days)
 Draft in `reports/blog/draft.md`, following BLOG_ALIGNMENT §4. Every number links to `results/published/<run_id>`.
 
-## 5. Key implementation notes from the Mercury API docs (verified 2026-10-20)
+## 6. Key implementation notes from the Mercury API docs (verified 2026-10-20)
 
 - Base URL `https://api.inceptionlabs.ai/v1`; auth `Authorization: Bearer $INCEPTION_API_KEY`.
 - Endpoints: `/chat/completions` (Mercury 3), `/fim/completions` and `/edit/completions` (Mercury Edit 2), `/models`.
@@ -156,7 +202,7 @@ Draft in `reports/blog/draft.md`, following BLOG_ALIGNMENT §4. Every number lin
 - Free tier per minute: 1,000 requests, 1M input tokens, 100k output tokens. 100M free tokens one-time.
 - Full doc index for agents: https://docs.inceptionlabs.ai/llms.txt; OpenAPI: https://api.inceptionlabs.ai/openapi.json.
 
-## 6. M1 as built (2026-10-20)
+## 7. M1 as built (2026-10-20)
 
 **Modules** (all under `src/dllm_eval/`)
 
@@ -190,7 +236,7 @@ A provider `warning` aborts the run when `fail_on_warning` is set (M0 F2). A req
 
 **Budget guard.** The runner stops launching jobs once actual spend reaches `budget_usd`. In-flight calls can overshoot by at most concurrency x one call's cost.
 
-**Differences from §4 (M1 plan)**
+**Differences from §5 (M1 work breakdown)**
 
 - Added `experiment.py` (experiment schema) and `Message.raw` / `ChatResult.as_message()` for provider-native replay. The R0 recordings showed Gemini thought signatures, which multi-turn tool loops must echo.
 - `dllm-eval smoke` was not added as a separate command. The harness smoke is an ordinary experiment (`configs/experiments/r0_smoke.yaml`); `scripts/smoke_r0.py` stays as the raw capability probe.

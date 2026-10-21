@@ -115,4 +115,4 @@ The result is 68M Mercury tokens (32% credit headroom) and $37 for baselines.
 
 ## 8. After the pilot (R1)
 
-Replace the §2.2 guesses with R1's measured median tokens per call and turn, broken out by arm, then run `make budget` again and revise this doc. This is the gate before starting R2 (ROADMAP M2).
+Replace the §2.2 guesses with R1's measured median tokens per call and turn, broken out by arm, then run `make budget` again and revise this doc. This is the gate before starting R2 ([ROADMAP_AND_PLAN](ROADMAP_AND_PLAN.md) §1, M2).

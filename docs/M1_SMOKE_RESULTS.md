@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Milestone | M1: Harness core (see [ROADMAP.md](ROADMAP.md)) |
+| Milestone | M1: Harness core (see [ROADMAP_AND_PLAN.md](ROADMAP_AND_PLAN.md) §1) |
 | Date | 2026-10-20 |
 | Commits | `6005a22` (harness core and live smoke), `5fd62f1` (untrack derived output), `cd98b06` (F2.5 network probe and clean-tree guard) |
 | Gate verdict | **Passed.** One item never ran live: the F2.5 probe's TLS path, which first runs at the start of the next `--live` run (§6) |
@@ -10,7 +10,7 @@
 
 ## 1. Gate checklist
 
-The exit gate from ROADMAP.md:
+The exit gate from ROADMAP_AND_PLAN §1:
 
 | Criterion | Result | Evidence |
 |---|---|---|

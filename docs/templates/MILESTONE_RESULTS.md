@@ -2,11 +2,12 @@
 
 <!-- Copy to docs/M<n>_<TOPIC>_RESULTS.md when the milestone's gate runs (CLAUDE.md rule).
      Record what was actually observed. Every number needs a run id or a command that
-     reproduces it. Delete sections that don't apply instead of leaving them empty. -->
+     reproduces it. Delete sections that don't apply instead of leaving them empty.
+     Links here are relative to docs/templates/; drop the leading ../ after copying. -->
 
 | | |
 |---|---|
-| Milestone | M<n>: <name> (see [ROADMAP.md](../ROADMAP.md)) |
+| Milestone | M<n>: <name> (see [ROADMAP_AND_PLAN.md](../ROADMAP_AND_PLAN.md) §1) |
 | Date | YYYY-MM-DD |
 | Commit | `<sha>` (the code the gate ran on) |
 | Gate verdict | **passed / failed / passed with open items** |
@@ -14,7 +15,7 @@
 
 ## 1. Gate checklist
 
-The exit gate from ROADMAP.md, one row per criterion:
+The exit gate from ROADMAP_AND_PLAN §1, one row per criterion:
 
 | Criterion | Result | Evidence |
 |---|---|---|

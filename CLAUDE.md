@@ -12,12 +12,12 @@ The results feed a follow-up blog article. The output that matters is **trustwor
 
 Read these first, in order:
 1. [docs/PRD.md](docs/PRD.md): goals, use cases, methodology rules (R1–R13)
-2. [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md): stack, layout, interfaces, Mercury API notes
+2. [docs/ROADMAP_AND_PLAN.md](docs/ROADMAP_AND_PLAN.md): roadmap and milestone gates (§1), then stack, layout, interfaces, work breakdown, Mercury API notes, and M1 as built (§2–§7)
 3. [docs/TEST_PLAN.md](docs/TEST_PLAN.md): what must pass before a number is publishable
-4. [docs/FEATURES.md](docs/FEATURES.md) / [docs/ROADMAP.md](docs/ROADMAP.md): feature IDs and current milestone
+4. [docs/FEATURES.md](docs/FEATURES.md): feature IDs and their Done status
 5. [docs/BLOG_ALIGNMENT.md](docs/BLOG_ALIGNMENT.md): how results map onto the article
 
-Current phase: **M1 complete (2026-10-20); M2 (UC1 code generation) is next.** The harness core passes 127 offline tests and its live smoke (`r0_smoke.yaml`, 24/24). F2.5 (network baseline probe) and the clean-tree guard are in. Feature status lives in the **Done** column of docs/FEATURES.md. See IMPLEMENTATION_PLAN §6 for what was built and how it differs from the plan.
+Current phase: **M1 complete (2026-10-20); M2 (UC1 code generation) is next.** The harness core passes 135 offline tests and its live smoke (`r0_smoke.yaml`, 24/24). F2.5 (network baseline probe) and the clean-tree guard are in. Feature status lives in the **Done** column of docs/FEATURES.md. See ROADMAP_AND_PLAN §7 for what was built and how it differs from the plan.
 
 ## Commands
 
@@ -83,10 +83,10 @@ Without `--live`, `run` prints the estimate and exits 2. Every live run first pr
 
 ## Working style for Claude in this repo
 
-- Before starting work, check ROADMAP.md for the current milestone, and don't build ahead of it unless asked.
+- Before starting work, check ROADMAP_AND_PLAN §1 for the current milestone, and don't build ahead of it unless asked.
 - When a milestone's gate runs, write `docs/M<n>_<TOPIC>_RESULTS.md` from docs/templates/MILESTONE_RESULTS.md: the gate checklist with evidence, offline and live runs, findings, open items, and where the evidence lives. Take every number from a run id or a command, never from memory.
 - When a feature lands, set its **Done** cell in docs/FEATURES.md to `true` and update the status line in the same commit. `make check` fails if the counts don't match the table (`tests/unit/test_features_doc.py`).
 - When a doc decision changes (stack, metric definition, model set), update the relevant doc in the same change.
-- When the vendor docs disagree with these notes, trust the live docs, then update this file and IMPLEMENTATION_PLAN §5 with the date.
+- When the vendor docs disagree with these notes, trust the live docs, then update this file and ROADMAP_AND_PLAN §6 with the date.
 - Keep raw data out of the context: summarise run directories with `analyze` instead of `cat`-ing large JSONL files.
 - Put scratch experiments in a scratch directory, never in `results/runs/`.
