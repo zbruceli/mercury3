@@ -26,7 +26,7 @@ The exit gate from ROADMAP_AND_PLAN §1: every number in the draft is footnoted 
 
 | | |
 |---|---|
-| Path | `/Users/zhengli/Documents/AI/Blogs & articles/mercury/draft.md` (outside the repo, at the user's request; ROADMAP_AND_PLAN §5 had planned `reports/blog/draft.md`) |
+| Path | `draft.md` in the author's blog folder (outside the repo, at the user's request; ROADMAP_AND_PLAN §5 had planned `reports/blog/draft.md`) |
 | Images | `images/fig1_pareto_uc1.png`, `images/fig2_task_vs_call_speedup_uc2.png`, `images/fig4_cost_per_success.png`, `images/diffusion_2026.gif` |
 | Length | ~2,400 words including captions and the editor note (`wc -w`) |
 | Not used | fig3 (latency CDF), the reliability table and decision matrix as tables (their key numbers are in the text) |
@@ -148,6 +148,6 @@ Note: Gemini's mean turns are 6.6 in fig2 (latency-eligible tasks) and 6.7 in M3
 | What | Where | In git? |
 |---|---|---|
 | This fact-check | `docs/M5_BLOG_RESULTS.md` | ✅ |
-| Draft and images | `/Users/zhengli/Documents/AI/Blogs & articles/mercury/` | ❌ outside the repo |
+| Draft and images | The author's blog folder (`draft.md`, `images/`) | ❌ outside the repo |
 | Figure sources | `reports/assets/` (+ CSVs) | ✅ |
 | Source runs | `results/runs/<run_id>/` for every run in §3 | ❌ local only |
