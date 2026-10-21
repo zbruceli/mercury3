@@ -33,6 +33,7 @@ def grading_job(job_id: str, problem: CodeProblem, content: str) -> tuple[dict[s
     }
     if problem.kind == "function":
         job |= {
+            "cache_key": problem.id,  # lets the sandbox reuse reference outputs
             "canonical": problem.canonical_solution,
             "inputs": problem.inputs,
             "atol": problem.atol,
@@ -50,6 +51,9 @@ def _read(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
+CHUNK_SIZE = 600  # jobs graded before each append to scores.jsonl (crash safety)
+
+
 def score_run(
     store: RunStore,
     problems: dict[str, CodeProblem],
@@ -57,8 +61,13 @@ def score_run(
     out_path: Path,
     *,
     log: Callable[[str], None] = print,
+    chunk_size: int = CHUNK_SIZE,
 ) -> list[dict[str, Any]]:
-    """Grade every ok call not yet in out_path. Returns all score rows (old + new)."""
+    """Grade every ok call not yet in out_path. Returns all score rows (old + new).
+
+    Jobs are sorted by problem, so consecutive jobs in a sandbox batch share the cached
+    reference outputs, and graded in chunks that are appended as they finish, so an
+    interrupted run resumes from the last completed chunk."""
     done = {r["job_id"] for r in _read(out_path)}
     todo: list[tuple[dict[str, Any], dict[str, Any], str]] = []
     for rec in store.latest_by_job().values():
@@ -67,12 +76,14 @@ def score_run(
         problem = problems[rec["item_id"]]
         job, method = grading_job(rec["job_id"], problem, rec["result"]["content"])
         todo.append((rec, job, method))
+    todo.sort(key=lambda t: (t[0]["item_id"], t[0]["job_id"]))
     log(f"grading {len(todo)} responses ({len(done)} already scored)")
-    if todo:
-        results = {r["job_id"]: r for r in executor.run([job for _, job, _ in todo])}
-        out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    for start in range(0, len(todo), chunk_size):
+        chunk = todo[start : start + chunk_size]
+        results = {r["job_id"]: r for r in executor.run([job for _, job, _ in chunk])}
         with out_path.open("a") as f:
-            for rec, _job, method in todo:
+            for rec, _job, method in chunk:
                 r = results.get(rec["job_id"]) or {
                     "status": "harness_error",
                     "passed": 0,
@@ -94,6 +105,7 @@ def score_run(
                     "grade_s": r.get("grade_s"),
                 }
                 f.write(json.dumps(row) + "\n")
+        log(f"  graded {min(start + chunk_size, len(todo))}/{len(todo)}")
     return _read(out_path)
 
 

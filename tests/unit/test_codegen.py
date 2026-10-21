@@ -593,3 +593,57 @@ def test_summarize_separates_budget_out() -> None:
     [s] = summarize(rows, finish={"a": "length", "b": "stop", "c": "stop"})
     assert s["budget_out"] == 1 and s["no_code"] == 1
     assert s["pass@1"] == 0.5  # budget-out still fails
+
+
+def test_score_run_is_chunked_and_survives_a_crash(
+    problems: dict[str, Any], host_exec: HostExecutor, tmp_path: Path
+) -> None:
+    store = RunStore(tmp_path / "run")
+    store.create({"run_id": "r"})
+    for r in range(5):
+        store.append_call(
+            {
+                "job_id": f"a/{r}",
+                "arm": "a",
+                "model": "m",
+                "item_id": "lcb-v6/abc001_a",
+                "repeat": r,
+                "status": "ok",
+                "result": {"content": "```python\nprint(2 * int(input()))\n```"},
+            }
+        )
+
+    class CrashAfterFirstChunk:
+        calls = 0
+
+        def run(self, jobs: Any) -> list[dict[str, Any]]:
+            self.calls += 1
+            if self.calls > 1:
+                raise KeyboardInterrupt  # e.g. the process is killed mid-run
+            return host_exec.run(jobs)
+
+    out = tmp_path / "scores.jsonl"
+    with pytest.raises(KeyboardInterrupt):
+        score_run(store, problems, CrashAfterFirstChunk(), out, chunk_size=2, log=lambda _: None)
+    assert len(out.read_text().splitlines()) == 2  # first chunk was saved
+    rows = score_run(store, problems, host_exec, out, chunk_size=2, log=lambda _: None)
+    assert sorted(r["job_id"] for r in rows) == [
+        f"a/{r}" for r in range(5)
+    ]  # resumed, no duplicates
+
+
+def test_reference_outputs_are_cached_per_problem(problems: dict[str, Any]) -> None:
+    harness._CANON_CACHE.clear()
+    good = _job(
+        problems, "mbpp+/Mbpp/2", "def shared(a, b):\n    return tuple(sorted(set(a) & set(b)))\n"
+    )
+    good["job_id"] = "g1"
+    assert harness.grade(good)["status"] == "pass"
+    # Same problem, broken reference: only passes if the cached reference outputs are reused.
+    reused = {**good, "job_id": "g2", "canonical": "raise SystemExit(1)\n"}
+    assert harness.grade(reused)["status"] == "pass"
+    other = {**reused, "job_id": "g3", "cache_key": "different-problem"}
+    assert (
+        harness.grade(other)["status"] == "harness_error"
+    )  # no cache hit -> reference really runs
+    harness._CANON_CACHE.clear()

@@ -340,21 +340,34 @@ def _run_fn(
         return {"load_error": "no output (crashed)"}, elapsed
 
 
+# Reference outputs for the most recent problem in this container. Scoring sorts jobs by
+# problem, so a batch's consecutive candidates for one problem run the reference once.
+# One entry only, to keep memory bounded.
+_CANON_CACHE: dict[str, tuple[dict[str, Any], float]] = {}
+
+
 def grade_function(job: dict[str, Any], work: str) -> dict[str, Any]:
     inputs_path = os.path.join(work, "inputs.json")
     with open(inputs_path, "w") as f:
         json.dump(job["inputs"], f)
     total = len(job["inputs"])
     mbpp_task = job.get("mbpp_task")
-    canon, canon_s = _run_fn(
-        work,
-        "canonical",
-        job["canonical"],
-        job["entry_point"],
-        inputs_path,
-        CANONICAL_TIMEOUT_S,
-        mbpp_task,
-    )
+    key = job.get("cache_key")
+    if key is not None and key in _CANON_CACHE:
+        canon, canon_s = _CANON_CACHE[key]
+    else:
+        canon, canon_s = _run_fn(
+            work,
+            "canonical",
+            job["canonical"],
+            job["entry_point"],
+            inputs_path,
+            CANONICAL_TIMEOUT_S,
+            mbpp_task,
+        )
+        if key is not None and "outputs" in canon:
+            _CANON_CACHE.clear()
+            _CANON_CACHE[key] = (canon, canon_s)
     if "outputs" not in canon:
         return {
             "status": "harness_error",
