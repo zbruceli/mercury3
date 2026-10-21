@@ -1,0 +1,31 @@
+job_id,arm,item_id,repeat,frames,span_s,final_chars,length_steps,first_frame_similarity,regressions,mean_step_edit,similarity_trace
+mercury-3:instant-diffusing/split-top-bottom/1,mercury-3:instant-diffusing,split-top-bottom,1,8,0.3934,3036,5,0.3144,3,0.5567,0.314 0.300 0.174 0.548 0.719 0.678 0.786 1.000
+mercury-3:low-diffusing/grayscale/2,mercury-3:low-diffusing,grayscale,2,9,0.5666,2303,6,0.0155,2,0.4902,0.015 0.010 0.383 0.409 0.613 0.567 0.724 0.747 1.000
+mercury-3:instant-diffusing/center-crop/1,mercury-3:instant-diffusing,center-crop,1,8,0.5283,2754,5,0.3680,2,0.6293,0.368 0.334 0.569 0.606 0.726 0.673 0.781 1.000
+mercury-3:instant-diffusing/split-halves/2,mercury-3:instant-diffusing,split-halves,2,7,0.3722,2521,5,0.4121,1,0.3831,0.412 0.365 0.598 0.650 0.740 0.757 1.000
+mercury-3:instant-diffusing/grayscale/1,mercury-3:instant-diffusing,grayscale,1,8,0.3705,2623,5,0.3887,2,0.5868,0.389 0.358 0.554 0.607 0.769 0.719 0.796 1.000
+mercury-3:instant-diffusing/grayscale/0,mercury-3:instant-diffusing,grayscale,0,8,0.4184,3277,5,0.3431,2,0.4954,0.343 0.308 0.524 0.571 0.748 0.474 0.793 1.000
+mercury-3:low-diffusing/center-crop/2,mercury-3:low-diffusing,center-crop,2,6,0.2321,1464,4,0.3199,1,0.3997,0.320 0.298 0.633 0.691 0.745 1.000
+mercury-3:low-diffusing/grayscale/0,mercury-3:low-diffusing,grayscale,0,11,1.0002,2845,7,0.1320,2,0.3835,0.132 0.113 0.344 0.385 0.512 0.492 0.626 0.683 0.767 0.772 1.000
+mercury-3:instant-diffusing/center-crop/0,mercury-3:instant-diffusing,center-crop,0,6,0.1734,2154,4,0.4431,1,0.4479,0.443 0.401 0.649 0.702 0.756 1.000
+mercury-3:low-diffusing/split-halves/2,mercury-3:low-diffusing,split-halves,2,6,0.0627,1613,5,0.1160,1,0.4104,0.116 0.102 0.480 0.612 0.654 1.000
+mercury-3:low-diffusing/center-crop/1,mercury-3:low-diffusing,center-crop,1,6,0.2147,1531,4,0.2965,1,0.4087,0.296 0.277 0.597 0.641 0.717 1.000
+mercury-3:low-diffusing/split-halves/0,mercury-3:low-diffusing,split-halves,0,9,0.5073,2089,6,0.1160,3,0.4420,0.116 0.109 0.441 0.488 0.678 0.638 0.758 0.757 1.000
+mercury-3:low-diffusing/split-top-bottom/0,mercury-3:low-diffusing,split-top-bottom,0,6,0.1595,1289,4,0.2057,1,0.4512,0.206 0.195 0.551 0.621 0.722 1.000
+mercury-3:instant-diffusing/split-quarters/0,mercury-3:instant-diffusing,split-quarters,0,10,2.2554,3051,6,0.3095,2,0.4359,0.309 0.286 0.483 0.541 0.669 0.635 0.729 0.777 0.806 1.000
+mercury-3:instant-diffusing/split-top-bottom/0,mercury-3:instant-diffusing,split-top-bottom,0,10,0.8131,3120,6,0.2849,2,0.5312,0.285 0.277 0.465 0.518 0.704 0.639 0.763 0.809 0.820 1.000
+mercury-3:low-diffusing/split-quarters/0,mercury-3:low-diffusing,split-quarters,0,6,0.2011,1849,4,0.3023,1,0.4189,0.302 0.268 0.605 0.660 0.750 1.000
+mercury-3:instant-diffusing/split-top-bottom/2,mercury-3:instant-diffusing,split-top-bottom,2,8,0.4504,2678,5,0.3224,2,0.5852,0.322 0.303 0.528 0.576 0.747 0.683 0.787 1.000
+mercury-3:instant-diffusing/split-halves/1,mercury-3:instant-diffusing,split-halves,1,8,0.3742,2599,5,0.3668,1,0.3699,0.367 0.343 0.555 0.604 0.740 0.763 0.797 1.000
+mercury-3:instant-diffusing/center-crop/2,mercury-3:instant-diffusing,center-crop,2,8,0.3975,2630,5,0.3575,2,0.4980,0.357 0.332 0.527 0.576 0.749 0.719 0.786 1.000
+mercury-3:instant-diffusing/split-quarters/1,mercury-3:instant-diffusing,split-quarters,1,10,0.9317,4028,7,0.2187,3,0.4904,0.219 0.200 0.408 0.443 0.340 0.313 0.430 0.514 0.530 1.000
+mercury-3:instant-diffusing/split-halves/0,mercury-3:instant-diffusing,split-halves,0,10,0.6966,3682,6,0.3005,2,0.5129,0.300 0.271 0.457 0.495 0.672 0.615 0.721 0.783 0.817 1.000
+mercury-3:low-diffusing/split-halves/1,mercury-3:low-diffusing,split-halves,1,7,0.3393,1937,5,0.3028,1,0.3451,0.303 0.279 0.579 0.631 0.677 0.686 1.000
+mercury-3:low-diffusing/center-crop/0,mercury-3:low-diffusing,center-crop,0,7,0.3400,1653,5,0.1809,1,0.3683,0.181 0.154 0.513 0.555 0.711 0.724 1.000
+mercury-3:low-diffusing/split-top-bottom/2,mercury-3:low-diffusing,split-top-bottom,2,8,0.4326,1876,5,0.3036,2,0.4300,0.304 0.284 0.543 0.600 0.752 0.692 0.792 1.000
+mercury-3:low-diffusing/split-quarters/1,mercury-3:low-diffusing,split-quarters,1,8,0.5475,1854,5,0.0678,2,0.5014,0.068 0.059 0.433 0.470 0.692 0.642 0.766 1.000
+mercury-3:low-diffusing/grayscale/1,mercury-3:low-diffusing,grayscale,1,5,0.0841,1762,4,0.5457,1,0.3221,0.546 0.510 0.690 0.719 1.000
+mercury-3:instant-diffusing/grayscale/2,mercury-3:instant-diffusing,grayscale,2,9,0.4899,3223,6,0.3391,2,0.4960,0.339 0.319 0.523 0.557 0.714 0.669 0.762 0.779 1.000
+mercury-3:low-diffusing/split-quarters/2,mercury-3:low-diffusing,split-quarters,2,8,0.4453,2062,5,0.0621,2,0.6684,0.062 0.054 0.442 0.482 0.660 0.611 0.733 1.000
+mercury-3:instant-diffusing/split-quarters/2,mercury-3:instant-diffusing,split-quarters,2,8,0.6714,3064,5,0.3224,2,0.4589,0.322 0.285 0.499 0.526 0.716 0.562 0.770 1.000
+mercury-3:low-diffusing/split-top-bottom/1,mercury-3:low-diffusing,split-top-bottom,1,7,0.3230,1560,5,0.1201,1,0.4074,0.120 0.107 0.493 0.533 0.687 0.718 1.000

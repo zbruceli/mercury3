@@ -5,9 +5,9 @@
 | Milestone | M4: Analysis and assets (see [ROADMAP_AND_PLAN.md](ROADMAP_AND_PLAN.md) §1) |
 | Date | 2026-10-21 |
 | Commit | `6ebff1f` (the report generator and assets) |
-| Gate verdict | **Not yet passed: 7 of 8 assets done.** The diffusion GIF needs the R5 live capture (§3). UC2 EX misses the B4 precision target (§1, §6) |
-| Tokens / spend | None (offline only). R5 is drafted and dry-run only: $0.013 expected, $0.043 worst case |
-| Answer | Every number in the blog can now be regenerated with one offline command, `uv run dllm-eval report`, which writes all assets into [reports/](../reports/README.md) with a dated "as of" footnote on each |
+| Gate verdict | **Passed with open items** (2026-10-21): all 8 assets exist. UC2 EX misses the B4 precision target, so UC2 accuracy is published as paired differences with CIs (§1, §7) |
+| Tokens / spend | **R5: $0.0079** (30 Mercury 3 calls; dry-run expected $0.013). Everything else offline |
+| Answer | All 8 assets exist. Every number in the blog can now be regenerated with one offline command, `uv run dllm-eval report`, which writes all assets into [reports/](../reports/README.md) with a dated "as of" footnote on each |
 
 ## 1. Gate checklist
 
@@ -19,7 +19,7 @@ The exit gate from ROADMAP_AND_PLAN §1: every item in the BLOG_ALIGNMENT §5 as
 | `fig2_task_vs_call_speedup_uc2.png` | ✅ | 🟡 latency ✅, EX not shown | [reports/assets/fig2_task_vs_call_speedup_uc2.png](../reports/assets/fig2_task_vs_call_speedup_uc2.png) + `.csv`, from `r4-uc2-main-20261021T165313Z` |
 | `fig3_latency_cdf.png` | ✅ | ✅ | [reports/assets/fig3_latency_cdf.png](../reports/assets/fig3_latency_cdf.png) + `.csv`, from R2 and R4 |
 | `fig4_cost_per_success.png` (promo + regular) | ✅ | 🟡 UC2 panel shows EX | [reports/assets/fig4_cost_per_success.png](../reports/assets/fig4_cost_per_success.png) + `.csv`, from R2 and R4 |
-| `diffusion_2026.gif` | ❌ | — | Renderer done and tested on the R0 recording (F6.5); the asset needs R5 (§3) |
+| `diffusion_2026.gif` | ✅ | ✅ | [reports/assets/diffusion_2026.gif](../reports/assets/diffusion_2026.gif) + [diffusion_dynamics.csv](../reports/assets/diffusion_dynamics.csv), from `r5-diffusion-capture-20261021T181518Z` (§3) |
 | `table_reliability.md` | ✅ | 🟡 UC2 | [reports/table_reliability.md](../reports/table_reliability.md), from R2, R4, R4b |
 | `failure_gallery.md` (6–10 examples) | ✅ (9) | ✅ | [reports/failure_gallery.md](../reports/failure_gallery.md), notes in [reports/failure_tags.csv](../reports/failure_tags.csv) |
 | `decision_matrix.md` | ✅ | 🟡 UC2 rows | [reports/decision_matrix.md](../reports/decision_matrix.md), from R2, R3, R4, R4b |
@@ -28,11 +28,11 @@ How each asset meets B4:
 
 | B4 criterion | Result | Evidence |
 |---|---|---|
-| 1. Source run's manifest passes B1 | ✅ | R2, R3, R4, R4b manifests: clean tree (`git.dirty: false`), live probes recorded (M2 §6, M3 §6) |
+| 1. Source run's manifest passes B1 | ✅ | R2, R3, R4, R4b, R5 manifests: clean tree (`git.dirty: false`), live probes recorded (M2 §6, M3 §6, §3 here) |
 | 2. CI half-widths (≤ 3 pp pass@1/EX; ≤ 10% p50 latency) | 🟡 | UC1 met (pass@1 ≤ 2.6 pp, latency ≤ 4.5%; M2 §6.1). UC2 latency met (≤ ±8.9%). **UC2 EX not met: ±7 to ±8 points per arm** (M3 §9). Every UC2 accuracy number in the assets carries its CI |
 | 3. Regenerates offline | ✅ | `uv run dllm-eval report` reads run directories and score files only; no API calls |
 | 4. "As of" footnote: model id, date, tier, region | ✅ | Every figure and table ends with run id, commit, model ids, service tier, client region, price-list date, and as-of date (`report.footnote`). The region is the client's ("one macOS arm64 host, US West"), set in [configs/report.yaml](../configs/report.yaml) |
-| 5. Reproducible by someone else from the run directory | ✅ | Two consecutive `dllm-eval report` builds give byte-identical files, PNGs included (md5 of all 14 outputs) |
+| 5. Reproducible by someone else from the run directory | ✅ | Two consecutive `dllm-eval report` builds give byte-identical files, PNGs included (md5 of all 14 outputs before R5; adding R5 left every earlier asset unchanged) |
 
 ## 2. Offline verification
 
@@ -45,16 +45,28 @@ How each asset meets B4:
 - The GIF renderer and dynamics on the real R0 diffusing recording.
 - `dllm-eval report` end to end on synthetic runs, with and without a diffusion run, and its failure when scores are missing.
 
-## 3. R5 diffusion capture (drafted, not run)
+## 3. R5 diffusion capture
 
 | | |
 |---|---|
-| Config | [configs/experiments/r5_diffusion_capture.yaml](../configs/experiments/r5_diffusion_capture.yaml) |
-| Workload | 5 prompts in the original article's style ("Write a Python function that splits an image into left and right halves.", the same request R0 recorded, plus top/bottom, quarters, grayscale, centre crop) × 3 repeats × Mercury 3 `instant` and `low`, `diffusing: true`, temperature 0.5, 4,096-token cap |
-| Dry-run | 30 jobs; **$0.0127 expected, $0.0431 worst case**; budget guard $1.00 |
-| Needs | The user's go-ahead (CLAUDE.md rule 1), then `uv run --env-file .env dllm-eval run configs/experiments/r5_diffusion_capture.yaml --live`, set `runs.diffusion` in configs/report.yaml, and rerun `dllm-eval report` |
+| Run id | `r5-diffusion-capture-20261021T181518Z` (local only), commit `1532800` |
+| Config | [configs/experiments/r5_diffusion_capture.yaml](../configs/experiments/r5_diffusion_capture.yaml): 5 prompts in the original article's style ("Write a Python function that splits an image into left and right halves.", the same request R0 recorded, plus top/bottom, quarters, grayscale, centre crop) × 3 repeats × Mercury 3 `instant` and `low`, `diffusing: true`, temperature 0.5, 4,096-token cap |
+| Jobs / result | **30/30 ok**: 0 errors, 0 retries, 0 warnings; every call stopped normally and carries frames |
+| Spend | **$0.0079** (dry-run expected $0.0127, worst case $0.0431) |
+| Network baseline | Inception connect 14 ms, TTFB 15 ms |
+| GIF | `mercury-3:instant-diffusing/split-halves/0` (10 frames), set as `diffusion_job` in configs/report.yaml |
 
-Diffusing-mode timings are never used for latency (PRD R7); the GIF and the dynamics CSV are the only outputs.
+Diffusing-mode timings are never used for latency (PRD R7). Denoising dynamics (F7.2, [diffusion_dynamics.csv](../reports/assets/diffusion_dynamics.csv)), median (range) per call:
+
+| Arm | Frames | Span (s) | Final chars | Distinct text lengths | Steps that move away from the final | First-frame similarity to final |
+|---|---:|---:|---:|---:|---:|---:|
+| Mercury 3 `instant` | 8 (6–10) | 0.45 (0.17–2.26) | 3,036 | 5 (4–7) | 2 (1–3) | 0.34 (0.22–0.44) |
+| Mercury 3 `low` | 7 (5–11) | 0.34 (0.06–1.00) | 1,849 | 5 (4–7) | 1 (1–3) | 0.18 (0.02–0.55) |
+
+What it shows:
+- **The answer resolves in 5–11 visible steps in well under a second** at the median, and it grows in blocks: a call has 4–7 distinct text lengths, so the visible text extends a few times while earlier blocks are still being refined.
+- **Refinement is not monotonic.** Every one of the 30 calls has at least one step that ends further from the final text than the step before (M4-F6). That is consistent with remasking: tokens revealed early can be replaced later.
+- **At `low`, the first visible frame is further from the final** (median similarity 0.18 vs 0.34). A plausible reading, not tested here: after hidden reasoning, the first visible frame of a shorter answer is mostly noise.
 
 ## 4. What the assets show
 
@@ -97,16 +109,15 @@ All from the runs named in each asset's footnote. These repeat M2 and M3 finding
 | M4-F3 | **The Haiku-vs-Mercury paired EX lead is borderline.** This bootstrap (2,000 resamples over questions) gives +4.7 points, CI +0.0 to +9.3; M3 §6.1's ad hoc calculation gave +0.2 to +9.1 | Don't write "clearly ahead" in the blog: the lower bound sits at zero | Decision matrix flags it as borderline; the calculation now lives in `uc2.paired_ex_delta` |
 | M4-F4 | **Mercury 3's runaway reasoning concentrates on problems that are hard or ill-posed.** 119 problems account for every `medium`/`high` budget-out. On Mbpp/430, all 10 `medium`/`high` samples run away, while AR models answer wrongly at once | A "new psychology" point for C11: diffusion-with-reasoning fails by not stopping, AR fails by committing | Gallery cases 1–2; failure_modes.md |
 | M4-F5 | **Mercury 3 is not the cheapest per correct answer** in either use case at the promo price, and doubles at the regular price (§4) | Corrects a possible reading of "cheap per token" as "cheap per result" | Fig 4; decision matrix |
-| M4-F6 | **R0's diffusing frames grow in blocks and are not monotonic.** 10 frames over 0.64 s, 6 distinct text lengths, and 3 of 9 steps move *away* from the final text by similarity (for example 0.84 → 0.74 before the last frame) | First evidence for C2's "coarse-to-fine" mechanics: generation is block-wise, with remasking. One smoke recording, not a published run | `diffusion.dynamics`; R5 will measure it over 30 calls |
+| M4-F6 | **Diffusing frames grow in blocks and refinement is not monotonic.** In R5, all 30 calls have at least one step that moves *away* from the final text (median 2 at `instant`, 1 at `low`), with 4–7 distinct text lengths per call. R0's recording showed the same (3 of 9 steps, for example 0.84 → 0.74 before the last frame) | Evidence for C2's "coarse-to-fine" claim with a caveat: generation is block-wise, with remasking, rather than a steady fade-in | §3; `diffusion.dynamics` |
 
 ## 7. Open items
 
-1. **R5 live capture (needs your go-ahead):** $0.013 expected (§3). Without it, the gate can't pass and the blog hook (BLOG_ALIGNMENT §4.1) has no GIF.
-2. **UC2 EX precision (TEST_PLAN B4.2), decision needed.** There are two options:
+1. **UC2 EX precision (TEST_PLAN B4.2), decision needed.** There are two options:
    - Extend R4 to all 496 scorable BIRD questions: about $21 and ~60M Mercury tokens (M3 §9).
    - Publish UC2 accuracy as paired differences with their CIs, which is what the assets do now.
-3. **Harness hardening, decision needed.** Non-API exceptions inside a provider call are retried as connection errors (M3 §9, M3-F1b). They should stop the run. It's a small change in `providers/`, and it should land before any further live run.
-4. **Client region wording.** configs/report.yaml says "one macOS arm64 host, US West", based on the San Jose CDN edge seen in M2 §5. Confirm or correct it before publishing; every footnote picks it up.
+2. **Harness hardening, decision needed.** Non-API exceptions inside a provider call are retried as connection errors (M3 §9, M3-F1b). They should stop the run. It's a small change in `providers/`, and it should land before any further live run.
+3. **Client region wording.** configs/report.yaml says "one macOS arm64 host, US West", based on the San Jose CDN edge seen in M2 §5. Confirm or correct it before publishing; every footnote picks it up.
 
 ## 8. Where the evidence lives
 
@@ -116,6 +127,7 @@ All from the runs named in each asset's footnote. These repeat M2 and M3 finding
 | Blog assets (figures, CSVs, tables, gallery, matrix, index) | `reports/`, `reports/assets/` | ✅ |
 | Manual failure tags and gallery notes | `reports/failure_tags.csv` | ✅ |
 | Report inputs | `configs/report.yaml` | ✅ |
-| R5 config (not run) | `configs/experiments/r5_diffusion_capture.yaml` | ✅ |
-| Source runs | `results/runs/{r2-uc1-main-20261021T034053Z, r3-uc1-length-20261021T152238Z, r4-uc2-main-20261021T165313Z, r4b-uc2-strict-20261021T170547Z}/` | ❌ local only |
+| R5 config | `configs/experiments/r5_diffusion_capture.yaml` | ✅ |
+| R5 raw run | `results/runs/r5-diffusion-capture-20261021T181518Z/` (frames in `calls.jsonl`) | ❌ local only |
+| Source runs | `results/runs/{r2-uc1-main-20261021T034053Z, r3-uc1-length-20261021T152238Z, r4-uc2-main-20261021T165313Z, r4b-uc2-strict-20261021T170547Z, r5-diffusion-capture-20261021T181518Z}/` | ❌ local only |
 | Score files the report reads | `results/analysis/<run>/scores.jsonl`, `uc2_scores.jsonl` | ❌ local only (regenerate with `dllm-eval score`) |

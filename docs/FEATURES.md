@@ -6,7 +6,7 @@ Priority: **P0** = required for the blog's headline results, **P1** = strongly w
 
 IDs are stable. Reference them in commits, tests, and the implementation plan.
 
-**Status (2026-10-21):** 41 of 44 done. M2 (UC1) and M3 (UC2 SQL agent) complete. M4 (analysis and assets): every offline asset is built (`dllm-eval report`); the diffusion GIF waits on the R5 live capture.
+**Status (2026-10-21):** 41 of 44 done. M2 (UC1) and M3 (UC2 SQL agent) complete. M4 (analysis and assets) complete: `dllm-eval report` builds every blog asset, including the R5 diffusion GIF. M5 (blog) is next.
 
 ## F1 Provider layer
 | ID | Feature | Pri | Done |
@@ -69,7 +69,7 @@ IDs are stable. Reference them in commits, tests, and the implementation plan.
 | F6.2 | Statistics: mean, p50, p95, bootstrap 95% CI | P0 | true |
 | F6.3 | Cost engine: tokens × frozen price table (promo and regular), $ per item and per success | P0 | true |
 | F6.4 | Charts: Pareto (UC1), task-vs-call speed-up (UC2), latency CDF, cost-per-success (`dllm-eval charts` per run; all four blog figures via `dllm-eval report`) | P0 | true |
-| F6.5 | Diffusion GIF renderer from F2.6 frames (`analysis/diffusion.py`; the blog GIF needs the R5 capture) | P1 | true |
+| F6.5 | Diffusion GIF renderer from F2.6 frames (`analysis/diffusion.py`; blog GIF from R5) | P1 | true |
 | F6.6 | Failure-mode tagging (rule tags + manual tag file `reports/failure_tags.csv`, aggregation per arm) and failure gallery export | P1 | true |
 | F6.7 | Markdown report generator with dated "as of" footnotes (`dllm-eval report`, configs/report.yaml) | P1 | true |
 

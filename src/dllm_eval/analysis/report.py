@@ -728,7 +728,7 @@ def write_diffusion(cfg: ReportConfig, runs_dir: Path, assets_dir: Path) -> list
     gif = diffusion.render_gif(
         diffusion.frames_of(rec),
         assets_dir / "diffusion_2026.gif",
-        title=f"{assets.arm_label(rec['arm'])} · diffusing mode",
+        title=f"{assets.arm_label(rec['arm']).removesuffix('-diffusing')} · diffusing mode",
         footnote=(
             f'Prompt: "{prompt}" Job {job}. Orange characters are not yet final. '
             + footnote(cfg, info)

@@ -70,7 +70,7 @@ All assets live in `reports/` (figures and their CSVs in `reports/assets/`) and 
 - [x] `fig2_task_vs_call_speedup_uc2.png`
 - [x] `fig3_latency_cdf.png`
 - [x] `fig4_cost_per_success.png` (promo + regular)
-- [ ] `diffusion_2026.gif`: diffusing-mode replay (renderer built; needs the R5 live capture)
+- [x] `diffusion_2026.gif`: diffusing-mode replay (R5)
 - [x] `table_reliability.md`: tool-call / schema validity
 - [x] `failure_gallery.md`: 6–10 annotated examples
 - [x] `decision_matrix.md`

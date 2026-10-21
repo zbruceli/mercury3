@@ -11,6 +11,7 @@ BLOG_ALIGNMENT §5; findings and caveats are in docs/M4_ANALYSIS_RESULTS.md.
 | uc1_length | `r3-uc1-length-20261021T152238Z` | `b9d80e6` | 2026-10-21 |
 | uc2 | `r4-uc2-main-20261021T165313Z` | `91c7204` | 2026-10-21 |
 | uc2_strict | `r4b-uc2-strict-20261021T170547Z` | `3c4b5fc` | 2026-10-21 |
+| diffusion | `r5-diffusion-capture-20261021T181518Z` |  |  |
 
 ## Figure 1: speed vs. correctness on code generation (C1, C3)
 
@@ -38,7 +39,9 @@ Data: [fig4_cost_per_success.csv](assets/fig4_cost_per_success.csv).
 
 ## Diffusion replay (C2)
 
-*Pending: needs the R5 diffusing-mode capture (a live run).*
+![Mercury 3 diffusing-mode replay](assets/diffusion_2026.gif)
+
+Denoising dynamics per call (F7.2): [diffusion_dynamics.csv](assets/diffusion_dynamics.csv).
 
 ## Tables
 

@@ -1,6 +1,6 @@
 # Roadmap and implementation plan
 
-**Status (2026-10-21):** M0 ✅ · M1 ✅ · M2 ✅ · M3 ✅ · **M4 (analysis and assets) in progress:** 7 of 8 blog assets built offline (`dllm-eval report`); the diffusion GIF waits on the R5 live capture (docs/M4_ANALYSIS_RESULTS.md). Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
+**Status (2026-10-21):** M0 ✅ · M1 ✅ · M2 ✅ · M3 ✅ · M4 ✅ · **M5 (blog) is next.** M4 results: docs/M4_ANALYSIS_RESULTS.md. Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
 
 This doc covers *when* (§1, the roadmap) and *how* (§2–§7, the implementation plan) to build what [FEATURES.md](FEATURES.md) lists.
 

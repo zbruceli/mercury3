@@ -8,5 +8,7 @@ runs:
   uc1_length: r3-uc1-length-20261021T152238Z
   uc2: r4-uc2-main-20261021T165313Z
   uc2_strict: r4b-uc2-strict-20261021T170547Z
-  diffusion: null  # R5, pending a live run
+  diffusion: r5-diffusion-capture-20261021T181518Z
 manual_tags: reports/failure_tags.csv
+# The GIF replays the original article's prompt (split an image into halves) at `instant`.
+diffusion_job: mercury-3:instant-diffusing/split-halves/0
