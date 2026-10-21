@@ -128,5 +128,5 @@ What drives it:
 - Median tokens per call are well below the §2.2 guesses.
 - Rare runaway reasoning (Mercury 3 `medium`/`high` exhausting the 32,768-token cap) dominates the means.
 
-The pilot had only 3 LiveCodeBench problems, so the projection is rough. Details: [M2_UC1_RESULTS.md](M2_UC1_RESULTS.md) §8. **Actual R2: $23.37.** R2's `budget_usd` stays at $80.
+The pilot had only 3 LiveCodeBench problems, so the projection is rough. Details: [M2_UC1_RESULTS.md](M2_UC1_RESULTS.md) §9. **Actual R2: $23.37.** R2's `budget_usd` stays at $80.
 

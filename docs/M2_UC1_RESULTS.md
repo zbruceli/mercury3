@@ -5,9 +5,10 @@
 | Milestone | M2: UC1 code generation (see [ROADMAP_AND_PLAN.md](ROADMAP_AND_PLAN.md) §1) |
 | Date | 2026-10-21 |
 | Commit | `446e61b` (the R1 pilot ran on this) |
-| Gate verdict | **Passed with one open item:** R3 (length sweep) still to run |
-| Tokens / spend | R1: $0.29; R1b cap probe: $0.29; OpenAI Fast-mode test: $0.002; **R2: $23.37** |
+| Gate verdict | **Passed** (2026-10-21) |
+| Tokens / spend | R1: $0.29; R1b cap probe: $0.29; OpenAI Fast-mode test: $0.002; **R2: $23.37**; R3: $2.03 |
 | R2 answer | **At matched quality the Cerebras AR control is faster than Mercury 3** (84.9% at 0.35 s vs 86.0% at 0.83 s), and **Mercury 3 gets worse above `low` reasoning** (budget-out on up to 8.6% of calls) (§6) |
+| R3 answer | **Decode speed is flat with output length for every model:** Mercury 3 ~850–900 visible tok/s (2–6× the frontier-lab fast models), Cerebras gpt-oss ~2,400–2,500. `realtime` gave no gain (§7) |
 | Cap probe answer | **A bigger budget barely helps Mercury 3:** at 131,072 tokens, 1 of 12 failures was rescued (§4) |
 | OpenAI latency answer | **Not your usage tier:** OpenAI adds ~0.45–0.6 s server-side per request; paid Fast mode trims ~0.15 s at the median (§5) |
 
@@ -17,9 +18,9 @@ The exit gate from ROADMAP_AND_PLAN §1:
 
 | Criterion | Result | Evidence |
 |---|---|---|
-| Pilot reviewed | ✅ | §3 (pilot), §4 (cap probe), §5 (OpenAI Fast-mode test), §7 (findings) |
+| Pilot reviewed | ✅ | §3 (pilot), §4 (cap probe), §5 (OpenAI Fast-mode test), §8 (findings) |
 | R2 complete | ✅ | §6: 41,405/41,405 ok, 0 harness errors |
-| R3 complete | ⏳ | length sweep not run yet |
+| R3 complete | ✅ | §7: 630/630 ok |
 | Pareto chart regenerates offline | ✅ | `dllm-eval charts` → [figures/m2_r2_pareto_uc1.png](figures/m2_r2_pareto_uc1.png) |
 | CI targets met (PRD UC1) | ✅ | pass@1 ≤ 2.6 pp, median latency ≤ 4.5% (§6.1) |
 
@@ -182,19 +183,58 @@ The `medium`/`high` drop is concentrated on LiveCodeBench: Mercury 3 `high` ran 
   17 calls were in flight across a gap; they keep their correctness result but are excluded from latency (`analysis/load.py`, `PAUSE_GAP_S`).
 - **Retries.** 921 calls needed retries, 765 of them Cerebras 429s, even though our client stayed under its documented 1,000 RPM. Retried calls are excluded from latency stats, which leaves ~2,800 of 3,185 Cerebras calls per arm; Cerebras's latency is measured on the calls that weren't throttled.
 
-## 7. Findings
+## 7. R3 output-length sweep
+
+**Answer: decode speed is flat with output length for every model, so diffusion has no length-dependent advantage here.**
+- **Mercury 3 decodes visible text at about 850–900 tok/s:** about 2× Gemini Flash-Lite, 2.8× Claude Haiku, and 6× GPT-6 Luna.
+- **gpt-oss-120b on Cerebras decodes at about 2,400–2,500 tok/s,** about 2.7× Mercury 3, at every length.
+- **Mercury's `realtime` flag gave no measurable gain.**
+
+| | |
+|---|---|
+| Run id | `r3-uc1-length-20261021T152238Z` (local only), commit `b9d80e6` |
+| Config | [configs/experiments/r3_uc1_length.yaml](../configs/experiments/r3_uc1_length.yaml): 30 timing-only prompts (10 each asking for ~256 / ~2,000 / ~8,000 output tokens) × 3 repeats × 7 arms (lowest setting per model, plus Mercury 3 `low` and `low` + `realtime`), 16,384-token cap |
+| Jobs / result | **630/630 ok**, 0 errors, 0 retries; 7 warm-up and 6 pause-spanning calls excluded from latency |
+| Spend | **$2.03** (expected ~$1.67) |
+
+Rates are medians per bucket:
+- **End-to-end** = all generated tokens (including hidden reasoning) ÷ total time.
+- **Visible decode** = visible tokens ÷ time after the first visible token.
+
+| Arm | Short: TTFT / total | Medium: TTFT / total / visible tok/s | Long: TTFT / total / visible tok/s | Long visible tokens |
+|---|---|---|---|---:|
+| gpt-oss-120b (Cerebras) `low` | 0.19 / 0.29 s | 0.22 / 1.24 s / **2,471** | 0.23 / 2.71 s / **2,396** | 6,136 |
+| **Mercury 3 `instant`** | **0.29 / 0.30 s** | 0.45 / 3.58 s / **902** | 0.46 / 13.5 s / **893** | 10,522 |
+| Mercury 3 `low` | 0.57 / 0.58 s | 2.31 / 4.99 s / 880 | 2.54 / 14.5 s / 849 | 8,813 |
+| Mercury 3 `low` + `realtime` | 0.62 / 0.62 s | 2.18 / 4.75 s / 905 | 2.76 / 13.9 s / 866 | 9,167 |
+| Gemini 3.5 Flash-Lite `minimal` | 0.75 / 0.95 s | 0.68 / 6.54 s / 444 | 0.73 / 19.3 s / 438 | 8,214 |
+| Claude Haiku 5.5 thinking off | 0.58 / 0.93 s | 0.63 / 13.9 s / 323 | 0.54 / 46.0 s / 324 | 14,530 |
+| GPT-6 Luna `none` | 0.91 / 1.69 s | 0.81 / 17.2 s / 164 | 0.84 / 114 s / 132 | 15,017 |
+
+**What the sweep shows:**
+- **Flat decode rates.** Every model's visible decode rate is nearly the same for ~2k and ~8–15k-token answers. Diffusion's block decoding doesn't pull further ahead on long outputs; it's a constant-factor speed-up.
+- **Short answers arrive in one block.** For Mercury 3 `instant`, total time (0.30 s) ≈ TTFT (0.29 s): the whole ~93-token answer lands at once. That's the visible signature of block decoding, and on short answers TTFT is the whole story.
+- **Hidden reasoning delays the first token.** At `low`, Mercury 3's TTFT grows with the task (0.57 → 2.3 → 2.5 s) because it reasons before the first visible block (median ~740–940 reasoning tokens on medium/long prompts). At `instant`, TTFT stays at 0.3–0.5 s.
+- **`realtime` didn't help (PRD OQ3).** Its TTFT was within noise of plain `low` (0.62 vs 0.57 s short, 2.18 vs 2.31 s medium, 2.76 vs 2.54 s long), and decode was the same. It may matter for voice-style workloads; for code it doesn't.
+- **Verbosity differs a lot, so total time isn't comparable across models.** Asked for ~800 lines, Haiku and Luna wrote ~15k tokens, Mercury ~9–10k, and gpt-oss ~6k. Compare the tok/s columns, not total seconds.
+- **All 27 length stops are verbosity, not runaways.** All were on long prompts at the 16,384 cap: Luna 13, Mercury 14 (Mercury `low`'s reasoning stayed at a median of ~1.1k tokens). This differs from R2's budget-out, which was hidden reasoning that never converged.
+
+## 8. Findings
 
 | # | Finding | Impact | Where handled |
 |---|---|---|---|
-| M2-F1 | **Mercury 3 sometimes reasons until it hits the output cap.** 7 calls (3 at `medium`, 4 at `high`) spent the whole 32,768-token budget on hidden reasoning and returned no answer (`finish=length`, 0 characters). 6 of them were LiveCodeBench `abc388_d` (every medium and high sample) and 1 was HumanEval/146. Its median latency stays low (0.70 s / 1.17 s), but these calls set its p95 at 52–58 s (worst 76 s). No other arm hit the cap | Lowers Mercury's pass@1 at the efforts meant to be most accurate, and dominates its tail latency. Mercury's own defaults are higher (65,536 at medium, 131,072 at high), but the R1b probe (§4) shows that 4× the room rescues only 1 of 12 calls | Scoring reports `budget out` separately from `no code`; both still fail. **Decided: keep the uniform 32,768 cap and report budget-out as a failure mode (§9).** A candidate blog point: a failure mode specific to reasoning effort |
+| M2-F1 | **Mercury 3 sometimes reasons until it hits the output cap.** 7 calls (3 at `medium`, 4 at `high`) spent the whole 32,768-token budget on hidden reasoning and returned no answer (`finish=length`, 0 characters). 6 of them were LiveCodeBench `abc388_d` (every medium and high sample) and 1 was HumanEval/146. Its median latency stays low (0.70 s / 1.17 s), but these calls set its p95 at 52–58 s (worst 76 s). No other arm hit the cap | Lowers Mercury's pass@1 at the efforts meant to be most accurate, and dominates its tail latency. Mercury's own defaults are higher (65,536 at medium, 131,072 at high), but the R1b probe (§4) shows that 4× the room rescues only 1 of 12 calls | Scoring reports `budget out` separately from `no code`; both still fail. **Decided: keep the uniform 32,768 cap and report budget-out as a failure mode (§10).** A candidate blog point: a failure mode specific to reasoning effort |
 | M2-F2 | **The fast-hardware AR control is the fastest arm here.** gpt-oss-120b on Cerebras: 0.23 s TTFT and 912–1,155 output tok/s at the median, against Mercury 3's 0.25–0.75 s and 375–479 tok/s | If R2/R3 confirm it, speed comes from serving hardware, not architecture: exactly the PRD R13 question | **Confirmed at full scale in R2 (§6):** gpt-oss `medium` 84.9% at 0.35 s vs Mercury 3 `low` 86.0% at 0.83 s, and ~2.5× the throughput. R3 tests longer outputs |
 | M2-F3 | **OpenAI is slow at the network/gateway level.** `GET /models` TTFB was 1.8 s (others 22–177 ms), and one Luna call took 120 s | Part of Luna's latency is OpenAI's API front door, not the model | **Side test (§5): mostly fixed overhead, not the usage tier.** Fast mode trims TTFT p50 by ~0.15 s and fixes the tail, but ~450 ms server time remains. Keep `default` (PRD R1); report Luna next to the network baseline |
 | M2-F4 | **Extraction is clean.** 383 of 390 responses were fenced; the 7 empty ones are exactly the budget-out calls. All 17 real failures had extracted code and ran: 15 on `abc388_d` and 2 on Mbpp/84 | No grader or extraction problems found | Hardened anyway for R2: stdin extraction now prefers a block that reads input or prints. 0 pilot results changed |
 | M2-F5 | **Medians are below the token guesses, but rare runaways dominate the means.** Pilot spend was $0.29 against $0.31 expected | Cost depends on how often runaways happen, so R2 cost is uncertain | BUDGET_ESTIMATE §8 recalibrated from the pilot. R2 actual: $23.37 (§8) |
 | M2-F6 | **Mercury 3 gets worse above `low` reasoning.** pass@1 86.0% (`low`) → 82.3% (`medium`) → 81.4% (`high`), because budget-out rises from 1.4% to 7.5% to 8.6% of calls. On LiveCodeBench, `high` ran out of budget on 155 of 475 calls but answered only 6 wrong. Runaway calls consumed **61% of all Mercury 3 output tokens** in R2. At `instant` the same failure appears as visible think-aloud text (17 calls) | The best Mercury 3 setting for code is `low`. Higher effort costs more and is slower (p95 ≈ 52 s) for lower accuracy. A strong, specific blog point | Reported as budget-out (PRD R1). Blog: frame as a reasoning-effort failure mode, not a general accuracy gap |
 | M2-F7 | **Mercury 3 is a large step up from Mercury 2.5.** At `low`: 86.0% vs 76.9% pass@1 (+9.1 points) and 0.83 s vs 1.36 s median | Generation-over-generation progress for the "what changed since 2025" section | Lineage chart (M4) |
+| M2-F8 | **Speed-ups are constant factors, flat with output length (R3).** Visible decode: Cerebras gpt-oss ~2,400–2,500 tok/s, Mercury 3 ~850–900, Gemini ~440, Haiku ~320, Luna ~130–160, with each model's rate nearly unchanged from ~2k to ~10k+ tokens | Diffusion's advantage over frontier-lab fast models is real (2–6×) but doesn't grow with length; the fast-hardware AR control is ~2.7× Mercury at every length | Blog: "a constant-factor speed-up, and hardware can match or beat it" |
+| M2-F9 | **Mercury's `realtime` flag gave no measurable gain for code (PRD OQ3).** TTFT within noise of plain `low` in all three buckets | Not worth a separate arm in UC2 | PRD OQ3 resolved |
+| M2-F10 | **Short Mercury answers arrive in a single block.** Total ≈ TTFT (0.30 vs 0.29 s at `instant`) | The visible signature of block decoding: for short outputs, TTFT is the whole latency | Blog "how it feels" section; pairs with the diffusing-mode GIF (M4) |
 
-## 8. R2 cost: projection vs actual (BUDGET_ESTIMATE §8)
+## 9. R2 cost: projection vs actual (BUDGET_ESTIMATE §8)
 
 Projected from the pilot's mean cost per call, scaled to R2 (2,710 EvalPlus and 475 LiveCodeBench calls per arm):
 - **Total: about $21.70**, against an $80 budget and a $50 dry-run estimate.
@@ -208,18 +248,18 @@ The pilot sampled only 3 LiveCodeBench problems, one of which (`abc388_d`) cause
 - Mercury: $15.41 at promo prices, covered by the free credit.
 - Mercury tokens: **39.6M** (36.0M output), above the projected 31M because runaways were more common at full scale than in the pilot. That's 40% of the 100M free credit for R2 alone.
 
-## 9. Open items
+## 10. Open items
 
 - **Output-cap policy (M2-F1): decided 2026-10-21.** R2 keeps the uniform 32,768 cap (PRD R1), and "budget out" is reported as its own failure mode. The R1b probe (§4) confirmed it: 131,072 rescued 1 of 12 calls.
-- **R3 (length sweep)**: the last M2 run (630 calls, ~$1.67 expected).
 - Chart polish for the blog (M4): a few labels touch neighbouring error bars in the R2 Pareto chart.
 
-## 10. Where the evidence lives
+## 11. Where the evidence lives
 
 | What | Where | In git? |
 |---|---|---|
 | This write-up | `docs/M2_UC1_RESULTS.md` | ✅ |
 | R1 raw run | `results/runs/r1-pilot-uc1-20261021T020019Z/` | ❌ local only |
+| R3 raw run + analysis | `results/runs/r3-uc1-length-20261021T152238Z/`, `results/analysis/r3-uc1-length-20261021T152238Z/` | ❌ local only (regenerate with `analyze`) |
 | R2 raw run | `results/runs/r2-uc1-main-20261021T034053Z/` (`calls.jsonl` 41,405 + resume records, `probes.jsonl`) | ❌ local only |
 | R2 scores + analysis | `results/analysis/r2-uc1-main-20261021T034053Z/` (`scores.jsonl`, `calls.parquet`, chart) | ❌ local only (regenerate with `score` / `analyze` / `charts`) |
 | R2 Pareto chart + data | `docs/figures/m2_r2_pareto_uc1.png`, `.csv` | ✅ |

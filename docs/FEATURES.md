@@ -6,7 +6,7 @@ Priority: **P0** = required for the blog's headline results, **P1** = strongly w
 
 IDs are stable. Reference them in commits, tests, and the implementation plan.
 
-**Status (2026-10-20):** 29 of 44 done. M1 complete. M2 (UC1) built and validated offline; R1 pilot next.
+**Status (2026-10-21):** 29 of 44 done. M2 (UC1) complete. M3 (UC2 SQL agent) is next.
 
 ## F1 Provider layer
 | ID | Feature | Pri | Done |
