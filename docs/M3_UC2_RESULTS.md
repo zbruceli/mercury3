@@ -6,7 +6,7 @@
 | Date | 2026-10-21 |
 | Commit | `135fef6` (UC2 pilots); `91c7204` (R4); R4 resumed and R4b ran on `3c4b5fc` (§6.3) |
 | Gate verdict | **Passed with open items** (§9) |
-| Tokens / spend | Aborted pilot: $0.24; UC2 pilot: $0.45; strict pilot: $0.04; **R4: $6.42** ($7.85 at Mercury's regular price); R4b: $0.61. Mercury 3 used **18.3M tokens** in R4 |
+| Tokens / spend | Aborted pilot: $0.24; UC2 pilot: $0.45; strict pilot: $0.04; **R4: $6.42** ($7.85 at Mercury's regular price); R4b: $0.61. Mercury 3 used **18.3M tokens** in R4. **R4c (all 496 questions, §6.5): $21.78** ($26.80 regular), 62.8M Mercury tokens |
 | R4 answer | **Mercury 3's per-call speed mostly carries through to whole tasks, but turn count matters as much as per-call speed.** Mercury 3 `low` finishes a task in 2.06 s at the median. That is 1.9–2.9× faster than the frontier-lab fast models, and about even with gpt-oss-120b on Cerebras, which is 1.7× faster per call but needs more turns (§6) |
 | Accuracy | All arms land within a few points: EX 47.6–59.1% with ±7–8 point CIs. Claude Haiku 5.5 is the only arm clearly ahead of Mercury 3 `low` (+4.7 points paired, CI +0.2 to +9.1) |
 
@@ -20,7 +20,7 @@ The exit gate from ROADMAP_AND_PLAN §1:
 | Traces replayable | ✅ | `dllm-eval trace <run> --verify --all`: R4 4,499/4,500 match byte for byte (the one miss used `julianday('now')`, §6.4); R4b 600/600; pilot 300/300 |
 | Reliability table produced | ✅ | §6.2, from `dllm-eval score r4-uc2-main-20261021T165313Z` |
 | Speed-up chart (F6.4, UC2 part) | ✅ | `dllm-eval charts` → [figures/m3_r4_speedup_uc2.png](figures/m3_r4_speedup_uc2.png) |
-| CI targets (TEST_PLAN B4: ≤ 3 pp EX, ≤ 10% p50 latency) | 🟡 | Latency met (task p50 CI ≤ ±8.9%). EX not met: ±7–8 points per arm, ±4–6 paired (§6.1, §9) |
+| CI targets (TEST_PLAN B4: ≤ 3 pp EX, ≤ 10% p50 latency) | 🟡 → ✅ for paired EX | R4: latency met (task p50 CI ≤ ±8.9%), EX ±7–8 per arm and ±4–6 paired. **R4c (§6.5): latency ≤ ±5.7%; paired EX differences ±2.0–3.0 points (met); per-arm EX ±4 points (still above 3)** |
 
 ## 2. Offline verification
 
@@ -158,6 +158,54 @@ Column definitions:
 
 `dllm-eval trace r4-uc2-main-20261021T165313Z --verify --all` rebuilds every turn's history and re-runs all recorded tool calls on the read-only databases. **4,499 of 4,500 traces reproduce byte for byte.** The exception, `gpt-oss-120b-cerebras:medium/bird/1242/0` turn 5, computed ages with `julianday('now')`, so the result changes with the clock (44.5577… → 44.5578…). That is expected, not a logging gap.
 
+### 6.5 R4c: all 496 scorable questions (added 2026-10-21)
+
+**Answer: the full question set confirms R4, with CIs about 2.5× tighter.** Rankings and speed ratios match R4. Haiku's accuracy lead over Mercury 3 `low` and gpt-oss's deficit are now clearly outside noise. Mercury 3 `instant` is slightly below `low`.
+
+| | |
+|---|---|
+| Run id | `r4c-uc2-full-20261021T214456Z` (local only), commit `1cada9b` |
+| Config | [configs/experiments/r4c_uc2_full.yaml](../configs/experiments/r4c_uc2_full.yaml): R4's 10 arms, settings, prompt and seed, on [all 496 scorable questions](../configs/uc2/bird_all_496.txt) (148 simple, 247 moderate, 101 challenging) × 3 repeats = 14,880 tasks. It's a separate run; R4 stays as recorded |
+| Harness | The first live run since the error-handling fix `4fc9401`: non-API exceptions inside a call now stop the run, and none occurred |
+| Jobs / result | **14,880/14,880 ok**, 0 errors, 0 aborts, no resume |
+| Spend | **$21.78** promo, $26.80 with Mercury at its regular price (projection ~$21, guard $40). Mercury: 62.8M tokens (7.2M output), $5.03 at promo. That is past the remaining free credit, so part of it is billed |
+| Wall time | 21:44–22:53 UTC. The other providers finished first; the last ~2,900 tasks were Mercury-only because all four Mercury arms share one provider limit of 8 tasks in flight. Per-task latency isn't affected, but the tail is not interleaved across providers (PRD R8) |
+| Network baseline | Connect 14–17 ms; `GET /models` TTFB Inception 16 ms, Cerebras 93, Google 137, Anthropic 155, OpenAI 927 |
+| Trace replay | 14,869/14,880 byte for byte. The 11 others are nondeterministic SQL the models wrote: 10 use the clock (`'now'`, `current_timestamp`) and 1 uses `ORDER BY RANDOM()` |
+| Gold check | `make test-bird`: all 496 gold queries score EX = 1 against themselves |
+
+| Arm | EX (95% CI) | Paired Δ vs Mercury `low` | Turns | Task p50 / p95 | Call p50 | Task / call ratio vs Mercury `low` | $ / correct |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Claude Haiku 5.5 `medium` | **57.8%** (53.6–61.9) | **+5.3 (+2.6, +8.1)** | 3.4 | 4.37 / 10.68 s | 1.22 s | 2.13× / 3.31× | 0.00176 |
+| Claude Haiku 5.5 thinking off | 56.7% (52.6–60.8) | **+4.2 (+1.7, +6.7)** | 3.2 | 3.87 / 9.52 s | 1.16 s | 1.88× / 3.15× | 0.00155 |
+| **Mercury 3 `low`** | 52.5% (48.5–56.7) | — | 5.1 | **2.05** / 8.69 s | 0.37 s | 1× / 1× | 0.00138 / 0.00277 |
+| Mercury 3 `high` | 51.6% (47.6–55.6) | −0.9 (−3.0, +1.3) | 5.4 | 2.60 / 12.33 s | 0.44 s | 1.27× / 1.19× | 0.00182 / 0.00364 |
+| Mercury 3 `medium` | 51.5% (47.4–55.5) | −1.0 (−2.9, +1.1) | 5.4 | 2.32 / 10.56 s | 0.40 s | 1.13× / 1.09× | 0.00168 / 0.00335 |
+| Gemini 3.5 Flash-Lite `minimal` | 51.2% (47.2–55.2) | −1.3 (−4.4, +1.8) | 6.6 | 4.44 / 6.94 s | 0.63 s | 2.16× / 1.69× | 0.00646 |
+| GPT-6 Luna `none` | 50.9% (46.8–55.2) | −1.5 (−4.3, +1.3) | 4.9 | 5.69 / 10.61 s | 1.13 s | 2.77× / 3.06× | **0.00077** |
+| Mercury 3 `instant` | 50.2% (46.2–54.4) | **−2.3 (−4.4, −0.3)** | 5.5 | 2.00 / 8.18 s | 0.36 s | 0.97× / 0.96× | 0.00170 / 0.00339 |
+| gpt-oss-120b (Cerebras) `low` | 46.2% (42.1–50.0) | **−6.3 (−9.2, −3.3)** | 6.3 | **1.92** / 7.04 s | **0.22 s** | 0.93× / 0.59× | 0.00543 |
+| gpt-oss-120b (Cerebras) `medium` | 44.7% (40.6–48.9) | **−7.8 (−10.8, −4.7)** | 6.6 | 2.39 / 9.63 s | 0.26 s | 1.16× / 0.70× | 0.00707 |
+
+**Reliability** (full table: `dllm-eval score r4c-uc2-full-20261021T214456Z`):
+- Answered: Haiku 99.6–99.7%, Luna 98.4%, Mercury 3 89.2–95.7% (`low` best), gpt-oss 74.9–85.7%, Gemini 71.1%. Gemini hits the turn cap 28.8% of the time.
+- Valid tool calls: ≥ 99.99% everywhere except Gemini (99.24%; the `queries` argument again).
+- Budget-out: Mercury 3 `instant` 1.7% of tasks (26 turns), `low` 5 turns, `high` 2 turns; no other arm.
+- gpt-oss answers in prose instead of calling `submit_answer`: 773 nudged tasks at `low`, 691 of them recovered.
+
+**Precision.** Paired EX differences are ±2.0–3.0 points, which meets TEST_PLAN B4. Per-arm EX is ±4 points, still above 3, because question difficulty varies; that's the honest limit of a 496-question benchmark. Task-p50 CIs are ±1.4–5.7%.
+
+**What changed vs R4 (150 questions):**
+- Haiku's lead over Mercury 3 `low` is now significant at both settings.
+- gpt-oss `low` is now clearly behind (−6.3).
+- Mercury 3 `instant` dropped from +1.3 to −2.3 relative to `low`.
+
+All latency ratios are within a few hundredths of R4's.
+
+![UC2 task-level vs call-level latency, all 496 questions](figures/m3_r4c_speedup_uc2.png)
+
+Figure data: [figures/m3_r4c_speedup_uc2.csv](figures/m3_r4c_speedup_uc2.csv). Regenerate with `dllm-eval charts r4c-uc2-full-20261021T214456Z`.
+
 ## 7. R4b strict-schema sub-run (F5.6)
 
 | | |
@@ -193,7 +241,7 @@ Two behaviours show up, and neither appears in tool mode:
 
 ## 9. Open items
 
-- **EX precision (TEST_PLAN B4).** Per-arm EX CIs are ±7–8 points against a 3-point target. More repeats won't fix it, because the width comes from question-to-question variance. Options for M4/M5:
+- ~~**EX precision (TEST_PLAN B4).**~~ **Resolved 2026-10-21 by R4c (§6.5):** paired differences are ±2.0–3.0 points; per-arm EX stays at ±4. The blog assets (`configs/report.yaml`) and the draft still cite R4; switching them to R4c is a separate decision. Original note: Per-arm EX CIs are ±7–8 points against a 3-point target. More repeats won't fix it, because the width comes from question-to-question variance. Options for M4/M5:
   - Report paired differences (±4–6 points), as in §6.1.
   - Or extend R4 to all 496 scorable questions, about 3.3× the cost (~$21) and ~60M Mercury tokens. Needs a user decision.
 - ~~**Harness hardening (follow-up).** Non-API exceptions inside a provider call (here a `TypeError` in stream parsing) are classified as retryable connection errors.~~ **Done 2026-10-21:** they now stop the run as `internal_error` on the first attempt (ROADMAP_AND_PLAN §7).
@@ -209,6 +257,8 @@ Two behaviours show up, and neither appears in tool mode:
 | Question samples | `configs/uc2/bird_r4_150.txt`, `bird_pilot_10.txt` | ✅ |
 | R4 raw run | `results/runs/r4-uc2-main-20261021T165313Z/` (`calls.jsonl`: 4,500 task records + 9 resume records, full traces; `probes.jsonl`) | ❌ local only |
 | R4 scores + analysis | `results/analysis/r4-uc2-main-20261021T165313Z/` (`uc2_scores.jsonl`, `uc2_arm_table.json`, `tasks.parquet`, `turns.parquet`, chart) | ❌ local only (regenerate with `score` / `analyze` / `charts`) |
+| R4c raw run + scores | `results/runs/r4c-uc2-full-20261021T214456Z/`, `results/analysis/r4c-uc2-full-20261021T214456Z/` | ❌ local only |
+| R4c chart + data | `docs/figures/m3_r4c_speedup_uc2.png`, `.csv` | ✅ |
 | R4b raw run + scores | `results/runs/r4b-uc2-strict-20261021T170547Z/`, `results/analysis/r4b-uc2-strict-20261021T170547Z/` | ❌ local only |
 | Pilots | `results/runs/r1-pilot-uc2-20261021T162056Z/`, `r1-pilot-uc2-strict-20261021T163232Z/`, aborted `r1-pilot-uc2-20261021T161833Z/` | ❌ local only |
 | BIRD data | `data/raw/bird-minidev/minidev.zip` (pinned), `data/bird-minidev/` (extracted) | ❌ (`dllm-eval fetch-data`) |
