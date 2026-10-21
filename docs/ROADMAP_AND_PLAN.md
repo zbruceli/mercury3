@@ -1,6 +1,6 @@
 # Roadmap and implementation plan
 
-**Status (2026-10-21):** M0 ✅ · M1 ✅ · M2 ✅ · M3 ✅ · **M4 (analysis and assets) is next.** Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
+**Status (2026-10-21):** M0 ✅ · M1 ✅ · M2 ✅ · M3 ✅ · **M4 (analysis and assets) in progress:** 7 of 8 blog assets built offline (`dllm-eval report`); the diffusion GIF waits on the R5 live capture (docs/M4_ANALYSIS_RESULTS.md). Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
 
 This doc covers *when* (§1, the roadmap) and *how* (§2–§7, the implementation plan) to build what [FEATURES.md](FEATURES.md) lists.
 
@@ -177,7 +177,7 @@ Every use case depends only on `Provider.chat`. Nothing outside `providers/` kno
 ### M4: Analysis and assets (≈4 days)
 1. Cost tables (promo and regular), latency CDFs, reliability table.
 2. R5 diffusion capture → GIF renderer (one frame per diffusion step, text overwritten in place to match the original article's animation style).
-3. Failure tagging: `reports/failure_tags.csv` (manual), aggregated per model, gallery export.
+3. Failure tagging: rule tags for every failure, overridden or annotated by `reports/failure_tags.csv` (manual), aggregated per model, gallery export.
 4. Decision matrix and Markdown report with "as of" footnotes.
 
 ### M5: Blog (≈3 days)

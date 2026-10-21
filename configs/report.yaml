@@ -1,0 +1,12 @@
+# Inputs for `dllm-eval report` (F6.7): which runs feed the blog assets in reports/.
+# Every run must be scored first (`dllm-eval score <run_id>`); nothing here calls an API.
+as_of: 2026-10-21
+client: "one macOS arm64 host, US West"
+service_tier: "Standard API tiers (no paid priority)"
+runs:
+  uc1: r2-uc1-main-20261021T034053Z
+  uc1_length: r3-uc1-length-20261021T152238Z
+  uc2: r4-uc2-main-20261021T165313Z
+  uc2_strict: r4b-uc2-strict-20261021T170547Z
+  diffusion: null  # R5, pending a live run
+manual_tags: reports/failure_tags.csv

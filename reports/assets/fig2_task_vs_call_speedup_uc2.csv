@@ -1,0 +1,11 @@
+arm,reference,call_ratio,task_ratio,call_p50_s,task_p50_s,turns_mean,call_ci_low,call_ci_high,task_ci_low,task_ci_high
+claude-haiku-5-5:medium,mercury-3:low,3.3241,2.1468,1.2466,4.4174,3.4232,3.1996,3.4655,1.9679,2.2833
+claude-haiku-5-5:thinking-off,mercury-3:low,3.1805,1.8757,1.1927,3.8594,3.2205,3.0945,3.2744,1.7540,2.0254
+gemini-3.5-flash-lite:minimal,mercury-3:low,1.6719,2.1526,0.6270,4.4292,6.6130,1.6267,1.7101,2.0092,2.3106
+gpt-6-luna:none,mercury-3:low,3.0322,2.8911,1.1371,5.9489,4.8708,2.9534,3.1025,2.7015,3.1319
+gpt-oss-120b-cerebras:low,mercury-3:low,0.5839,0.8831,0.2190,1.8171,6.2819,0.5678,0.5982,0.8203,0.9672
+gpt-oss-120b-cerebras:medium,mercury-3:low,0.6789,1.1067,0.2546,2.2772,6.6890,0.6629,0.6985,1.0179,1.1941
+mercury-3:high,mercury-3:low,1.1794,1.2018,0.4423,2.4728,5.4442,1.1271,1.2203,1.1094,1.3338
+mercury-3:instant,mercury-3:low,0.9383,0.9288,0.3519,1.9111,5.4116,0.9044,0.9677,0.8597,1.0152
+mercury-3:low,mercury-3:low,1.0000,1.0000,0.3750,2.0576,5.1169,0.9684,1.0324,0.9146,1.0950
+mercury-3:medium,mercury-3:low,1.0735,1.1308,0.4026,2.3267,5.3393,1.0363,1.1113,1.0365,1.2200

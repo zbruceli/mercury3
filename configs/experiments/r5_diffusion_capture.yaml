@@ -1,0 +1,32 @@
+# R5 diffusing-mode capture (F2.6 -> F6.5 GIF, F7.2 denoising dynamics; TEST_PLAN B5).
+# Visualization only: diffusing mode streams the full current text on every chunk, so its
+# timings are never used for latency numbers (PRD R7). Prompts follow the original
+# article's animated example ("split an image into halves" in Python); the first one is
+# the same request R0 recorded. Mercury 3 at `instant` (no hidden reasoning, so every
+# denoising step is visible) and at `low` (the best UC1 setting).
+#   uv run dllm-eval run configs/experiments/r5_diffusion_capture.yaml --dry-run
+name: r5-diffusion-capture
+description: Mercury 3 diffusing-mode frames for the blog GIF and denoising dynamics
+seed: 5
+repeats: 3
+budget_usd: 1.0
+max_concurrency_per_provider: 2
+warmup_calls_per_arm: 0
+
+arms:
+  - {name: instant-diffusing, model: mercury-3, reasoning_effort: instant, temperature: 0.5, max_completion_tokens: 4096, expected_output_tokens: 900, provider_extras: {diffusing: true}}
+  - {name: low-diffusing, model: mercury-3, reasoning_effort: low, temperature: 0.5, max_completion_tokens: 4096, expected_output_tokens: 1500, provider_extras: {diffusing: true}}
+
+workload:
+  kind: prompts
+  items:
+    - id: split-halves
+      messages: [{role: user, content: "Write a Python function that splits an image into left and right halves."}]
+    - id: split-top-bottom
+      messages: [{role: user, content: "Write a Python function that splits an image into top and bottom halves."}]
+    - id: split-quarters
+      messages: [{role: user, content: "Write a Python function that splits an image into four equal quarters."}]
+    - id: grayscale
+      messages: [{role: user, content: "Write a Python function that converts an image to grayscale."}]
+    - id: center-crop
+      messages: [{role: user, content: "Write a Python function that crops an image to a centered square."}]

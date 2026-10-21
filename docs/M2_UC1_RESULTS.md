@@ -126,7 +126,7 @@ One oddity: several runaways stopped at identical token counts (128,982 twice, 1
 
 | | |
 |---|---|
-| Run id | `r2-uc1-main-20261021T034053Z` (local only), commit `446e61b`, resumed on `48b35cc` |
+| Run id | `r2-uc1-main-20261021T034053Z` (local only), commit `07dce9e` (per its manifest; corrected in M4, M4-F1), resumed on `48b35cc` |
 | Config | [configs/experiments/r2_uc1_main.yaml](../configs/experiments/r2_uc1_main.yaml): all 164 HumanEval+, 378 MBPP+, 95 LiveCodeBench v6 easy+medium (pre-cutoff) × 5 repeats × 13 arms |
 | Jobs / result | **41,405/41,405 ok**, 0 errors at the end, no abort. 5 Cerebras 429s failed after retries on the first pass and succeeded on resume |
 | Spend | **$23.37** (pilot projection ~$22; budget $80) |

@@ -521,3 +521,22 @@ def _charts_uc2(store: RunStore, dest: Path, reference: str) -> None:
     )
     csv = uc2.write_speedup_csv(points, dest / "fig_uc2_speedup.csv")
     typer.echo(f"wrote {png} and {csv}")
+
+
+@app.command()
+def report(
+    config: Annotated[Path, typer.Option(help="Report config")] = Path("configs/report.yaml"),
+    runs_dir: Annotated[Path, typer.Option()] = DEFAULT_RUNS_DIR,
+    analysis_dir: Annotated[Path, typer.Option()] = DEFAULT_ANALYSIS_DIR,
+    out_dir: Annotated[Path, typer.Option(help="Where the blog assets go")] = Path("reports"),
+) -> None:
+    """Build every blog asset (figures, CSVs, tables, gallery, decision matrix, README) from
+    scored runs (F6.4, F6.6, F6.7). Offline only."""
+    from dllm_eval.analysis.report import build, load_report_config
+
+    try:
+        cfg = load_report_config(config)
+        build(cfg, runs_dir, analysis_dir, out_dir, log=typer.echo)
+    except (OSError, ValueError, ValidationError) as e:
+        typer.echo(f"report failed: {e}", err=True)
+        raise typer.Exit(1) from e

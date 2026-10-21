@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import random
 import statistics
-import textwrap
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -22,7 +21,16 @@ from typing import Any
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from dllm_eval.analysis.charts import FAMILY_COLOR, GRID, MODEL_STYLE, SURFACE, TEXT, TEXT_2
+from dllm_eval.analysis.charts import (
+    FAMILY_COLOR,
+    GRID,
+    MODEL_STYLE,
+    SURFACE,
+    TEXT,
+    TEXT_2,
+    add_footnote,
+    add_header,
+)
 from dllm_eval.analysis.load import mark_pause_spanning
 from dllm_eval.logging_store import RunStore
 from dllm_eval.stats import percentile
@@ -115,6 +123,25 @@ def _boot_mean(xs: list[float], seed: int, n_boot: int = 2000) -> tuple[float, f
     n = len(xs)
     boots = sorted(statistics.fmean(xs[rng.randrange(n)] for _ in range(n)) for _ in range(n_boot))
     return percentile(boots, 2.5), percentile(boots, 97.5)
+
+
+def paired_ex_delta(
+    scores: Iterable[dict[str, Any]], arm: str, reference: str = DEFAULT_REFERENCE, *, seed: int = 0
+) -> tuple[float, float, float]:
+    """EX of `arm` minus EX of `reference` on the questions both answered: the mean of
+    per-question differences in pass rate, with a bootstrap 95% CI over questions."""
+    rates: dict[str, dict[str, list[bool]]] = defaultdict(lambda: defaultdict(list))
+    for s in scores:
+        if s["status"] != "harness_error" and s["arm"] in (arm, reference):
+            rates[s["arm"]][s["item_id"]].append(s["ex"])
+    shared = sorted(set(rates[arm]) & set(rates[reference]))
+    diffs = [
+        statistics.fmean(rates[arm][q]) - statistics.fmean(rates[reference][q]) for q in shared
+    ]
+    if not diffs:
+        raise ValueError(f"no shared questions between {arm} and {reference}")
+    lo, hi = _boot_mean(diffs, seed)
+    return statistics.fmean(diffs), lo, hi
 
 
 def _rate(num: float, den: float) -> float | None:
@@ -326,7 +353,14 @@ def _label(arm: str) -> str:
     return f"{MODEL_STYLE.get(model, ('', '', model))[2]} · {setting}"
 
 
-def plot_speedup(points: list[SpeedupPoint], out_png: Path, *, title: str, subtitle: str) -> Path:
+def plot_speedup(
+    points: list[SpeedupPoint],
+    out_png: Path,
+    *,
+    title: str,
+    subtitle: str,
+    footnote: str | None = None,
+) -> Path:
     """Paired horizontal bars per arm: call-level and task-level latency ratio against the
     reference arm (1x = as fast as the reference; >1 = slower)."""
     pts = sorted(points, key=lambda p: p.task_ratio)
@@ -339,7 +373,7 @@ def plot_speedup(points: list[SpeedupPoint], out_png: Path, *, title: str, subti
         color = FAMILY_COLOR[family]
         for dy, ratio, ci, alpha, kind in (
             (-h / 2, p.call_ratio, p.call_ci, 0.45, "per call"),
-            (h / 2, p.task_ratio, p.task_ci, 1.0, "per task"),
+            (h / 2, p.task_ratio, p.task_ci, 1.0, f"per task · {p.turns_mean:.1f} turns"),
         ):
             ax.barh(i + dy, ratio, height=h * 0.92, color=color, alpha=alpha, zorder=2)
             ax.hlines(i + dy, ci[0], ci[1], color=TEXT_2, linewidth=1, zorder=3)
@@ -362,10 +396,10 @@ def plot_speedup(points: list[SpeedupPoint], out_png: Path, *, title: str, subti
         ax.spines[side].set_color(GRID)
     ax.tick_params(colors=TEXT_2, labelsize=8)
     xmax = max([max(p.call_ci[1], p.task_ci[1]) for p in pts] + [1.0])
-    ax.set_xlim(0, xmax * 1.22)
-    fig.suptitle(title, x=0.02, y=0.985, ha="left", fontsize=13, color=TEXT, fontweight="bold")
-    ax.set_title(textwrap.fill(subtitle, 120), loc="left", fontsize=8, color=TEXT_2, pad=8)
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    ax.set_xlim(0, xmax * 1.35)
+    top = add_header(fig, title, subtitle)
+    bottom = add_footnote(fig, footnote) if footnote else 0.0
+    fig.tight_layout(rect=(0, bottom, 1, top))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, facecolor=SURFACE)
     plt.close(fig)

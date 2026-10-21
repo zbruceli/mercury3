@@ -64,11 +64,13 @@ These are reasons for the follow-up to exist beyond "we measured it":
 
 ## 5. Asset checklist (produced by M4 in the roadmap)
 
-- [ ] `fig1_pareto_uc1.png`: speed-quality frontier
-- [ ] `fig2_task_vs_call_speedup_uc2.png`
-- [ ] `fig3_latency_cdf.png`
-- [ ] `fig4_cost_per_success.png` (promo + regular)
-- [ ] `diffusion_2026.gif`: diffusing-mode replay
-- [ ] `table_reliability.md`: tool-call / schema validity
-- [ ] `failure_gallery.md`: 6–10 annotated examples
-- [ ] `decision_matrix.md`
+All assets live in `reports/` (figures and their CSVs in `reports/assets/`) and regenerate with `uv run dllm-eval report`. Status as of 2026-10-21: see docs/M4_ANALYSIS_RESULTS.md.
+
+- [x] `fig1_pareto_uc1.png`: speed-quality frontier
+- [x] `fig2_task_vs_call_speedup_uc2.png`
+- [x] `fig3_latency_cdf.png`
+- [x] `fig4_cost_per_success.png` (promo + regular)
+- [ ] `diffusion_2026.gif`: diffusing-mode replay (renderer built; needs the R5 live capture)
+- [x] `table_reliability.md`: tool-call / schema validity
+- [x] `failure_gallery.md`: 6–10 annotated examples
+- [x] `decision_matrix.md`

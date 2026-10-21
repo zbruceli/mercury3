@@ -8,11 +8,13 @@ the individual model, and each chart also writes its data as a CSV table.
 
 from __future__ import annotations
 
+import itertools
+import math
 import random
 import statistics
 import textwrap
 from collections import defaultdict
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -101,11 +103,47 @@ def pareto_points(
     return points
 
 
-def plot_pareto(points: list[ParetoPoint], out_png: Path, *, title: str, subtitle: str) -> Path:
+def add_header(fig: Any, title: str, subtitle: str, *, wrap: int = 150) -> float:
+    """Title and subtitle at the top left, spaced in inches so the gap doesn't grow with
+    the figure height. Returns the top of the free area (figure fraction)."""
+    h = float(fig.get_figheight())
+    top = 1 - 0.12 / h
+    fig.text(
+        0.01, top, title, ha="left", va="top", fontsize=13, color=TEXT, fontweight="bold",
+        parse_math=False,
+    )  # fmt: skip
+    lines = textwrap.fill(subtitle, wrap)
+    sub_top = top - 0.3 / h
+    fig.text(0.01, sub_top, lines, ha="left", va="top", fontsize=8, color=TEXT_2, parse_math=False)
+    return sub_top - ((lines.count("\n") + 1) * 0.15 + 0.1) / h
+
+
+def add_footnote(fig: Any, text: str, *, wrap: int = 210) -> float:
+    """The "run id / as of" line under a chart (TEST_PLAN B4.4). Returns its height
+    (figure fraction), so the plot can sit above it."""
+    lines = textwrap.fill(text, wrap)
+    h = float(fig.get_figheight())
+    fig.text(
+        0.01, 0.08 / h, lines, ha="left", va="bottom", fontsize=6.5,
+        color=TEXT_2, parse_math=False,
+    )  # fmt: skip
+    return ((lines.count("\n") + 1) * 0.11 + 0.14) / h
+
+
+def plot_pareto(
+    points: list[ParetoPoint],
+    out_png: Path,
+    *,
+    title: str,
+    subtitle: str,
+    footnote: str | None = None,
+) -> Path:
     fig, ax = plt.subplots(figsize=(10, 6.2), dpi=200)
     fig.patch.set_facecolor(SURFACE)
     ax.set_facecolor(SURFACE)
     labels: list[tuple[str, float, float]] = []
+    bars: list[tuple[float, float, float]] = []  # (x, y_low, y_high) of each CI bar
+    lines: list[list[tuple[float, float]]] = []
     by_model: dict[str, list[ParetoPoint]] = defaultdict(list)
     for p in points:
         by_model[p.model].append(p)
@@ -116,8 +154,10 @@ def plot_pareto(points: list[ParetoPoint], out_png: Path, *, title: str, subtitl
         xs = [p.latency_p50_s for p in pts]
         ys = [100 * p.pass1 for p in pts]
         if len(pts) > 1:
+            lines.append(list(zip(xs, ys, strict=True)))
             ax.plot(xs, ys, color=color, linewidth=2, alpha=0.55, zorder=2, solid_capstyle="round")
         for p in pts:
+            bars.append((p.latency_p50_s, 100 * p.ci_low, 100 * p.ci_high))
             ax.vlines(
                 p.latency_p50_s,
                 100 * p.ci_low,
@@ -136,8 +176,9 @@ def plot_pareto(points: list[ParetoPoint], out_png: Path, *, title: str, subtitl
     lo = min(p.latency_p50_s for p in points)
     hi = max(p.latency_p50_s for p in points)
     nice = [0.1, 0.2, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 30, 60]
-    ax.set_xlim(lo / 1.25, hi * 1.25)
-    ax.xaxis.set_major_locator(FixedLocator([v for v in nice if lo / 1.25 <= v <= hi * 1.25]))
+    # extra room on the left so the fastest points can take their labels there
+    ax.set_xlim(lo / 2.3, hi * 1.25)
+    ax.xaxis.set_major_locator(FixedLocator([v for v in nice if lo / 2.3 <= v <= hi * 1.25]))
     ax.xaxis.set_minor_locator(NullLocator())
     ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g} s"))
     ax.set_xlabel(
@@ -157,62 +198,153 @@ def plot_pareto(points: list[ParetoPoint], out_png: Path, *, title: str, subtitl
         for f, c in FAMILY_COLOR.items()
     ]
     ax.legend(handles=handles, loc="lower right", frameon=False, fontsize=8, labelcolor=TEXT_2)
-    fig.suptitle(title, x=0.06, y=0.975, ha="left", fontsize=13, color=TEXT, fontweight="bold")
-    ax.set_title(textwrap.fill(subtitle, 140), loc="left", fontsize=8.5, color=TEXT_2, pad=10)
-    fig.tight_layout(rect=(0, 0, 1, 0.965))
-    _place_labels(fig, ax, labels)
+    top = add_header(fig, title, subtitle)
+    bottom = add_footnote(fig, footnote) if footnote else 0.0
+    fig.tight_layout(rect=(0, bottom, 1, top))
+    _place_labels(fig, ax, labels, bars=bars, lines=lines)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, facecolor=SURFACE)
     plt.close(fig)
     return out_png
 
 
-# Candidate label offsets (points) around a marker, tried in order.
+# Candidate label offsets (points) around a marker, tried in order of preference.
 _OFFSETS = [
-    (8, 5),
-    (8, -12),
-    (-8, 5),
-    (-8, -12),
-    (8, 16),
-    (8, -23),
-    (-8, 16),
-    (-8, -23),
-    (8, 27),
-    (8, -34),
-]
+    (8, 5), (8, -12), (-8, 5), (-8, -12), (8, -3), (-8, -3), (8, 16), (8, -23), (-8, 16),
+    (-8, -23), (8, 27), (8, -34), (-8, 27), (-8, -34), (14, 38), (14, -45),
+]  # fmt: skip
 
 
-def _place_labels(fig: Any, ax: Any, labels: list[tuple[str, float, float]]) -> None:
-    """Greedy collision avoidance: each label takes the first offset whose box overlaps no
-    label already placed (falls back to the first offset)."""
+def _segment_samples(
+    ax: Any, line: Sequence[tuple[float, float]], step_px: float = 3.0
+) -> list[tuple[float, float]]:
+    """Display-space points every few pixels along a polyline given in data space."""
+    pts = ax.transData.transform(line)
+    out = []
+    for (x0, y0), (x1, y1) in itertools.pairwise(pts):
+        n = max(2, int(math.hypot(x1 - x0, y1 - y0) / step_px))
+        out += [(x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n) for i in range(n + 1)]
+    return out
+
+
+def _crosses(a: Any, b: Any, c: Any, d: Any) -> bool:
+    """Whether segment ab properly crosses segment cd (display space)."""
+
+    def side(p: Any, q: Any, r: Any) -> float:
+        return float((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]))
+
+    return side(a, b, c) * side(a, b, d) < 0 and side(c, d, a) * side(c, d, b) < 0
+
+
+def _va(dx: int, dy: int) -> str:
+    """Labels far from their marker get a leader line and are centred on its end."""
+    return "center" if abs(dy) > 16 or abs(dx) > 10 else "baseline"
+
+
+def _box_dist(box: Any, pt: Any) -> float:
+    """Pixel distance from a point to a box (0 inside)."""
+    px, py = float(pt[0]), float(pt[1])
+    return math.hypot(max(box.x0 - px, 0, px - box.x1), max(box.y0 - py, 0, py - box.y1))
+
+
+def _place_labels(
+    fig: Any,
+    ax: Any,
+    labels: list[tuple[str, float, float]],
+    *,
+    bars: Sequence[tuple[float, float, float]] = (),
+    lines: Sequence[Sequence[tuple[float, float]]] = (),
+) -> None:
+    """Greedy placement: each label takes the offset with the lowest cost. Overlapping a
+    label already placed, or leaving the axes, is ruled out; crossing a marker, a CI bar,
+    a connecting line or another leader costs in proportion to how much of it the label
+    covers, and so does sitting nearer another marker than its own. Greedy depends on the
+    order, so a few orders are tried and the cheapest layout wins."""
     renderer = fig.canvas.get_renderer()
     area = ax.get_window_extent(renderer)
-    placed: list[Any] = []
-    for text, x, y in sorted(labels, key=lambda t: (-t[2], t[1])):
-        box = None
-        for dx, dy in _OFFSETS:
+    to_px = ax.transData.transform
+    markers = [to_px((x, y)) for _, x, y in labels]
+    bar_px = [(to_px((x, lo)), to_px((x, hi))) for x, lo, hi in bars]
+    line_px = [p for line in lines for p in _segment_samples(ax, line)]
+    boxes: dict[tuple[int, int, int], Any] = {}
+
+    def trial_box(i: int, dx: int, dy: int) -> Any:
+        if (i, dx, dy) not in boxes:
+            text, x, y = labels[i]
             ann = ax.annotate(
                 text, (x, y), xytext=(dx, dy), textcoords="offset points",
-                ha="left" if dx > 0 else "right", fontsize=7.5, color=TEXT_2, zorder=4,
+                ha="left" if dx > 0 else "right", va=_va(dx, dy), fontsize=7.5,
             )  # fmt: skip
-            candidate = ann.get_window_extent(renderer).expanded(1.04, 1.15)
-            inside = (
-                area.x0 <= candidate.x0
-                and candidate.x1 <= area.x1
-                and area.y0 <= candidate.y0
-                and candidate.y1 <= area.y1
-            )
-            if inside and not any(candidate.overlaps(b) for b in placed):
-                box = candidate
-                break
+            boxes[(i, dx, dy)] = ann.get_window_extent(renderer).expanded(1.04, 1.25)
             ann.remove()
-        if box is None:  # nothing free: keep the first position
-            ann = ax.annotate(
-                text, (x, y), xytext=_OFFSETS[0], textcoords="offset points",
-                fontsize=7.5, color=TEXT_2, zorder=4,
-            )  # fmt: skip
-            box = ann.get_window_extent(renderer)
-        placed.append(box)
+        return boxes[(i, dx, dy)]
+
+    def layout(order: list[int]) -> tuple[float, dict[int, tuple[int, int]]]:
+        placed: list[Any] = []
+        leaders: list[tuple[Any, Any]] = []
+        leader_px: list[tuple[float, float]] = []
+        chosen: dict[int, tuple[int, int]] = {}
+        total = 0.0
+        for i in order:
+            own_px = markers[i]
+            best: tuple[float, tuple[int, int], Any] | None = None
+            for rank, (dx, dy) in enumerate(_OFFSETS):
+                box = trial_box(i, dx, dy)
+                inside = (
+                    area.x0 <= box.x0
+                    and box.x1 <= area.x1
+                    and area.y0 <= box.y0 <= box.y1 <= area.y1
+                )
+                if not inside or any(box.overlaps(b) for b in placed):
+                    continue
+                hits = sum(box.contains(mx, my) for mx, my in markers) * 50
+                for (bx, by0), (_, by1) in bar_px:
+                    if box.x0 - 3 <= bx <= box.x1 + 3:
+                        hits += 4 * max(0.0, min(box.y1, by1) - max(box.y0, by0))
+                hits += sum(box.contains(px, py) for px, py in line_px) * 3
+                hits += sum(box.contains(px, py) for px, py in leader_px) * 6
+                # a label nearer another marker than its own reads as that marker's label
+                own = _box_dist(box, own_px)
+                if any(_box_dist(box, m) < own for m in markers):
+                    hits += 40
+                # annotate draws a leader toward the text's centre (relpos 0.5, 0.5)
+                centre = ((box.x0 + box.x1) / 2, (box.y0 + box.y1) / 2)
+                if _va(dx, dy) == "center":
+                    hits += 200 * sum(_crosses(own_px, centre, a, b) for a, b in leaders)
+                cost = hits + rank * 0.5 + math.hypot(dx, dy) * 0.6
+                if best is None or cost < best[0]:
+                    best = (cost, (dx, dy), box)
+            if best is None:  # nothing free: keep the first position
+                best = (1e6, _OFFSETS[0], trial_box(i, *_OFFSETS[0]))
+            cost, (dx, dy), box = best
+            total += cost
+            chosen[i] = (dx, dy)
+            placed.append(box)
+            if _va(dx, dy) == "center":
+                a, b = own_px, ((box.x0 + box.x1) / 2, (box.y0 + box.y1) / 2)
+                leaders.append((a, b))
+                leader_px += [(a[0] + (b[0] - a[0]) * k / 40, a[1] + (b[1] - a[1]) * k / 40)
+                              for k in range(41)]  # fmt: skip
+        return total, chosen
+
+    idx = list(range(len(labels)))
+    orders = [
+        sorted(idx, key=lambda i: (-labels[i][2], labels[i][1])),
+        sorted(idx, key=lambda i: (labels[i][2], labels[i][1])),
+        sorted(idx, key=lambda i: (labels[i][1], -labels[i][2])),
+        sorted(idx, key=lambda i: (-labels[i][1], -labels[i][2])),
+    ]
+    _, chosen = min((layout(o) for o in orders), key=lambda r: r[0])
+    for i, (text, x, y) in enumerate(labels):
+        dx, dy = chosen[i]
+        far = _va(dx, dy) == "center"
+        ax.annotate(
+            text, (x, y), xytext=(dx, dy), textcoords="offset points",
+            ha="left" if dx > 0 else "right", va=_va(dx, dy),
+            fontsize=7.5, color=TEXT_2, zorder=4,
+            arrowprops={"arrowstyle": "-", "color": TEXT_2, "lw": 0.6, "alpha": 0.6,
+                        "shrinkA": 1, "shrinkB": 5} if far else None,
+        )  # fmt: skip
 
 
 def write_points_csv(points: list[ParetoPoint], out_csv: Path) -> Path:

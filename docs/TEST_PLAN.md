@@ -100,4 +100,4 @@ Token figures are the pre-pilot estimate for Mercury 3 + 2.5, before the 25% con
 | R2 UC1 main | UC1 | all + Mercury 2.5 | 542 (HE+ + MBPP+) + ~100 LCB | 5 | ~41M |
 | R3 UC1 length sweep | UC1 | all | 30 | 3 (30 samples per bucket) | ~1.1M |
 | R4 UC2 main | UC2 | all | 150 stratified | 3 | ~33M (actual: 18.3M, $6.42 total; M3_UC2_RESULTS) |
-| R5 diffusion capture | P2 / blog GIF | Mercury 3 | 5 prompts | 3 | ~18k |
+| R5 diffusion capture | P2 / blog GIF | Mercury 3 `instant` + `low`, diffusing (`r5_diffusion_capture.yaml`) | 5 prompts | 3 | ~36k (dry-run: $0.013 expected, $0.043 worst case) |
