@@ -39,7 +39,7 @@ Sources: M2 = [M2_UC1_RESULTS.md](M2_UC1_RESULTS.md), M3 = [M3_UC2_RESULTS.md](M
 
 ### Hero image (`images/hero_drag_race.png`)
 
-Built by `hero_drag_race.py` (in the blog folder) from `reports/assets/fig1_pareto_uc1.csv` only. Each car sits at the fraction of the track it covers by the time the fastest model finishes (0.345 s ÷ its own median), assuming constant speed. The image has no title or footer (2026-10-21, user request): each car is labelled with its model name and median time only; pass rates appear in the article body, not the image.
+Built by `scripts/hero_drag_race.py` (copy in the blog folder; output also at `docs/images/hero_drag_race.png` for the README) from `reports/assets/fig1_pareto_uc1.csv` only. Each car sits at the fraction of the track it covers by the time the fastest model finishes (0.345 s ÷ its own median), assuming constant speed. The image has no title or footer (2026-10-21, user request): each car is labelled with its model name and median time only; pass rates appear in the article body, not the image.
 
 | Draft claim | Value in source | Source | Run | ✔ |
 |---|---|---|---|---|

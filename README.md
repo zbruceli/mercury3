@@ -8,14 +8,43 @@ The results feed a follow-up to *[What is Diffusion LLM and why it matters](http
 
 **Status (2026-10-21):** M0–M4 done; M5 blog draft written and fact-checked. Per-feature status: [docs/FEATURES.md](docs/FEATURES.md).
 
-## Headline results (as of 2026-10-21)
+## Is diffusion LLM the speed demon as promised?
 
-- **Code:** Mercury 3 `low` passes 86.0% at a 0.83 s median, tying Claude Haiku 5.5 with thinking off. gpt-oss-120b on Cerebras passes 84.9% at 0.34 s. Mercury 3 decodes ~850–900 visible tok/s, 2–6× the frontier labs' fast models; Cerebras is ~2.7× faster still.
-- **Agent:** Mercury 3 `low` finishes a SQL-agent task in 2.06 s at the median, 1.9–2.9× faster than the frontier labs' fast models. Accuracy is within a few points across models.
-- **Cost:** Mercury 3 is not the cheapest per correct answer, even at its promo price.
-- **Caveat:** these compare products (model plus serving stack), not architectures.
+![A drag race of fast LLMs: gpt-oss-120b on Cerebras has crossed the finish line while Mercury 3, Gemini, Claude Haiku and GPT-6 Luna are still mid-track](docs/images/hero_drag_race.png)
 
-Every number has a run id. Details: [M2](docs/M2_UC1_RESULTS.md), [M3](docs/M3_UC2_RESULTS.md), [M4](docs/M4_ANALYSIS_RESULTS.md), [M5 fact-check](docs/M5_BLOG_RESULTS.md). Charts and tables: [reports/](reports/README.md).
+*Where each model is when the first one finishes, by median time to answer a coding problem (cars drawn at constant speed). 637 problems × 5 samples, run r2-uc1-main-20261021T034053Z, as of 2026-10-21.*
+
+On October 19, 2026, Inception Labs launched Mercury 3, claiming it beats GPT-6 Luna and Claude Haiku 5.5 on benchmarks while running 4–8× faster, at more than 1,000 tokens per second ([Inception blog](https://www.inceptionlabs.ai/blog/introducing-mercury-3)). This repo tests that claim with about \$34 of API spend and more than 48,000 model calls.
+
+**Short version:** Mercury 3 is genuinely fast and genuinely good. It is not the fastest thing on the menu, it is not the cheapest per right answer, and it has one very odd habit.
+
+### Key findings (as of 2026-10-21)
+
+1. **Speed is real, but not unique.** On code generation, Mercury 3 `low` passes 86.0\% of problems at a 0.83 s median, tying Claude Haiku 5.5 with thinking off (86.1\% at 0.97 s). But the control, gpt-oss-120b on Cerebras, passes 84.9\% at 0.34 s. Mercury 3 decodes ~850–900 visible tokens/s (about 2× Gemini Flash-Lite, 2.8× Claude Haiku, 6× GPT-6 Luna); gpt-oss on Cerebras decodes ~2,400–2,500, about 2.7× faster, at every output length.
+2. **In agents, the number of turns matters as much as speed per turn.** In the SQL agent, Mercury 3 `low` finishes a task in 2.06 s at the median, 1.9–2.9× faster than Claude Haiku (3.86 s), Gemini (4.43 s) and GPT-6 Luna (5.95 s). Haiku is 3.2× slower per call but only 1.9× slower per task because it needs ~3.2 turns to Mercury's 5.1. gpt-oss on Cerebras is 1.7× faster per call but needs 6.3 turns, ending only slightly faster per task (1.82 s). Accuracy lands within a few points for everyone (47.6–59.1\%), with ±7–8 point error bars.
+3. **Cheap per token is not cheap per answer.** Mercury 3 `low` costs \$0.59 per 1,000 passing code answers at its 50\%-off launch price (\$1.19 regular); GPT-6 Luna with reasoning off costs \$0.07. In the agent, Mercury 3 `instant` costs \$1.31 per 1,000 correct tasks (\$2.62 regular) against Luna's \$0.74.
+4. **Mercury 3 sometimes thinks forever.** More reasoning makes it worse on code: 86.0\% at `low`, 82.3\% at `medium`, 81.4\% at `high`, because 7.5–8.6\% of calls reason silently until the 32,768-token cap and return nothing. Those calls burned 61\% of Mercury 3's output tokens in the code test. No other model did this even once. Autoregressive models fail by committing; this one fails by not stopping.
+
+![Speed vs correctness on code generation](reports/assets/fig1_pareto_uc1.png)
+
+*Code generation: accuracy vs median latency, one point per model and setting. Run r2-uc1-main-20261021T034053Z, as of 2026-10-21.*
+
+### Surprises that have nothing to do with diffusion
+
+- **OpenAI has a slow front door.** Even a free "list models" request took 0.8–1.2 s of server-side processing; paying 2× for Fast mode trimmed only ~0.15 s at the median.
+- **The cheapest right answer comes from GPT-6 Luna with reasoning off**, the slowest decoder in the test.
+- **Some models really like to talk.** Asked for an ~800-line program, Claude Haiku and GPT-6 Luna wrote ~15,000 tokens; gpt-oss wrote ~6,000.
+- **Claude Haiku stops exploring when you ask for JSON:** with a strict output schema it answered all 150 database questions in one shot, without looking at the database.
+- **Mercury 3 sometimes leaks its own plumbing:** in strict-JSON mode it broke the format on 6 of 150 tasks, mostly by appending internal tool-call markup. Every other model: zero.
+- **Cerebras throttled below its published limit:** 765 rate-limit errors in the code test while the client stayed under 1,000 requests per minute.
+
+### Verdict
+
+Mercury 3 is faster than the big labs' fast models, about as accurate as them with reasoning off, and especially good in agent loops. But an ordinary autoregressive model on Cerebras hardware was faster in both tests, so what this measures is a *product* (model plus serving stack), not an architecture. It's a speed demon, just not the only one in town.
+
+**Caveats:** products, not architectures; LiveCodeBench problems predate the models' training cutoffs (a harder set, not a fresh one); SQL accuracy has ±7–8 point error bars; Mercury's prices are promotional and double at the regular price; one client host in the US West, one day, standard API tiers.
+
+Every number has a run id. Details: [M2](docs/M2_UC1_RESULTS.md), [M3](docs/M3_UC2_RESULTS.md), [M4](docs/M4_ANALYSIS_RESULTS.md), [M5 fact-check](docs/M5_BLOG_RESULTS.md). All charts and tables: [reports/](reports/README.md).
 
 ## Quick start
 
