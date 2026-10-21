@@ -6,8 +6,9 @@
 | Date | 2026-10-21 (in progress) |
 | Commit | `446e61b` (the R1 pilot ran on this) |
 | Gate verdict | **Not yet run.** R1 pilot done and reviewed; R2 and R3 pending |
-| Tokens / spend | R1: $0.29; R1b cap probe: $0.29 |
+| Tokens / spend | R1: $0.29; R1b cap probe: $0.29; OpenAI Fast-mode test: $0.002 |
 | Cap probe answer | **A bigger budget barely helps Mercury 3:** at 131,072 tokens, 1 of 12 failures was rescued (§4) |
+| OpenAI latency answer | **Not your usage tier:** OpenAI adds ~0.45–0.6 s server-side per request; paid Fast mode trims ~0.15 s at the median (§5) |
 
 ## 1. Gate checklist
 
@@ -15,7 +16,7 @@ The exit gate from ROADMAP_AND_PLAN §1:
 
 | Criterion | Result | Evidence |
 |---|---|---|
-| Pilot reviewed | ✅ | §3 (pilot), §4 (cap probe), §5 (findings) |
+| Pilot reviewed | ✅ | §3 (pilot), §4 (cap probe), §5 (OpenAI Fast-mode test), §6 (findings) |
 | R2 and R3 complete | ⏳ | — |
 | Pareto chart regenerates offline | ⏳ | F6.4 not built yet |
 | CI targets met (PRD UC1) | ⏳ | — |
@@ -83,17 +84,47 @@ The network probe's first live run worked against all five providers. Its TLS pa
 
 One oddity: several runaways stopped at identical token counts (128,982 twice, 129,565 twice). It's recorded as an observation, with no explanation claimed.
 
-## 5. Findings
+## 5. Side test: GPT-6 Luna standard vs Fast mode (M2-F3)
+
+**Question:** is Luna's slow first token caused by your new OpenAI account's usage tier or queueing, or is it fixed overhead at OpenAI's API front door?
+
+**Answer: mostly fixed overhead, not your tier.**
+- OpenAI documents usage tiers (Free / Build / Launch / Grow, set by total credit purchases) as changing **rate limits and monthly caps only, not latency** ([rate-limits guide](https://developers.openai.com/api/docs/guides/rate-limits)). The pilot hit no 429s.
+- Paying for **Fast mode** (`service_tier: "fast"`, alias `"priority"`, at 2× the price) trims the median TTFT by about 0.15 s and mainly fixes the slow tail.
+- Even with Fast mode, OpenAI spends about **450 ms server-side** before the first token. That's well above Mercury 3 `instant` (0.25 s) and the Cerebras control (0.23 s) in the pilot.
+
+| | |
+|---|---|
+| Script | [scripts/oai_priority_ab.py](../scripts/oai_priority_ab.py), committed together with this section |
+| Raw rows | `results/analysis/oai-priority-ab-20261021T033428Z/calls.jsonl` (local only) |
+| Design | 20 short coding prompts, `reasoning_effort: none`, 512-token cap, streamed. Each prompt ran once per tier, in seeded random order, one call at a time |
+| Cost | **$0.0022** (40 calls) |
+| Served tier | Every response reported the tier requested: no silent fallback |
+
+| Tier | TTFT p50 (s) | TTFT p90 (s) | Worst TTFT (s) | Server `openai-processing-ms` p50 | Total p50 (s) |
+|---|---:|---:|---:|---:|---:|
+| `default` (standard) | 0.825 | 1.522 | 6.85 | 596 | 1.402 |
+| `fast` (2× price) | 0.668 | 0.889 | 1.80 | 450 | 0.967 |
+
+**Paired by prompt:** Fast was quicker on 13 of 20 prompts, with a median gain of 0.146 s. So Fast mode helps, but the effect at the median is modest and noisy; the big change is in the tail (worst case 6.85 s → 1.80 s).
+
+**Context:**
+- The free `GET /v1/models` call measured shortly before showed 814–1,209 ms of server processing, with a ~20 ms connect and ~40 ms TLS through Cloudflare's San Jose edge. So the slowness is server-side, not the network.
+- The pilot's Luna TTFT (0.99 s median with reasoning off) is in line with the standard tier here; time of day varies.
+
+**Implication for the study:** keep `default` for Luna, as for every model (PRD R1: no provider gets a paid speed tier the others lack). Report Luna's latency next to the network baseline and mention that Fast mode exists. One more factor I can't rule out: account age or undocumented per-account routing. Re-probing in R2 and later runs will show whether the gateway overhead shrinks as the account ages.
+
+## 6. Findings
 
 | # | Finding | Impact | Where handled |
 |---|---|---|---|
-| M2-F1 | **Mercury 3 sometimes reasons until it hits the output cap.** 7 calls (3 at `medium`, 4 at `high`) spent the whole 32,768-token budget on hidden reasoning and returned no answer (`finish=length`, 0 characters). 6 of them were LiveCodeBench `abc388_d` (every medium and high sample) and 1 was HumanEval/146. Its median latency stays low (0.70 s / 1.17 s), but these calls set its p95 at 52–58 s (worst 76 s). No other arm hit the cap | Lowers Mercury's pass@1 at the efforts meant to be most accurate, and dominates its tail latency. Mercury's own defaults are higher (65,536 at medium, 131,072 at high), but the R1b probe (§4) shows that 4× the room rescues only 1 of 12 calls | Scoring reports `budget out` separately from `no code`; both still fail. **Decided: keep the uniform 32,768 cap and report budget-out as a failure mode (§7).** A candidate blog point: a failure mode specific to reasoning effort |
+| M2-F1 | **Mercury 3 sometimes reasons until it hits the output cap.** 7 calls (3 at `medium`, 4 at `high`) spent the whole 32,768-token budget on hidden reasoning and returned no answer (`finish=length`, 0 characters). 6 of them were LiveCodeBench `abc388_d` (every medium and high sample) and 1 was HumanEval/146. Its median latency stays low (0.70 s / 1.17 s), but these calls set its p95 at 52–58 s (worst 76 s). No other arm hit the cap | Lowers Mercury's pass@1 at the efforts meant to be most accurate, and dominates its tail latency. Mercury's own defaults are higher (65,536 at medium, 131,072 at high), but the R1b probe (§4) shows that 4× the room rescues only 1 of 12 calls | Scoring reports `budget out` separately from `no code`; both still fail. **Decided: keep the uniform 32,768 cap and report budget-out as a failure mode (§8).** A candidate blog point: a failure mode specific to reasoning effort |
 | M2-F2 | **The fast-hardware AR control is the fastest arm here.** gpt-oss-120b on Cerebras: 0.23 s TTFT and 912–1,155 output tok/s at the median, against Mercury 3's 0.25–0.75 s and 375–479 tok/s | If R2/R3 confirm it, speed comes from serving hardware, not architecture: exactly the PRD R13 question | R2/R3 with full n; the length sweep (R3) tests longer outputs |
-| M2-F3 | **OpenAI is slow at the network/gateway level.** `GET /models` TTFB was 1.8 s (others 22–177 ms), and one Luna call took 120 s | Part of Luna's latency is OpenAI's API front door, not the model | Report the probe baseline next to Luna's numbers. Periodic re-probes in R2 will show whether it persists |
+| M2-F3 | **OpenAI is slow at the network/gateway level.** `GET /models` TTFB was 1.8 s (others 22–177 ms), and one Luna call took 120 s | Part of Luna's latency is OpenAI's API front door, not the model | **Side test (§5): mostly fixed overhead, not the usage tier.** Fast mode trims TTFT p50 by ~0.15 s and fixes the tail, but ~450 ms server time remains. Keep `default` (PRD R1); report Luna next to the network baseline |
 | M2-F4 | **Extraction is clean.** 383 of 390 responses were fenced; the 7 empty ones are exactly the budget-out calls. All 17 real failures had extracted code and ran: 15 on `abc388_d` and 2 on Mbpp/84 | No grader or extraction problems found | Hardened anyway for R2: stdin extraction now prefers a block that reads input or prints. 0 pilot results changed |
 | M2-F5 | **Medians are below the token guesses, but rare runaways dominate the means.** Pilot spend was $0.29 against $0.31 expected | Cost depends on how often runaways happen, so R2 cost is uncertain | BUDGET_ESTIMATE §8 recalibrated from the pilot |
 
-## 6. R2 recalibration (BUDGET_ESTIMATE §8)
+## 7. R2 recalibration (BUDGET_ESTIMATE §8)
 
 Projected from the pilot's mean cost per call, scaled to R2 (2,710 EvalPlus and 475 LiveCodeBench calls per arm):
 - **Total: about $21.70**, against an $80 budget and a $50 dry-run estimate.
@@ -102,16 +133,17 @@ Projected from the pilot's mean cost per call, scaled to R2 (2,710 EvalPlus and 
 
 The pilot sampled only 3 LiveCodeBench problems, one of which (`abc388_d`) caused every runaway, so this projection is rough in both directions. The `budget_usd` guard stays at $80.
 
-## 7. Open items
+## 8. Open items
 
 - **Output-cap policy (M2-F1): decided 2026-10-21.** R2 keeps the uniform 32,768 cap (PRD R1), and "budget out" is reported as its own failure mode. The R1b probe (§4) confirmed it: 131,072 rescued 1 of 12 calls.
 - R2 and R3, then the Pareto chart (F6.4).
 
-## 8. Where the evidence lives
+## 9. Where the evidence lives
 
 | What | Where | In git? |
 |---|---|---|
 | This write-up | `docs/M2_UC1_RESULTS.md` | ✅ |
 | R1 raw run | `results/runs/r1-pilot-uc1-20261021T020019Z/` | ❌ local only |
 | R1b raw run + scores | `results/runs/r1b-cap-probe-20261021T021543Z/`, `results/analysis/r1b-cap-probe-20261021T021543Z/` | ❌ local only |
+| OpenAI Fast-mode test rows | `results/analysis/oai-priority-ab-20261021T033428Z/calls.jsonl` | ❌ local only (rerun: `scripts/oai_priority_ab.py`) |
 | R1 scores + analysis | `results/analysis/r1-pilot-uc1-20261021T020019Z/` (`scores.jsonl`, `calls.parquet`) | ❌ local only (regenerate with `score` / `analyze`) |
