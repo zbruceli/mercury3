@@ -154,6 +154,7 @@ def parse_response(d: dict[str, Any]) -> dict[str, Any]:
 
 
 class OpenAICompatProvider(BaseProvider):
+    API_ERRORS = (openai.APIError,)
     # provider_extras keys this adapter accepts; anything else is a config error.
     ALLOWED_EXTRAS: frozenset[str] = frozenset()
 

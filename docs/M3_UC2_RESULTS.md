@@ -196,7 +196,7 @@ Two behaviours show up, and neither appears in tool mode:
 - **EX precision (TEST_PLAN B4).** Per-arm EX CIs are ±7–8 points against a 3-point target. More repeats won't fix it, because the width comes from question-to-question variance. Options for M4/M5:
   - Report paired differences (±4–6 points), as in §6.1.
   - Or extend R4 to all 496 scorable questions, about 3.3× the cost (~$21) and ~60M Mercury tokens. Needs a user decision.
-- **Harness hardening (follow-up).** Non-API exceptions inside a provider call (here a `TypeError` in stream parsing) are classified as retryable connection errors. They should stop the run, as other harness bugs do (M1 error policy).
+- ~~**Harness hardening (follow-up).** Non-API exceptions inside a provider call (here a `TypeError` in stream parsing) are classified as retryable connection errors.~~ **Done 2026-10-21:** they now stop the run as `internal_error` on the first attempt (ROADMAP_AND_PLAN §7).
 - **Chart polish for the blog (M4).** Show the turn count next to each bar so the call-to-task ratio change is self-explanatory.
 - **F6.4 stays not done.** The latency CDF and cost-per-success charts are M4 work.
 

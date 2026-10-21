@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+import httpx2  # the HTTP client both SDKs are built on
+
 from dllm_eval.config import Model, Provider, RateLimits
 from dllm_eval.schemas import ChatRequest, ChatResult
 from dllm_eval.timing import Clock
@@ -23,6 +25,17 @@ RUN_FATAL_STATUS = frozenset({401, 402, 403, 404})
 # Error types/codes that look retryable by status but are really billing problems
 # (M0_SMOKE_RESULTS F1: OpenAI sends an empty balance as 429 insufficient_quota).
 BILLING_ERROR_MARKERS = frozenset({"insufficient_quota", "credit_balance_exhausted"})
+
+
+# Exceptions that come from the network or the API: chat() classifies these (retry, skip
+# the call, or stop the run). Anything else raised inside a call is a harness bug, such as
+# a TypeError in stream parsing (M3-F1b), and propagates so the runner stops instead of
+# retrying it as a connection problem. Adapters add their SDK's base error (API_ERRORS).
+TRANSPORT_ERRORS: tuple[type[BaseException], ...] = (
+    httpx2.HTTPError,
+    TimeoutError,
+    ConnectionError,
+)
 
 
 class ErrorKind(StrEnum):
@@ -160,6 +173,9 @@ class RateLimiter:
 class BaseProvider(ABC):
     """Validates, rate-limits, and retries; subclasses implement one raw call."""
 
+    # The SDK's base exception for API and connection errors (see TRANSPORT_ERRORS).
+    API_ERRORS: tuple[type[BaseException], ...] = ()
+
     def __init__(
         self,
         model_key: str,
@@ -227,6 +243,9 @@ class BaseProvider(ABC):
             error_type=error_type,
         )
 
+    def _classified_errors(self) -> tuple[type[BaseException], ...]:
+        return (ProviderError, *TRANSPORT_ERRORS, *self.API_ERRORS)
+
     async def chat(self, req: ChatRequest) -> ChatResult:
         self.validate(req)
         retries = 0
@@ -234,7 +253,7 @@ class BaseProvider(ABC):
             await self.limiter.acquire()
             try:
                 result = await self._chat_once(req)
-            except Exception as exc:
+            except self._classified_errors() as exc:
                 err = self.to_provider_error(exc)
                 err.attempts = retries + 1
                 if err.kind is not ErrorKind.RETRY:

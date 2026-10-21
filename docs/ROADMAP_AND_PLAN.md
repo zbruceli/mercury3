@@ -234,6 +234,8 @@ Draft in `reports/blog/draft.md`, following BLOG_ALIGNMENT §4. Every number lin
 
 A provider `warning` aborts the run when `fail_on_warning` is set (M0 F2). A request-validation error or an unexpected exception also aborts it, so a harness bug doesn't burn budget.
 
+Only errors from the SDKs (`openai.APIError`, `anthropic.APIError`) and the transport (`httpx2.HTTPError`, `TimeoutError`, `ConnectionError`) are classified by the table above. Since 2026-10-21, any other exception raised inside a call, such as a `TypeError` in stream parsing, propagates on the first attempt and stops the run as `internal_error`. Before that, it was retried as a connection error (M3-F1b).
+
 **Resume semantics.** A job counts as done only when its latest record has `status: ok`. Anything else is re-run and appended, and analysis uses the latest record per job. Resuming with a changed experiment config is refused.
 
 **Budget guard.** The runner stops launching jobs once actual spend reaches `budget_usd`. In-flight calls can overshoot by at most concurrency x one call's cost.

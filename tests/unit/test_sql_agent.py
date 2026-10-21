@@ -653,6 +653,27 @@ def test_config_error_aborts(fake_registry: ModelRegistry, tmp_path: Path) -> No
     assert any(r["status"] == "config_error" for r in store.iter_calls())
 
 
+def test_harness_bug_in_a_call_aborts_the_run(
+    fake_registry: ModelRegistry, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """M3-F1b: a TypeError in stream parsing was retried 5 times as a connection error.
+    Now it stops the run as an internal error after one attempt."""
+    from dllm_eval.providers.fake import FakeProvider
+
+    calls = []
+
+    async def broken(self: Any, req: Any) -> Any:
+        calls.append(req)
+        raise TypeError("unsupported operand type(s) for +: 'NoneType' and 'int'")
+
+    monkeypatch.setattr(FakeProvider, "_chat_once", broken)
+    s, store, _ = uc2_run(fake_registry, tmp_path, max_concurrency_per_provider=1)
+    assert s.aborted and "internal error" in s.aborted and "TypeError" in s.aborted
+    recs = list(store.iter_calls())
+    assert recs[0]["status"] == "internal_error"
+    assert len(calls) == 1  # no retries
+
+
 def test_dry_run_counts_turns(fake_registry: ModelRegistry) -> None:
     e = Experiment.model_validate(EXP)
     assert isinstance(e.workload, SqlAgentWorkload)

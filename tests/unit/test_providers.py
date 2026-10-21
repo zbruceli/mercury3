@@ -381,3 +381,47 @@ def test_rate_limiter_blocks_until_window_drains() -> None:
     slept.clear()
     asyncio.run(go2())
     assert sum(slept) == pytest.approx(60.0)
+
+
+def test_chat_lets_harness_bugs_through(fake_registry: ModelRegistry) -> None:
+    """A non-API exception inside a call (here a TypeError, as in M3-F1b) is a harness bug:
+    it propagates at once instead of being retried as a connection problem."""
+    sleep = _NoSleep()
+    p = build_provider("fake-ar", fake_registry, sleep=sleep)
+
+    async def broken(_req: Any) -> Any:
+        raise TypeError("unsupported operand type(s) for +: 'NoneType' and 'int'")
+
+    p._chat_once = broken  # type: ignore[method-assign]
+    with pytest.raises(TypeError):
+        asyncio.run(p.chat(req("fake-ar")))
+    assert sleep.calls == []
+
+
+def test_chat_retries_transport_errors(fake_registry: ModelRegistry) -> None:
+    import httpx2
+
+    sleep = _NoSleep()
+    p = build_provider("fake-ar", fake_registry, sleep=sleep, rng=random.Random(0))
+    real = p._chat_once
+    failures = [httpx2.RemoteProtocolError("peer closed"), TimeoutError()]
+
+    async def flaky(r: Any) -> Any:
+        if failures:
+            raise failures.pop(0)
+        return await real(r)
+
+    p._chat_once = flaky  # type: ignore[method-assign]
+    assert asyncio.run(p.chat(req("fake-ar"))).retries == 2
+    assert len(sleep.calls) == 2
+
+
+def test_sdk_errors_are_classified() -> None:
+    import anthropic
+    import openai
+
+    from dllm_eval.providers.anthropic import AnthropicProvider
+    from dllm_eval.providers.openai_compat import OpenAICompatProvider
+
+    assert issubclass(openai.APIConnectionError, OpenAICompatProvider.API_ERRORS)
+    assert issubclass(anthropic.APIStatusError, AnthropicProvider.API_ERRORS)

@@ -136,6 +136,7 @@ def parse_response(d: dict[str, Any]) -> dict[str, Any]:
 
 
 class AnthropicProvider(BaseProvider):
+    API_ERRORS = (anthropic.APIError,)
     # thinking: e.g. {"type": "disabled"} for Haiku's thinking-off arm (allowed at effort <= high)
     ALLOWED_EXTRAS = frozenset({"thinking"})
 

@@ -25,7 +25,7 @@ Current phase (2026-10-21): **M0–M4 complete; M5 blog draft written and fact-c
 
 Open items carried into M5 (decide with the user; M4_ANALYSIS_RESULTS §7):
 - UC2 EX precision misses TEST_PLAN B4 (±7–8 points per arm). Either extend R4 to all 496 scorable BIRD questions (~$21), or publish paired differences with CIs, as the assets do now.
-- Harness fix: non-API exceptions inside a provider call are retried as connection errors. They should stop the run. Land it before any further live run.
+- ~~Harness fix: non-API exceptions inside a provider call are retried as connection errors.~~ Done 2026-10-21: only SDK and transport errors are classified; anything else stops the run as `internal_error` (ROADMAP_AND_PLAN §7).
 
 ## Commands
 
