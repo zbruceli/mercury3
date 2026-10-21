@@ -17,7 +17,7 @@ Read these first, in order:
 4. [docs/FEATURES.md](docs/FEATURES.md): feature IDs and their Done status
 5. [docs/BLOG_ALIGNMENT.md](docs/BLOG_ALIGNMENT.md): how results map onto the article
 
-Current phase: **M1 complete (2026-10-20); M2 (UC1 code generation) is next.** The harness core passes 135 offline tests and its live smoke (`r0_smoke.yaml`, 24/24). F2.5 (network baseline probe) and the clean-tree guard are in. Feature status lives in the **Done** column of docs/FEATURES.md. See ROADMAP_AND_PLAN §7 for what was built and how it differs from the plan.
+Current phase: **M2 (UC1 code generation) in progress (2026-10-20):** datasets, prompts, Docker sandbox, and scoring are built and validated (542/542 canonical solutions pass); the R1 pilot is next and needs the user's go-ahead. Previously: **M1 complete.** The harness core passes 135 offline tests and its live smoke (`r0_smoke.yaml`, 24/24). F2.5 (network baseline probe) and the clean-tree guard are in. Feature status lives in the **Done** column of docs/FEATURES.md. See ROADMAP_AND_PLAN §7 for what was built and how it differs from the plan.
 
 ## Commands
 
@@ -33,6 +33,9 @@ uv run --env-file .env dllm-eval run configs/experiments/<x>.yaml --live        
 uv run --env-file .env dllm-eval run <cfg> --live --resume <run_id>  # finish an interrupted run
 # --live refuses uncommitted changes (TEST_PLAN B1); --allow-dirty overrides and is recorded in the manifest
 uv run dllm-eval analyze <run_id>                                    # offline: arm table + calls.parquet
+uv run dllm-eval fetch-data                                          # download + sha256-verify UC1 datasets
+uv run dllm-eval score <run_id>                                      # UC1: grade code in Docker -> pass@k
+make test-sandbox                                                    # grader validation in Docker (no API calls)
 ```
 
 Without `--live`, `run` prints the estimate and exits 2. Every live run first probes each provider's network (free `GET .../models`; F2.5). Start probes go in `manifest.json` and all probes in `probes.jsonl`; `analyze` prints them. Tests use the fake provider (`kind: fake`) and never touch the network.
@@ -76,7 +79,9 @@ Without `--live`, `run` prints the estimate and exits 2. Every live run first pr
 - Vendor-specific code stays in `src/dllm_eval/providers/`.
 - Async I/O with per-provider semaphores and rate limiters. No global mutable state.
 - Prompts are versioned constants (e.g. `PROMPT_V1`). Changing a prompt means a new version, never an edit in place.
-- Model-generated code runs **only** inside the Docker sandbox (no network, resource limits, non-root). Never `exec` or `subprocess` it on the host.
+- Model-generated code runs **only** inside the Docker sandbox (no network, resource limits, non-root). Never `exec` or `subprocess` it on the host. Downloaded dataset code, including canonical solutions, is treated the same way. `HostExecutor` is only for our own test fixtures.
+- After any change to `sandbox/` or `usecases/codegen/`, run `make test-sandbox`. Every EvalPlus canonical solution must still pass, and the pinned input drops must not change.
+- Docker Desktop puts its CLI (and `docker-credential-osxkeychain`) in `~/.docker/bin`. Add that to `PATH` for `docker pull`; the executor finds the CLI on its own.
 - SQL tools use a read-only SQLite connection (`mode=ro`) with a timeout and a row cap.
 - Tests: unit tests for every scorer, parser, and cost function, using recorded fixtures. Live tests use `@pytest.mark.live` and are excluded by default.
 - Reference feature IDs (e.g. `F2.6`) in commit messages and PR descriptions.

@@ -77,6 +77,7 @@ def build_manifest(
     *,
     git: dict[str, Any] | None = None,
     network_probe: list[dict[str, Any]] | None = None,
+    extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     keys = sorted(set(model_keys))
     provider_keys = sorted({registry.models[k].provider for k in keys})
@@ -96,6 +97,7 @@ def build_manifest(
         },
         # Start-of-run network baseline (F2.5); periodic probes go to probes.jsonl.
         "network_probe": network_probe or [],
+        **(extra or {}),  # e.g. UC1: pinned dataset specs + prompt version
     }
 
 

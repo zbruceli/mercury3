@@ -39,6 +39,13 @@ Coverage target: ≥85% on `providers/`, `timing`, `metrics`, `cost`, and `scori
 - Assert: 2xx, usage present, no unexpected `warning`, and the server-returned model ID matches the config.
 - Budget: < 50k tokens total. Never run in CI.
 
+### A3b. Sandbox validation (`tests/sandbox`, marker `@pytest.mark.sandbox`, `make test-sandbox`)
+- Needs Docker and the digest-pinned image in `configs/sandbox.yaml`. Makes no API calls.
+- **Every EvalPlus canonical solution must pass when graded as a candidate** (164 HumanEval+, 378 MBPP+). A failure means the grader is wrong.
+- Inputs the reference itself fails are dropped for every model. The known drops are pinned in the test: HumanEval/32 (7 of 888), Mbpp/255 (1 of 112).
+- Lockdown: candidate code cannot reach the network, resolve DNS, or write outside `/tmp`.
+- Run it after any change to `sandbox/` or `usecases/codegen/`, and before R1/R2 scoring.
+
 ### A4. Pipeline (end-to-end dry) tests
 - `dllm-eval run --dry-run` on each experiment config produces the expected job count and cost estimate.
 - A mini run (3 items × 1 model, fake provider) → analyze → charts render without error.
@@ -65,7 +72,7 @@ Coverage target: ≥85% on `providers/`, `timing`, `metrics`, `cost`, and `scori
 | Temperature mismatch | All models at 0.5 where allowed; log `warning`; sensitivity arm at provider defaults |
 | Reasoning-token confound | Report visible vs. reasoning tokens; compare at matched effort tiers |
 | Prompt bias toward one model | Single neutral prompt, written before the pilot and frozen; no per-model tuning in the primary arm |
-| Benchmark contamination | LiveCodeBench post-cutoff subset reported separately |
+| Benchmark contamination | No post-cutoff public set exists (PRD UC1). All UC1 sets are pre-cutoff; LiveCodeBench v6 is reported separately as the harder set, with that caveat stated |
 | Extraction failures misread as model failures | Track extraction-failure rate separately; manual audit of a sample |
 | Architecture vs. hardware | Fast-hardware AR control (PRD R13) |
 | Cold start / caching | Discard the first call per model per run window; report cache hits |

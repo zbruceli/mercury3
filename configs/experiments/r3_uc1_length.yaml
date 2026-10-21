@@ -1,0 +1,91 @@
+# R3 UC1 output-length sweep (F4.5, F4.6; TEST_PLAN B5). Timing only, not scored:
+# 30 prompts (10 per bucket: short ~256, medium ~2k, long ~8k output tokens) x 3 repeats
+# = 30 timing samples per bucket per arm. Lowest arm per model, plus Mercury 3 `low` and
+# `low` + realtime (PRD OQ3). Bucket = item id prefix.
+#   uv run dllm-eval run configs/experiments/r3_uc1_length.yaml --dry-run
+name: r3-uc1-length
+description: UC1 length sweep - how decode speed scales with output length
+seed: 3
+repeats: 3
+budget_usd: 10.0
+max_concurrency_per_provider: 4
+warmup_calls_per_arm: 1
+network_probe_interval_s: 600
+
+arms:
+  - {name: instant, model: mercury-3, reasoning_effort: instant, temperature: 0.5, max_completion_tokens: 16384, expected_output_tokens: 3400}
+  - {name: low, model: mercury-3, reasoning_effort: low, temperature: 0.5, max_completion_tokens: 16384, expected_output_tokens: 3700}
+  - {name: low-realtime, model: mercury-3, reasoning_effort: low, temperature: 0.5, max_completion_tokens: 16384, expected_output_tokens: 3700, provider_extras: {realtime: true}}
+  - {name: thinking-off, model: claude-haiku-5-5, reasoning_effort: low, max_completion_tokens: 16384, expected_output_tokens: 3400, provider_extras: {thinking: {type: disabled}}}
+  - {name: none, model: gpt-6-luna, reasoning_effort: none, max_completion_tokens: 16384, expected_output_tokens: 3400}
+  - {name: minimal, model: gemini-3.5-flash-lite, reasoning_effort: minimal, temperature: 0.5, max_completion_tokens: 16384, expected_output_tokens: 3400}
+  - {name: low, model: gpt-oss-120b-cerebras, reasoning_effort: low, temperature: 0.5, max_completion_tokens: 16384, expected_output_tokens: 3700}
+
+workload:
+  kind: prompts
+  items:
+    # --- short: ~256 output tokens -------------------------------------------------
+    - id: short-01
+      messages: [{role: user, content: "Write a Python function `is_palindrome(s: str) -> bool` that ignores case and non-alphanumeric characters. Reply with only the code in one ```python block."}]
+    - id: short-02
+      messages: [{role: user, content: "Write a Python function `chunk(xs: list, n: int) -> list[list]` that splits a list into chunks of size n (last chunk may be shorter). Reply with only the code in one ```python block."}]
+    - id: short-03
+      messages: [{role: user, content: "Write a Python function `roman_to_int(s: str) -> int`. Reply with only the code in one ```python block."}]
+    - id: short-04
+      messages: [{role: user, content: "Write a Python function `flatten(d: dict, sep: str = '.') -> dict` that flattens nested dictionaries into dotted keys. Reply with only the code in one ```python block."}]
+    - id: short-05
+      messages: [{role: user, content: "Write a Python function `binary_search(xs: list[int], target: int) -> int` returning the index or -1. Reply with only the code in one ```python block."}]
+    - id: short-06
+      messages: [{role: user, content: "Write a Python function `word_count(text: str) -> dict[str, int]` that counts lowercase words, ignoring punctuation. Reply with only the code in one ```python block."}]
+    - id: short-07
+      messages: [{role: user, content: "Write a Python function `merge_intervals(iv: list[tuple[int, int]]) -> list[tuple[int, int]]`. Reply with only the code in one ```python block."}]
+    - id: short-08
+      messages: [{role: user, content: "Write a Python function `rle_encode(s: str) -> str` for run-length encoding, e.g. 'aaab' -> 'a3b1'. Reply with only the code in one ```python block."}]
+    - id: short-09
+      messages: [{role: user, content: "Write a Python function `is_valid_ipv4(s: str) -> bool`. Reply with only the code in one ```python block."}]
+    - id: short-10
+      messages: [{role: user, content: "Write a Python function `transpose(m: list[list[int]]) -> list[list[int]]`. Reply with only the code in one ```python block."}]
+
+    # --- medium: ~2,000 output tokens (about 200 lines) -----------------------------
+    - id: medium-01
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing a thread-safe LRU cache class with TTL expiry, get/put/delete, size limits, hit/miss statistics, docstrings and type hints, followed by a pytest test suite. Reply with the code in one ```python block."}]
+    - id: medium-02
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing a tokenizer and recursive-descent parser for arithmetic expressions with + - * / ^, parentheses, unary minus and variables, plus an evaluator and pytest tests. Reply with the code in one ```python block."}]
+    - id: medium-03
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing a token-bucket rate limiter and a sliding-window rate limiter behind a common interface, with an injectable clock, docstrings, and pytest tests. Reply with the code in one ```python block."}]
+    - id: medium-04
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing a CSV-to-JSON command-line tool using argparse: type inference, column selection, filtering by expression, and error reporting, plus pytest tests. Reply with the code in one ```python block."}]
+    - id: medium-05
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing Dijkstra, A*, and BFS shortest paths on a weighted grid with obstacles, path reconstruction, and pytest tests. Reply with the code in one ```python block."}]
+    - id: medium-06
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing a simple event-sourced bank account: events, aggregate, snapshotting, replay, and pytest tests. Reply with the code in one ```python block."}]
+    - id: medium-07
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing a trie with insert, delete, prefix search, autocomplete ranked by frequency, and wildcard matching, plus pytest tests. Reply with the code in one ```python block."}]
+    - id: medium-08
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing a retry decorator with exponential backoff, jitter, per-exception policies, sync and async support, and pytest tests. Reply with the code in one ```python block."}]
+    - id: medium-09
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing a matrix class with addition, multiplication, transpose, determinant, inverse via Gauss-Jordan, and pytest tests. Reply with the code in one ```python block."}]
+    - id: medium-10
+      messages: [{role: user, content: "Write a complete Python module (about 200 lines) implementing a minimal INI-style config parser with sections, typed getters, interpolation, comments, and pytest tests. Reply with the code in one ```python block."}]
+
+    # --- long: ~8,000 output tokens (about 800 lines) -------------------------------
+    - id: long-01
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing an in-memory key-value database with a SQL-like query language: lexer, parser, query planner, SELECT/INSERT/UPDATE/DELETE with WHERE and ORDER BY, secondary indexes, transactions with rollback, a REPL, and an extensive pytest suite at the end. Reply with the code in one ```python block."}]
+    - id: long-02
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing a Markdown-to-HTML converter supporting headings, emphasis, links, images, nested lists, code blocks, tables, block quotes and escaping, with a CLI and an extensive pytest suite at the end. Reply with the code in one ```python block."}]
+    - id: long-03
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing a stack-based virtual machine and an assembler for it: instruction set, labels, functions and calls, a disassembler, a debugger with breakpoints, and an extensive pytest suite at the end. Reply with the code in one ```python block."}]
+    - id: long-04
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing a library management system: data models, a persistence layer on sqlite3, search, loans with due dates and fines, reports, an argparse CLI, and an extensive pytest suite at the end. Reply with the code in one ```python block."}]
+    - id: long-05
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing a Lisp interpreter: reader, environments, special forms (define, lambda, if, let, quote, begin), tail-call optimization, a standard library, a REPL, and an extensive pytest suite at the end. Reply with the code in one ```python block."}]
+    - id: long-06
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing a discrete-event simulation of a multi-server bank queue with customer arrival distributions, balking and reneging, statistics collection, a text report, and an extensive pytest suite at the end. Reply with the code in one ```python block."}]
+    - id: long-07
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing a JSON schema validator supporting types, required, properties, additionalProperties, items, enum, const, min/max constraints, pattern, oneOf/anyOf/allOf, $ref with local definitions, error paths, and an extensive pytest suite at the end. Reply with the code in one ```python block."}]
+    - id: long-08
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing a chess move generator and validator: board representation, all piece moves, castling, en passant, promotion, check and checkmate detection, FEN parsing, perft counting, and an extensive pytest suite at the end. Reply with the code in one ```python block."}]
+    - id: long-09
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing a static site generator: front-matter parsing, templates with loops and conditionals, a Markdown subset, tag pages, an RSS feed, incremental rebuilds, a CLI, and an extensive pytest suite at the end. Reply with the code in one ```python block."}]
+    - id: long-10
+      messages: [{role: user, content: "Write a complete single-file Python program (about 800 lines) implementing a spreadsheet engine: cell references, ranges, formulas with operators and functions (SUM, AVERAGE, IF, VLOOKUP), dependency tracking, cycle detection, recalculation, CSV import/export, and an extensive pytest suite at the end. Reply with the code in one ```python block."}]

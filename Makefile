@@ -1,4 +1,4 @@
-.PHONY: install fmt lint typecheck test test-live check validate-config budget smoke-live
+.PHONY: install fmt lint typecheck test test-live check validate-config budget smoke-live test-sandbox
 
 install:
 	uv sync
@@ -20,6 +20,10 @@ test:
 # Spends real tokens. Run only with explicit approval.
 test-live:
 	uv run pytest -m live
+
+# Grades every EvalPlus canonical solution in Docker; all must pass (harness validation).
+test-sandbox:
+	uv run pytest -m sandbox -v
 
 validate-config:
 	uv run dllm-eval validate-config

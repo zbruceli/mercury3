@@ -1,6 +1,6 @@
 # Roadmap and implementation plan
 
-**Status (2026-10-20):** M0 ✅ · M1 ✅ · **M2 (UC1 code generation) is next.** Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
+**Status (2026-10-20):** M0 ✅ · M1 ✅ · **M2 (UC1 code generation) in progress:** offline build validated; R1 pilot next. Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
 
 This doc covers *when* (§1, the roadmap) and *how* (§2–§7, the implementation plan) to build what [FEATURES.md](FEATURES.md) lists.
 
@@ -13,6 +13,7 @@ This doc covers *when* (§1, the roadmap) and *how* (§2–§7, the implementati
 | 5 | Work breakdown per milestone |
 | 6 | Mercury API notes and cross-provider findings |
 | 7 | M1 as built, and how it differs from the plan |
+| 8 | M2 as built so far: UC1 data, prompts, sandbox, scoring |
 
 ## 1. Roadmap
 
@@ -32,7 +33,7 @@ M5 Blog                                 ███████
 |---|---|---|---|
 | **M0: Project setup and API verification** (wk 1) ✅ done 2026-10-20 ([results](M0_SMOKE_RESULTS.md)) | Accounts/keys for all providers; verify model IDs, prices, and limits; resolve PRD OQ1/OQ4; repo scaffolding (uv, ruff, pytest, pre-commit) | — | `configs/models.yaml` filled with `verified_on`; a manual curl to each provider works; CI-style `make check` passes on an empty package |
 | **M1: Harness core** (wk 1–2) ✅ done 2026-10-20 ([results](M1_SMOKE_RESULTS.md)) | Provider layer, timing, logging, runner, budget guard, cost engine, CLI skeleton | F1.1–F1.8, F2.1–F2.5, F3.1–F3.6, F6.1–F6.3 | A1 + A2 + A4 pass; R0 smoke passes; one end-to-end mini run produces a manifest and a calls.jsonl |
-| **M2: UC1 code generation** (wk 2–3) | Datasets, sandbox, scoring, length sweep; R1 pilot, then R2 and R3 | F4.x, F6.4 (Pareto) | Pilot reviewed; R2/R3 complete; Pareto chart regenerates offline; CI targets met |
+| **M2: UC1 code generation** (wk 2–3) 🟡 offline build validated 2026-10-20; R1 pilot next | Datasets, sandbox, scoring, length sweep; R1 pilot, then R2 and R3 | F4.x, F6.4 (Pareto) | Pilot reviewed; R2/R3 complete; Pareto chart regenerates offline; CI targets met |
 | **M3: UC2 SQL agent** (wk 3–4) | BIRD subset, tools, agent loop, scorers, strict-schema sub-run; R4 | F5.x, F6.4 (speed-up chart) | R4 complete; traces replayable; reliability table produced |
 | **M4: Analysis and assets** (wk 5) | Statistics, cost tables (promo and regular), diffusion GIF (R5), failure tagging, decision matrix | F2.6, F6.5–F6.7, F7.2 (optional) | Every item in the BLOG_ALIGNMENT asset checklist exists and passes B4 |
 | **M5: Blog article** (wk 6) | Draft following the BLOG_ALIGNMENT outline; fact-check every number against its run ID; publish the repo/results | — | Every number in the draft is footnoted with a run ID; a reproducibility check is done from a clean clone |
@@ -249,3 +250,43 @@ A provider `warning` aborts the run when `fail_on_warning` is set (M0 F2). A req
 - Contract tests replay every R0 recording through the production parsers.
 - The I/O-path tests drive the real adapters through a stub SDK client.
 - The fake-provider tests cover the runner and CLI: interleaving, resume, the budget guard, and aborts on warnings and billing errors.
+
+## 8. M2 as built so far (2026-10-20)
+
+**Modules**
+
+| Module | What it does |
+|---|---|
+| `configs/datasets.yaml` + `usecases/codegen/datasets.py` | Pinned dataset registry (url, bytes, sha256) and loaders for HumanEval+ v0.1.10, MBPP+ v0.2.0, and LiveCodeBench v6. `dllm-eval fetch-data` downloads and verifies. LCB private tests are pickled, so a restricted unpickler refuses every global |
+| `usecases/codegen/prompts.py` | Frozen `uc1-v1` templates (function / stdin / LeetCode). A test pins their sha256, so editing them in place fails `make check` |
+| `usecases/codegen/extract.py` | Picks the last fenced block that defines the entry point. Also handles truncated fences, unfenced code, and none. Extraction failures are counted separately from wrong answers |
+| `usecases/codegen/workload.py` + `experiment.CodegenWorkload` | `kind: codegen` workloads with a seeded `sample` or explicit `ids` per dataset. The runner resolves them into prompt items |
+| `sandbox/harness.py` | Runs inside the container, stdlib only. Each solution runs in its own subprocess with a time limit and a 768 MB address-space cap; outputs come back as tagged JSON (never pickle) |
+| `sandbox/executor.py` | `DockerExecutor`: digest-pinned `python:3.12-slim`, `--network none`, read-only root, noexec `/tmp`, non-root, all capabilities dropped. 20 jobs per container, 3 containers in parallel; a dead container's jobs are re-run one per container. `HostExecutor` exists for tests only |
+| `usecases/codegen/scoring.py` + `dllm-eval score` | Run log → extraction → sandbox → `results/analysis/<run>/scores.jsonl` (resumable) → pass@1 / pass@5 per arm and dataset |
+| `configs/experiments/r1_pilot_uc1.yaml`, `r2_uc1_main.yaml`, `r3_uc1_length.yaml` | R1: 390 calls, ~$0.31 expected. R2: 41,405 calls, ~$50 expected. R3: 630 calls, ~$1.67 expected |
+
+**Grading fidelity (EvalPlus)**
+
+The first sandbox run had 26 canonical solutions failing against themselves. All were grader gaps:
+- Missing special oracles: set-equality tasks, not-None tasks, alternative-answer tasks, and HumanEval `find_zero`.
+- Missing MBPP+ per-task input deserialization (JSON lists back to tuples, sets, and complex numbers).
+- Ints over 4,300 digits.
+- Huge outputs filling `/tmp`.
+- One OOM-killed container taking 19 results with it.
+
+The fixes mirror EvalPlus's own code (`evalplus/eval/__init__.py`, `_special_oracle.py`, `data/mbpp.py`), including its carried-over float tolerance.
+
+One rule is ours: an input counts only if the reference passes it. That drops 7 of 888 HumanEval/32 inputs (float error) and 1 of 112 Mbpp/255 inputs (memory). A problem left with no valid inputs is a harness error, never a pass.
+
+Result: **542/542 canonical solutions pass in Docker**. All 3,866 LiveCodeBench tests are well formed (LCB has no reference solutions to grade).
+
+**Decisions**
+- **LiveCodeBench is pre-cutoff** (PRD UC1). No public post-cutoff release exists.
+- **Every arm uses `max_completion_tokens` 32,768** (PRD R1).
+- **Temperature 0.5** where accepted (PRD R2). Claude Haiku 5.5 rejects non-default sampling values. GPT-6 Luna is untested, so both run at provider default.
+- **Scoring is a separate offline step**, so grading never mixes with timing and can be re-run without API calls.
+- **Docker Desktop's CLI lives in `~/.docker/bin`.** The executor finds it there when it isn't on the PATH.
+
+**Not done yet:** R1 pilot → review → recalibrate BUDGET_ESTIMATE → R2 and R3 → Pareto chart (F6.4). That's the M2 gate, recorded in `docs/M2_UC1_RESULTS.md` when it runs.
+

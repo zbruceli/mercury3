@@ -9,11 +9,12 @@ import random
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from dllm_eval.config import ModelRegistry
 from dllm_eval.cost import call_cost, estimate_tokens, tokens_cost
-from dllm_eval.experiment import Arm, Experiment, PromptItem
+from dllm_eval.experiment import Arm, Experiment, PromptItem, PromptWorkload
 from dllm_eval.logging_store import RunStore
 from dllm_eval.providers import BaseProvider, ErrorKind, ProviderError, RateLimiter, build_provider
 from dllm_eval.schemas import ChatRequest
@@ -32,13 +33,23 @@ class Job:
     warmup: bool = False
 
 
-def expand_jobs(exp: Experiment) -> list[Job]:
+def resolve_items(exp: Experiment, root: Path = Path(".")) -> list[PromptItem]:
+    """The prompts a run sends: inline prompt items, or UC1 problems formatted by the frozen
+    prompt template (which loads and checksum-verifies the datasets)."""
+    if isinstance(exp.workload, PromptWorkload):
+        return list(exp.workload.items)
+    from dllm_eval.usecases.codegen.workload import build_items, select_problems
+
+    return build_items(select_problems(exp.workload, exp.seed, root=root))
+
+
+def expand_jobs(exp: Experiment, items: list[PromptItem] | None = None) -> list[Job]:
     """Every (arm, item, repeat), shuffled with the experiment seed so models interleave
     (never all of model A, then all of B; CLAUDE.md measurement practices)."""
     jobs = [
         Job(f"{arm.id}/{item.id}/{r}", arm, item, r)
         for arm in exp.arms
-        for item in exp.workload.items
+        for item in (items if items is not None else resolve_items(exp))
         for r in range(exp.repeats)
     ]
     random.Random(exp.seed).shuffle(jobs)
@@ -81,15 +92,17 @@ class DryRunRow:
     cost_worst: float
 
 
-def dry_run(exp: Experiment, registry: ModelRegistry) -> list[DryRunRow]:
+def dry_run(
+    exp: Experiment, registry: ModelRegistry, items: list[PromptItem] | None = None
+) -> list[DryRunRow]:
     """Job counts and token/cost estimates per arm (F3.5). No API calls."""
     exp.check_against(registry)
+    items = items if items is not None else resolve_items(exp)
     rows = []
     for arm in exp.arms:
         model = registry.models[arm.model]
         per_item_in = [
-            sum(estimate_tokens(m.content or "") for m in item.messages)
-            for item in exp.workload.items
+            sum(estimate_tokens(m.content or "") for m in item.messages) for item in items
         ]
         n = len(per_item_in) * exp.repeats
         inp = sum(per_item_in) * exp.repeats
@@ -130,11 +143,12 @@ async def run_experiment(
     *,
     provider_factory: ProviderFactory = build_provider,
     prober: Prober | None = None,
+    items: list[PromptItem] | None = None,
     log: Callable[[str], None] = print,
 ) -> RunSummary:
     exp.check_against(registry)
     done = store.completed_job_ids()
-    all_jobs = expand_jobs(exp)
+    all_jobs = expand_jobs(exp, items)
     jobs = [j for j in all_jobs if j.job_id not in done]
     summary = RunSummary(
         run_id=run_id, planned=len(all_jobs), skipped_done=len(all_jobs) - len(jobs)

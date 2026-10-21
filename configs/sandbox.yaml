@@ -1,0 +1,12 @@
+# Docker sandbox for grading UC1 code (F4.3). The image MUST be pinned by digest:
+# after `docker pull python:3.12-slim`, set image to python:3.12-slim@sha256:<digest>
+# (`docker image inspect --format '{{index .RepoDigests 0}}' python:3.12-slim`).
+# Until then `dllm-eval score` refuses to run.
+image: python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1  # Python 3.12.15, pulled 2026-10-20
+cpus: 1.0
+memory: 2g        # per container; each solution process is also capped at 768 MB (harness)
+pids_limit: 256
+tmpfs_size: 512m
+batch_size: 20
+parallel: 3       # 3 x 2g on an 8 GB machine
+batch_timeout_s: 1800

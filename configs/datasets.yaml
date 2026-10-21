@@ -1,0 +1,31 @@
+# UC1 benchmark datasets (F4.1). Files live under data/raw/ (gitignored); this registry
+# pins exactly which bytes were used. `dllm-eval fetch-data` downloads and verifies them.
+# Downloaded 2026-10-20 with the user's approval.
+
+datasets:
+  humaneval+:
+    version: v0.1.10
+    url: https://github.com/evalplus/humanevalplus_release/releases/download/v0.1.10/HumanEvalPlus.jsonl.gz
+    path: data/raw/humanevalplus/HumanEvalPlus-v0.1.10.jsonl.gz
+    bytes: 925932
+    sha256: 272720b90ac375502c8ed23cd791c2a93dfb22a911641a494da74a426c09f101
+    problems: 164
+
+  mbpp+:
+    version: v0.2.0
+    url: https://github.com/evalplus/mbppplus_release/releases/download/v0.2.0/MbppPlus.jsonl.gz
+    path: data/raw/mbppplus/MbppPlus-v0.2.0.jsonl.gz
+    bytes: 336032
+    sha256: af43697e8791c4c149bdfd6b489d8b5412507551ac20e28a439f650b8225db63
+    problems: 378
+
+  lcb-v6:
+    # LiveCodeBench code_generation_lite, release_v6 shard (contest dates 2025-01-04 .. 2025-04-06),
+    # pinned to dataset commit 0fe84c39. PRE-CUTOFF for every model under test: report it as a
+    # harder set, NOT as contamination-free (decided 2026-10-20; no public post-cutoff release).
+    version: release_v6 (test6.jsonl @ 0fe84c3912ea0c4d4a78037083943e8f0c4dd505)
+    url: https://huggingface.co/datasets/livecodebench/code_generation_lite/resolve/0fe84c3912ea0c4d4a78037083943e8f0c4dd505/test6.jsonl
+    path: data/raw/livecodebench/test6.jsonl
+    bytes: 134303240
+    sha256: bb4c364f71921c4495a6ad15abe1a927350b720009f4933e2e71f8af0f6fd1f5
+    problems: 175  # 95 easy+medium are used (PRD UC1)

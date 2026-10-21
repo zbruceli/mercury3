@@ -14,10 +14,10 @@ import typer
 from pydantic import ValidationError
 
 from dllm_eval.config import DEFAULT_MODELS_PATH, ProviderKind, load_registry
-from dllm_eval.experiment import load_experiment
+from dllm_eval.experiment import CodegenWorkload, Experiment, load_experiment
 from dllm_eval.logging_store import RunStore, build_manifest, git_state, secret_values
 from dllm_eval.probe import probe_all
-from dllm_eval.runner import dry_run, run_experiment
+from dllm_eval.runner import dry_run, resolve_items, run_experiment
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 
@@ -60,6 +60,79 @@ def validate_config(
             raise typer.Exit(1)
 
 
+def workload_provenance(exp: Experiment) -> dict[str, Any]:
+    """For UC1 runs: the exact dataset bytes and prompt version (PRD R10/R11)."""
+    if not isinstance(exp.workload, CodegenWorkload):
+        return {}
+    from dllm_eval.usecases.codegen import prompts
+    from dllm_eval.usecases.codegen.datasets import load_dataset_registry
+
+    reg = load_dataset_registry()
+    used = sorted({s.dataset for s in exp.workload.sources})
+    return {
+        "prompt_version": prompts.PROMPT_VERSION,
+        "datasets": {n: reg.datasets[n].model_dump(mode="json") for n in used},
+    }
+
+
+@app.command("fetch-data")
+def fetch_data(
+    datasets: Annotated[Path, typer.Option(help="Dataset registry")] = Path(
+        "configs/datasets.yaml"
+    ),
+) -> None:
+    """Download any missing UC1 dataset and verify every file against its pinned sha256."""
+    from dllm_eval.usecases.codegen.datasets import fetch, load_dataset_registry
+
+    reg = load_dataset_registry(datasets)
+    for name, spec in reg.datasets.items():
+        try:
+            path = fetch(spec)
+        except (OSError, ValueError) as e:
+            typer.echo(f"{name}: FAILED: {e}", err=True)
+            raise typer.Exit(1) from e
+        typer.echo(f"{name} {spec.version}: OK ({path}, {spec.bytes} bytes, sha256 verified)")
+
+
+@app.command()
+def score(
+    run_id: Annotated[str, typer.Argument(help="UC1 run id to grade")],
+    runs_dir: Annotated[Path, typer.Option()] = DEFAULT_RUNS_DIR,
+    out_dir: Annotated[Path, typer.Option()] = DEFAULT_ANALYSIS_DIR,
+    sandbox: Annotated[Path, typer.Option(help="Sandbox config")] = Path("configs/sandbox.yaml"),
+) -> None:
+    """Grade a UC1 run's code in the Docker sandbox and print pass@k. Never calls a model API."""
+    from dllm_eval.sandbox.executor import DockerExecutor, docker_available, load_sandbox_config
+    from dllm_eval.usecases.codegen.scoring import score_run, summarize
+    from dllm_eval.usecases.codegen.scoring import to_markdown as scores_markdown
+    from dllm_eval.usecases.codegen.workload import select_problems
+
+    store = RunStore(runs_dir / run_id)
+    if not store.exists():
+        typer.echo(f"no run {run_id} under {runs_dir}", err=True)
+        raise typer.Exit(1)
+    exp = Experiment.model_validate(store.read_manifest()["experiment"])
+    if not isinstance(exp.workload, CodegenWorkload):
+        typer.echo("not a UC1 (codegen) run", err=True)
+        raise typer.Exit(1)
+    try:
+        cfg = load_sandbox_config(sandbox)
+    except (OSError, ValueError, ValidationError) as e:
+        typer.echo(f"sandbox not ready: {e}", err=True)
+        raise typer.Exit(1) from e
+    if not docker_available():
+        typer.echo("Docker daemon is not running; start Docker Desktop", err=True)
+        raise typer.Exit(1)
+    problems = {p.id: p for p in select_problems(exp.workload, exp.seed)}
+    out = out_dir / run_id / "scores.jsonl"
+    rows = score_run(store, problems, DockerExecutor(cfg), out, log=typer.echo)
+    api_errors: dict[str, int] = {}
+    for rec in store.latest_by_job().values():
+        if rec["status"] != "ok":
+            api_errors[rec["arm"]] = api_errors.get(rec["arm"], 0) + 1
+    typer.echo(scores_markdown(summarize(rows, api_errors)))
+
+
 @app.command()
 def run(
     config: Annotated[Path, typer.Argument(help="Experiment YAML")],
@@ -81,7 +154,8 @@ def run(
     try:
         registry = load_registry(models)
         exp = load_experiment(config)
-        rows = dry_run(exp, registry)
+        items = resolve_items(exp)
+        rows = dry_run(exp, registry, items)
     except (ValidationError, OSError, ValueError) as e:
         typer.echo(f"invalid config: {e}", err=True)
         raise typer.Exit(1) from e
@@ -97,7 +171,9 @@ def run(
             f"{r.output_tokens_worst} | {r.cost_expected:.4f} / {r.cost_worst:.4f} |"
         )
     worst = sum(r.cost_worst for r in rows)
-    typer.echo(f"total worst-case cost ${worst:.4f}")
+    expected = sum(r.cost_expected for r in rows)
+    typer.echo(f"total expected cost ${expected:.4f} (from expected_output_tokens)")
+    typer.echo(f"total worst-case cost ${worst:.4f} (every call uses max_completion_tokens)")
     if dry_run_only:
         return
     if not live:
@@ -164,6 +240,7 @@ def run(
             REPO_ROOT,
             git=git,
             network_probe=start_probes,
+            extra=workload_provenance(exp),
         )
         store.create(manifest)
     for pr in start_probes:  # every probe, start/resume/periodic, also lands in probes.jsonl
@@ -176,6 +253,7 @@ def run(
             store,
             run_id,
             prober=prober if exp.network_probe else None,
+            items=items,
             log=typer.echo,
         )
     )

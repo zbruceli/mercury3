@@ -6,7 +6,7 @@ Priority: **P0** = required for the blog's headline results, **P1** = strongly w
 
 IDs are stable. Reference them in commits, tests, and the implementation plan.
 
-**Status (2026-10-20):** 23 of 44 done. M1 complete. M2 (UC1) is next.
+**Status (2026-10-20):** 29 of 44 done. M1 complete. M2 (UC1) built and validated offline; R1 pilot next.
 
 ## F1 Provider layer
 | ID | Feature | Pri | Done |
@@ -44,12 +44,12 @@ IDs are stable. Reference them in commits, tests, and the implementation plan.
 ## F4 UC1: code generation
 | ID | Feature | Pri | Done |
 |---|---|---|---|
-| F4.1 | Dataset loaders: HumanEval+, MBPP+ (EvalPlus); LiveCodeBench subset filtered by release date | P0 | false |
-| F4.2 | Prompt template plus code extraction from markdown fences (robust to extra prose) | P0 | false |
-| F4.3 | Sandboxed test execution (Docker, no network, CPU/memory/time limits) | P0 | false |
-| F4.4 | pass@1 / pass@k with an unbiased estimator | P0 | false |
-| F4.5 | Output-length sweep prompt set (short/medium/long) | P1 | false |
-| F4.6 | `realtime: true` arm for Mercury | P1 | false |
+| F4.1 | Dataset loaders: HumanEval+, MBPP+ (EvalPlus); LiveCodeBench v6 easy+medium (pre-cutoff; see PRD UC1), pinned by sha256 in configs/datasets.yaml | P0 | true |
+| F4.2 | Prompt template plus code extraction from markdown fences (robust to extra prose) | P0 | true |
+| F4.3 | Sandboxed test execution (Docker, no network, CPU/memory/time limits) | P0 | true |
+| F4.4 | pass@1 / pass@k with an unbiased estimator | P0 | true |
+| F4.5 | Output-length sweep prompt set (short/medium/long) | P1 | true |
+| F4.6 | `realtime: true` arm for Mercury | P1 | true |
 
 ## F5 UC2: SQL tool-calling agent
 | ID | Feature | Pri | Done |

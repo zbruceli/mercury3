@@ -62,7 +62,8 @@ venv = ".venv"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers -m 'not live'"
+addopts = "-ra --strict-markers -m 'not live and not sandbox'"
 markers = [
     "live: calls real provider APIs and spends tokens; run only with explicit approval",
+    "sandbox: needs the Docker daemon and a digest-pinned sandbox image (make test-sandbox)",
 ]

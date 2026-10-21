@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Self
+from typing import Any, Literal, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -39,9 +39,9 @@ class PromptItem(_Strict):
 
 
 class PromptWorkload(_Strict):
-    """Plain prompt list. UC1/UC2 add their own workload kinds in M2/M3."""
+    """Plain prompt list (smoke tests, the UC1 length sweep)."""
 
-    kind: str = "prompts"
+    kind: Literal["prompts"] = "prompts"
     items: list[PromptItem]
 
     @model_validator(mode="after")
@@ -50,6 +50,26 @@ class PromptWorkload(_Strict):
         if len(ids) != len(set(ids)):
             raise ValueError("workload item ids must be unique")
         return self
+
+
+class CodegenSource(_Strict):
+    dataset: Literal["humaneval+", "mbpp+", "lcb-v6"]
+    sample: int | None = Field(default=None, gt=0)  # seeded random subset (experiment seed)
+    ids: list[str] | None = None  # explicit native ids, e.g. ["HumanEval/0"]
+
+    @model_validator(mode="after")
+    def _one_selector(self) -> Self:
+        if self.sample is not None and self.ids is not None:
+            raise ValueError("use either sample or ids, not both")
+        return self
+
+
+class CodegenWorkload(_Strict):
+    """UC1 problems from configs/datasets.yaml, formatted by usecases/codegen/prompts.py."""
+
+    kind: Literal["codegen"]
+    sources: list[CodegenSource]
+    prompt_version: str  # must equal prompts.PROMPT_VERSION (prompts are frozen)
 
 
 class Experiment(_Strict):
@@ -69,7 +89,7 @@ class Experiment(_Strict):
     network_probe_interval_s: float | None = Field(default=None, gt=0)
     stream: bool = True
     arms: list[Arm]
-    workload: PromptWorkload
+    workload: PromptWorkload | CodegenWorkload
 
     @model_validator(mode="after")
     def _unique_arms(self) -> Self:

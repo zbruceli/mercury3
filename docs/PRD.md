@@ -66,7 +66,7 @@ We chose these two use cases because each one targets a different claimed advant
 
 **Workload.**
 - *Primary:* EvalPlus **HumanEval+** (164 problems) and **MBPP+** (378 problems). These use stronger tests than the originals.
-- *Contamination-resistant:* a **LiveCodeBench** subset of problems released after the models' training cutoffs (target n ≈ 100, easy/medium).
+- *Harder set (pre-cutoff):* **LiveCodeBench v6**, easy+medium, 95 problems (AtCoder stdin and LeetCode function-style, contest dates 2025-01-04 to 2025-04-06). **Decided 2026-10-20:** no public LiveCodeBench problems are newer than the models' mid-2026 training cutoffs (the lite dataset was last updated 2025-06-05), so this set is reported as harder, **not** contamination-free. Every model has the same exposure, so relative comparisons still hold.
 - Output-length sweep: short (≤256 tokens), medium (≈2k), long (≈8k). Long outputs come from "implement module X with tests" prompts, to see how block decoding scales with length.
 
 **Metrics.**
