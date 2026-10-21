@@ -772,7 +772,13 @@ def test_read_ids_rejects_duplicates(tmp_path: Path) -> None:
 
 
 def test_repo_uc2_configs_validate(repo_registry: ModelRegistry) -> None:
-    for name in ("r1_pilot_uc2", "r1_pilot_uc2_strict", "r4_uc2_main", "r4b_uc2_strict"):
+    for name in (
+        "r1_pilot_uc2",
+        "r1_pilot_uc2_strict",
+        "r4_uc2_main",
+        "r4b_uc2_strict",
+        "r4c_uc2_full",
+    ):
         cfg = yaml.safe_load((REPO / f"configs/experiments/{name}.yaml").read_text())
         e = Experiment.model_validate(cfg)
         e.check_against(repo_registry)

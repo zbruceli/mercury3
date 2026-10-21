@@ -27,7 +27,7 @@ def test_release_has_498_unique_questions() -> None:
     assert {q.id for q in qs} >= GOLD_EXCLUDED
 
 
-@pytest.mark.parametrize("config", ["r4_uc2_main", "r1_pilot_uc2"])
+@pytest.mark.parametrize("config", ["r4_uc2_main", "r1_pilot_uc2", "r4c_uc2_full"])
 def test_sampled_gold_queries_score_against_themselves(config: str) -> None:
     exp = load_experiment(REPO / f"configs/experiments/{config}.yaml")
     assert isinstance(exp.workload, SqlAgentWorkload)
