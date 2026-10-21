@@ -127,10 +127,13 @@ def score(
     out = out_dir / run_id / "scores.jsonl"
     rows = score_run(store, problems, DockerExecutor(cfg), out, log=typer.echo)
     api_errors: dict[str, int] = {}
+    finish: dict[str, str | None] = {}
     for rec in store.latest_by_job().values():
         if rec["status"] != "ok":
             api_errors[rec["arm"]] = api_errors.get(rec["arm"], 0) + 1
-    typer.echo(scores_markdown(summarize(rows, api_errors)))
+        else:
+            finish[rec["job_id"]] = rec["result"].get("finish_reason")
+    typer.echo(scores_markdown(summarize(rows, api_errors, finish)))
 
 
 @app.command()

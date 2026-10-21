@@ -46,9 +46,9 @@ def extract_code(text: str, problem: CodeProblem) -> Extraction:
         wanted = re.compile(rf"^\s*def\s+{re.escape(problem.entry_point)}\s*\(", re.M)
     elif problem.kind == "leetcode":
         wanted = re.compile(r"^\s*class\s+Solution\b", re.M)
-    else:
-        wanted = None
-    matching = [b for b in blocks if wanted is None or wanted.search(b)]
+    else:  # stdin: a real program reads input or prints (not a sample I/O or math block)
+        wanted = re.compile(r"input\(|sys\.stdin|print\(|sys\.stdout")
+    matching = [b for b in blocks if wanted.search(b)]
     # Prefer the last block that defines what we need (models often show a draft first);
     # otherwise the longest block.
     chosen = matching[-1] if matching else max(blocks, key=len)

@@ -98,10 +98,17 @@ def score_run(
 
 
 def summarize(
-    rows: list[dict[str, Any]], api_errors: dict[str, int] | None = None
+    rows: list[dict[str, Any]],
+    api_errors: dict[str, int] | None = None,
+    finish: dict[str, str | None] | None = None,
 ) -> list[dict[str, Any]]:
     """Per (arm, dataset): pass@1 (mean over problems of c/n), pass@5 where n >= 5,
-    extraction failures, and harness errors (which are bugs, not model failures)."""
+    extraction failures, and harness errors (which are bugs, not model failures).
+
+    `finish` maps job_id -> finish_reason. A response with no code that stopped on
+    `length` spent its whole output budget (usually on hidden reasoning): it is counted as
+    `budget_out` instead of `no_code`. Both still count as failures in pass@k."""
+    finish = finish or {}
     by: dict[tuple[str, str], dict[str, list[bool]]] = defaultdict(lambda: defaultdict(list))
     meta: dict[tuple[str, str], dict[str, int]] = defaultdict(lambda: defaultdict(int))
     for r in rows:
@@ -112,7 +119,10 @@ def summarize(
         by[key][r["item_id"]].append(r["status"] == "pass")
         if r["extraction"] in ("none", "truncated_fence"):
             meta[key][f"extraction_{r['extraction']}"] += 1
-        meta[key][r["status"]] += 1
+        status = r["status"]
+        if status == "no_code" and finish.get(r["job_id"]) == "length":
+            status = "budget_out"
+        meta[key][status] += 1
     out = []
     for (arm, dataset), items in sorted(by.items()):
         row: dict[str, Any] = {
@@ -141,6 +151,7 @@ _COUNT_COLUMNS = [
     ("timeout", "timeout"),
     ("error", "error"),
     ("no code", "no_code"),
+    ("budget out", "budget_out"),
     ("truncated", "extraction_truncated_fence"),
     ("harness err", "harness_errors"),
 ]

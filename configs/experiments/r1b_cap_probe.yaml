@@ -1,0 +1,20 @@
+# R1b: output-cap probe (M2-F1, decided 2026-10-21). The two problems where Mercury 3
+# exhausted the 32,768-token cap in R1, rerun at Mercury 3's own maximum (131,072) to see
+# whether it converges given more room or keeps reasoning. 2 problems x 2 arms x 3 = 12 calls.
+# Diagnostic only: R2 keeps the uniform 32,768 cap (PRD R1).
+name: r1b-cap-probe
+description: Does Mercury 3 converge on abc388_d and HumanEval/146 with a 131,072-token cap?
+seed: 1
+repeats: 3
+budget_usd: 2.0
+max_concurrency_per_provider: 4
+network_probe_interval_s: 600
+workload:
+  kind: codegen
+  prompt_version: uc1-v1
+  sources:
+    - {dataset: lcb-v6, ids: [abc388_d]}
+    - {dataset: humaneval+, ids: [HumanEval/146]}
+arms:
+  - {name: medium-131k, model: mercury-3, reasoning_effort: medium, temperature: 0.5, max_completion_tokens: 131072, expected_output_tokens: 32000}
+  - {name: high-131k, model: mercury-3, reasoning_effort: high, temperature: 0.5, max_completion_tokens: 131072, expected_output_tokens: 32000}

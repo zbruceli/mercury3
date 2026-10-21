@@ -555,3 +555,41 @@ def test_cli_fetch_data_verifies(ds_root: Path, monkeypatch: pytest.MonkeyPatch)
     (ds_root / "data/raw/he/he.jsonl.gz").write_bytes(b"tampered")
     r = CliRunner().invoke(cli.app, ["fetch-data"])
     assert r.exit_code == 1 and "FAILED" in r.output
+
+
+def test_stdin_extraction_skips_sample_io_blocks(problems: dict[str, Any]) -> None:
+    p = problems["lcb-v6/abc001_a"]
+    text = "Program:\n```python\nprint(2 * int(input()))\n```\nSample:\n```\n3\n6\n```"
+    assert "input()" in extract_code(text, p).code
+
+
+def test_summarize_separates_budget_out() -> None:
+    rows = [
+        {
+            "job_id": "a",
+            "arm": "m:high",
+            "dataset": "lcb-v6",
+            "item_id": "x",
+            "status": "no_code",
+            "extraction": "none",
+        },
+        {
+            "job_id": "b",
+            "arm": "m:high",
+            "dataset": "lcb-v6",
+            "item_id": "x",
+            "status": "no_code",
+            "extraction": "none",
+        },
+        {
+            "job_id": "c",
+            "arm": "m:high",
+            "dataset": "lcb-v6",
+            "item_id": "y",
+            "status": "pass",
+            "extraction": "fenced",
+        },
+    ]
+    [s] = summarize(rows, finish={"a": "length", "b": "stop", "c": "stop"})
+    assert s["budget_out"] == 1 and s["no_code"] == 1
+    assert s["pass@1"] == 0.5  # budget-out still fails

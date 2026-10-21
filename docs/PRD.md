@@ -105,7 +105,7 @@ We chose these two use cases because each one targets a different claimed advant
 ## 6. Methodology requirements
 
 ### 6.1 Fairness
-- R1. Identical prompts, tool definitions, `max_completion_tokens` budgets, and stop conditions across models. Any provider-specific adaptation must be documented in the run config.
+- R1. Identical prompts, tool definitions, `max_completion_tokens` budgets, and stop conditions across models. UC1 uses 32,768 for every arm. A response that spends the whole budget without answering (Mercury 3 at `medium`/`high` in R1) counts as a failure and is reported as "budget out" (decided 2026-10-21, M2-F1). Any provider-specific adaptation must be documented in the run config.
 - R2. **Temperature.** Mercury 3 accepts only 0.5–1.0. Primary arm: every model at 0.5 where the provider allows it, otherwise the provider default, recorded in the run config. Every response's `warning` field is logged and checked.
 - R3. **Reasoning parity.** Sweep all four Mercury efforts. Run each AR baseline at its "off/minimal" setting and one "on" setting. The exception is Gemini 3.5 Flash-Lite, which runs `minimal` only because of its output price (BUDGET_ESTIMATE §7). Report reasoning tokens separately from visible tokens.
 - R4. **Always set `reasoning_effort` explicitly.** The docs disagree on the Mercury 3 default: the API schema says `medium`, while the Reasoning Efforts page says `low`.

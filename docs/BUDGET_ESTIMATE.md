@@ -116,3 +116,17 @@ The result is 68M Mercury tokens (32% credit headroom) and $37 for baselines.
 ## 8. After the pilot (R1)
 
 Replace the §2.2 guesses with R1's measured median tokens per call and turn, broken out by arm, then run `make budget` again and revise this doc. This is the gate before starting R2 ([ROADMAP_AND_PLAN](ROADMAP_AND_PLAN.md) §1, M2).
+
+### 8.1 Recalibration from the R1 pilot (2026-10-21)
+
+R1 cost **$0.29** against $0.31 expected. Scaling the pilot's mean cost per call to R2 gives:
+- **About $21.70 in total**, against an $80 budget and a $50 dry-run estimate.
+- **About $9.30 for the paid baselines.**
+- **About 31M Mercury tokens**, 31% of the free credit.
+
+What drives it:
+- Median tokens per call are well below the §2.2 guesses.
+- Rare runaway reasoning (Mercury 3 `medium`/`high` exhausting the 32,768-token cap) dominates the means.
+
+The pilot had only 3 LiveCodeBench problems, so the projection is rough. Details: [M2_UC1_RESULTS.md](M2_UC1_RESULTS.md) §5. R2's `budget_usd` stays at $80.
+

@@ -1,6 +1,6 @@
 # Roadmap and implementation plan
 
-**Status (2026-10-20):** M0 ✅ · M1 ✅ · **M2 (UC1 code generation) in progress:** offline build validated; R1 pilot next. Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
+**Status (2026-10-20):** M0 ✅ · M1 ✅ · **M2 (UC1 code generation) in progress:** R1 pilot done; R2/R3 next. Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
 
 This doc covers *when* (§1, the roadmap) and *how* (§2–§7, the implementation plan) to build what [FEATURES.md](FEATURES.md) lists.
 
@@ -33,7 +33,7 @@ M5 Blog                                 ███████
 |---|---|---|---|
 | **M0: Project setup and API verification** (wk 1) ✅ done 2026-10-20 ([results](M0_SMOKE_RESULTS.md)) | Accounts/keys for all providers; verify model IDs, prices, and limits; resolve PRD OQ1/OQ4; repo scaffolding (uv, ruff, pytest, pre-commit) | — | `configs/models.yaml` filled with `verified_on`; a manual curl to each provider works; CI-style `make check` passes on an empty package |
 | **M1: Harness core** (wk 1–2) ✅ done 2026-10-20 ([results](M1_SMOKE_RESULTS.md)) | Provider layer, timing, logging, runner, budget guard, cost engine, CLI skeleton | F1.1–F1.8, F2.1–F2.5, F3.1–F3.6, F6.1–F6.3 | A1 + A2 + A4 pass; R0 smoke passes; one end-to-end mini run produces a manifest and a calls.jsonl |
-| **M2: UC1 code generation** (wk 2–3) 🟡 offline build validated 2026-10-20; R1 pilot next | Datasets, sandbox, scoring, length sweep; R1 pilot, then R2 and R3 | F4.x, F6.4 (Pareto) | Pilot reviewed; R2/R3 complete; Pareto chart regenerates offline; CI targets met |
+| **M2: UC1 code generation** (wk 2–3) 🟡 R1 pilot done 2026-10-21 ([results](M2_UC1_RESULTS.md)); R2/R3 next | Datasets, sandbox, scoring, length sweep; R1 pilot, then R2 and R3 | F4.x, F6.4 (Pareto) | Pilot reviewed; R2/R3 complete; Pareto chart regenerates offline; CI targets met |
 | **M3: UC2 SQL agent** (wk 3–4) | BIRD subset, tools, agent loop, scorers, strict-schema sub-run; R4 | F5.x, F6.4 (speed-up chart) | R4 complete; traces replayable; reliability table produced |
 | **M4: Analysis and assets** (wk 5) | Statistics, cost tables (promo and regular), diffusion GIF (R5), failure tagging, decision matrix | F2.6, F6.5–F6.7, F7.2 (optional) | Every item in the BLOG_ALIGNMENT asset checklist exists and passes B4 |
 | **M5: Blog article** (wk 6) | Draft following the BLOG_ALIGNMENT outline; fact-check every number against its run ID; publish the repo/results | — | Every number in the draft is footnoted with a run ID; a reproducibility check is done from a clean clone |
