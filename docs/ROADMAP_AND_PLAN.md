@@ -1,6 +1,6 @@
 # Roadmap and implementation plan
 
-**Status (2026-10-21):** M0 ✅ · M1 ✅ · M2 ✅ · M3 ✅ · M4 ✅ · **M5 (blog) is next.** M4 results: docs/M4_ANALYSIS_RESULTS.md. Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
+**Status (2026-10-21):** M0 ✅ · M1 ✅ · M2 ✅ · M3 ✅ · M4 ✅ · **M5 (blog) 🟡 draft done.** M5 results and fact-check: docs/M5_BLOG_RESULTS.md (gate open: repo visibility, clean-clone reproducibility check). Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
 
 This doc covers *when* (§1, the roadmap) and *how* (§2–§7, the implementation plan) to build what [FEATURES.md](FEATURES.md) lists.
 

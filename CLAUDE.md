@@ -17,7 +17,7 @@ Read these first, in order:
 4. [docs/FEATURES.md](docs/FEATURES.md): feature IDs and their Done status
 5. [docs/BLOG_ALIGNMENT.md](docs/BLOG_ALIGNMENT.md): how results map onto the article
 
-Current phase (2026-10-21): **M0–M4 complete; M5 (blog draft in `reports/blog/draft.md`, following BLOG_ALIGNMENT §4) is next.** Feature status lives in the **Done** column of docs/FEATURES.md (41 of 44). Per milestone:
+Current phase (2026-10-21): **M0–M4 complete; M5 blog draft written and fact-checked** (draft outside the repo in `~/Documents/AI/Blogs & articles/mercury/draft.md`; fact-check table in docs/M5_BLOG_RESULTS.md). M5 gate still open: make the repo public and run the clean-clone reproducibility check. Feature status lives in the **Done** column of docs/FEATURES.md (41 of 44). Per milestone:
 - **M0/M1 (harness):** 135 offline tests and the live smoke (`r0_smoke.yaml`, 24/24) at M1; network baseline probe (F2.5) and the clean-tree guard. ROADMAP_AND_PLAN §7 covers how the build differs from the plan.
 - **M2 (UC1 code generation):** R1 pilot, R1b cap probe, R2 (41,405 calls, $23.37) and R3 length sweep ($2.03). Uniform 32,768-token cap; budget-out counts as a failure (M2-F1). docs/M2_UC1_RESULTS.md.
 - **M3 (UC2 SQL agent):** UC2 pilot, R4 (4,500 tasks, $6.42) and R4b strict-schema sub-run ($0.61). docs/M3_UC2_RESULTS.md.
