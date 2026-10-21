@@ -26,7 +26,6 @@ Current phase (2026-10-21): **M0–M4 complete; M5 blog draft written and fact-c
 Open items carried into M5 (decide with the user; M4_ANALYSIS_RESULTS §7):
 - UC2 EX precision misses TEST_PLAN B4 (±7–8 points per arm). Either extend R4 to all 496 scorable BIRD questions (~$21), or publish paired differences with CIs, as the assets do now.
 - Harness fix: non-API exceptions inside a provider call are retried as connection errors. They should stop the run. Land it before any further live run.
-- Confirm the client region ("one macOS arm64 host, US West") that every footnote takes from configs/report.yaml.
 
 ## Commands
 

@@ -134,13 +134,13 @@ Note: Gemini's mean turns are 6.6 in fig2 (latency-eligible tasks) and 6.7 in M3
 - **Inception's own numbers** (1,068 tok/s on NVIDIA GPUs, "4–8× faster", "outperforms") are quoted as the vendor's claims and set against our measurements. The draft does not claim Mercury runs on GPUs beyond what the post says.
 - **"Diffusion may well be why Mercury beats the big labs' fast models"** is hedged on purpose: the study compares products (PRD R13) and can't separate architecture from serving.
 - **"Early research suggested diffusion models handle reversal tasks"** (future tests) refers to LLaDA, cited in the original article (BLOG_ALIGNMENT C8); not tested here (F7.1 open).
-- **Client region "US West"** is still the M4 open item; it appears in every figure footnote.
+- **Client region "US West"**: confirmed by the user on 2026-10-21 (closes M4 open item 3).
 
 ## 5. Open items
 
 1. **Make `zbruceli/mercury3` public, or drop the two repo links,** before publishing. Not changed by this milestone.
 2. **Reproducibility check from a clean clone (ROADMAP gate).** Raw runs and score files are local only; copy the source runs to `results/published/` (or publish them elsewhere) and run `dllm-eval report` from a fresh clone.
-3. **Carried from M4:** UC2 EX precision (the draft publishes the paired difference with its CI), the harness hardening for non-API exceptions, and the client-region wording.
+3. **Carried from M4:** UC2 EX precision (the draft publishes the paired difference with its CI), and the harness hardening for non-API exceptions. The client region was confirmed on 2026-10-21.
 4. **Editorial review by the user.** Title, tone, and the editor note at the top of the draft.
 
 ## 6. Where the evidence lives
