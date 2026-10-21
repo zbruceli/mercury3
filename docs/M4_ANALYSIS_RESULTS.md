@@ -4,7 +4,7 @@
 |---|---|
 | Milestone | M4: Analysis and assets (see [ROADMAP_AND_PLAN.md](ROADMAP_AND_PLAN.md) §1) |
 | Date | 2026-10-21 |
-| Commit | `COMMIT_SHA` (the report generator and assets) |
+| Commit | `6ebff1f` (the report generator and assets) |
 | Gate verdict | **Not yet passed: 7 of 8 assets done.** The diffusion GIF needs the R5 live capture (§3). UC2 EX misses the B4 precision target (§1, §6) |
 | Tokens / spend | None (offline only). R5 is drafted and dry-run only: $0.013 expected, $0.043 worst case |
 | Answer | Every number in the blog can now be regenerated with one offline command, `uv run dllm-eval report`, which writes all assets into [reports/](../reports/README.md) with a dated "as of" footnote on each |
