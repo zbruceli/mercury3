@@ -262,6 +262,19 @@ def test_parallel_calls_streamed_at_one_index_stay_separate() -> None:
     assert calls[0].extra == {"extra_content": sig} and calls[1].extra == {}
 
 
+def test_parallel_calls_with_null_index() -> None:
+    """R4: Gemini also sends "index": null; that crashed the slot logic (TypeError)."""
+    asm = OpenAIStreamAssembler()
+    for i, cid in enumerate(["a", "b"]):
+        asm.feed(i * 0.1, {"choices": [{"delta": {"tool_calls": [
+            {"index": None, "id": cid, "function": {"name": "run_sql", "arguments": f'{{"query":"{cid}"}}'}}
+        ]}}]})  # fmt: skip
+    assert [(c.id, c.parsed()) for c in asm.build_tool_calls()] == [
+        ("a", {"query": "a"}),
+        ("b", {"query": "b"}),
+    ]
+
+
 def test_anthropic_streamed_tool_and_thinking() -> None:
     asm = AnthropicStreamAssembler()
     events = [

@@ -83,13 +83,13 @@ class OpenAIStreamAssembler:
                     self.parts.append(text)
             for tc in delta.get("tool_calls") or []:
                 has_content = True
-                wire = tc.get("index", 0)
+                wire = tc.get("index") or 0  # Gemini may send "index": null
                 key = self._slot_of.get(wire, wire)
                 slot = self.tool_calls.get(key)
                 if slot is not None and tc.get("id") and slot["id"] and tc["id"] != slot["id"]:
                     # Gemini streams parallel calls as complete calls that all say index 0;
                     # a new id at a used index is a new call, not more of the old one.
-                    key = max(self.tool_calls) + 1
+                    key = max(self.tool_calls, default=-1) + 1
                     self._slot_of[wire] = key
                     slot = None
                 if slot is None:
