@@ -29,7 +29,7 @@ The exit gate from ROADMAP_AND_PLAN §1: every number in the draft is footnoted 
 | Path | `draft.md` in the author's blog folder (outside the repo, at the user's request; ROADMAP_AND_PLAN §5 had planned `reports/blog/draft.md`) |
 | Images | `images/hero_drag_race.png` (hero, §3), `images/fig1_pareto_uc1.png`, `images/fig2_task_vs_call_speedup_uc2.png`, `images/fig4_cost_per_success.png`, `images/diffusion_2026.gif` |
 | Length | ~2,400 words including captions and the editor note (`wc -w`) |
-| Not used | fig3 (latency CDF), the reliability table and decision matrix as tables (their key numbers are in the text) |
+| Not used | fig3 (latency CDF), the reliability table and decision matrix as tables (their key numbers are in the text); all three are in the technical report (§7) |
 
 **Opening claim source.** Inception, "Diffusion at Scale: Introducing Mercury 3", https://www.inceptionlabs.ai/blog/introducing-mercury-3, dated Oct 19, 2026 on the page (checked 2026-10-21). Paraphrased: outperforms GPT-6 Luna and Claude Haiku 5.5 while running 4–8× faster, 1,000+ tok/s (1,068 tok/s on NVIDIA GPUs). One search snippet gave Oct 15; the page itself says Oct 19, which the draft uses.
 
@@ -163,3 +163,53 @@ Note: Gemini's mean turns are 6.6 in fig2 (latency-eligible tasks) and 6.7 in M3
 | Draft and images | The author's blog folder (`draft.md`, `images/`) | ❌ outside the repo |
 | Figure sources | `reports/assets/` (+ CSVs) | ✅ |
 | Source runs | `results/runs/<run_id>/` for every run in §3 | ❌ local only |
+
+## 7. Technical report (long version)
+
+| | |
+|---|---|
+| Path | `technical_report.md` in the author's blog folder, next to the draft |
+| Length | ~7,300 words of text (8,576 by `wc -w`, which also counts table pipes and the code block) |
+| Images | The draft's five, plus `images/fig3_latency_cdf.png` (copied from `reports/assets/`, scaled to 1,600 px) and `images/fig5_decode_speed_r3.png` (new, built by `fig_decode_speed.py` in the blog folder from the R3 table in M2 §7) |
+| Format | `$` and `%` escaped outside code; every image PNG or GIF, ≤ 1,600 px on the long side, < 1 MB |
+
+Every table in the report is copied from a results doc or a generated report, so its numbers trace to the run named there. Section by section:
+
+| Report section | Source | Run |
+|---|---|---|
+| §1 key findings | Rows of §5–§7 below | R2, R3, R4, R4b |
+| §2 the claim | Inception blog post (§2 above); pricing from configs/models.yaml (`verified_on` 2026-10-20) | — |
+| §3 diffusion dynamics table and observations | M4 §3, M4-F6; caveat on the diffusing stream from M0 §4 | R5 |
+| §4.1 models and settings table, prices | configs/models.yaml; temperatures from configs/experiments/r2_uc1_main.yaml; PRD R1–R3 | — |
+| §4.2 measurement | PRD R5–R12; CLAUDE.md measurement rules | — |
+| §4.3 run inventory | M2 header and §3–§7, M3 header and §4–§7, M4 §3; totals as in §3 above (48,095 jobs, \$33.75) | all |
+| §4.3 network baselines | M2 §3, M3 §4.2 and §6 | R1, R4 probes |
+| §5.1 UC1 arm table, CI precision | M2 §6.1 | R2 |
+| §5.2 per-dataset table, LiveCodeBench budget-out | M2 §6.2 | R2 |
+| §5.3 latency tail | M4 §4 (fig 3); fig3 CSV | R2, R4 |
+| §5.4 length sweep table and findings | M2 §7 | R3 |
+| §5.5 runaway table | reports/table_reliability.md §3; counts from reports/failure_modes.md | R2 |
+| §5.5 61\% of tokens, 119 problems | M2-F6, M4-F4 | R2 |
+| §5.5 cap probe table | M2 §4 | R1b |
+| §5.5 gallery cases 1–4 | reports/failure_gallery.md cases 1–4 | R2 |
+| §5.6 lineage | M2-F7, M2 §6.1 | R2 |
+| §6.1 BIRD design and example | M3 §3, §5; PRD UC2; `bird/1380` from configs/uc2/bird_r4_150.txt | R4 |
+| §6.1 trace replay | M3 §6.4 | R4 |
+| §6.2 UC2 arm table | M3 §6.1; fig2 CSV | R4 |
+| §6.2 paired differences | Recomputed offline on 2026-10-21 with `uc2.paired_ex_delta` (seed 0) on `uc2_scores.jsonl`. Matches M3 §6.1 except Haiku `medium` upper bound (+10.2, M3 +10.7), Luna (−6.2, +3.8; M3 −6.0, +3.6), gpt-oss `low` upper (+2.0; M3 +2.2), gpt-oss `medium` lower (−12.7; M3 −12.9), Mercury 3 `instant` upper (+5.3; M3 +5.6). The report uses the recomputed set throughout | R4 |
+| §6.2 per-call vs per-task ratios | fig2 CSV | R4 |
+| §6.2 difficulty breakdown, BIRD labels | M3 §6.1, M3-F7 | R4, UC2 pilot |
+| §6.3 reliability table, turn-cap classification | M3 §6.2; reports/table_reliability.md §1; M4 §4 | R4 |
+| §6.3 gallery cases 5–7 | reports/failure_gallery.md cases 5–7 | R4 |
+| §6.4 strict-schema table and behaviours | M3 §7, M3-F4, M3-F5; gallery cases 8–9 | R4b |
+| §7 cost table | fig4 CSV | R2, R4 |
+| §7 caching | M3 §5 | — |
+| §8.1 OpenAI front door, Fast-mode table | M2 §5 | OAI |
+| §8.2 Cerebras throttling | M2 §6.3 | R2 |
+| §8.3 Mercury quirks | M0 F2, F7; ROADMAP_AND_PLAN §6; CLAUDE.md API notes | R0 |
+| §8.4 other providers | M3-F1, M3-F2, M3-F8, M0 F1, F3, F4 | UC2 pilot, R0 |
+| §9 claims scorecard | Same numbers as the draft (§3 above) | R2, R3, R4 |
+| §10 decision table | reports/decision_matrix.md | R2, R3, R4, R4b |
+| §11 threats to validity | PRD; M2–M4 open items | — |
+
+Derived numbers in the report that don't appear verbatim in a source: gpt-oss `medium` at 42\% of Mercury 3 `low`'s median (0.345 / 0.8275 = 0.417); Mercury 3 `low` takes 15\% less time than Haiku thinking off (1 − 0.8275 / 0.9710 = 0.148); Mercury 2.5 `medium` at 4.6× Mercury 3 `low`'s latency (3.8181 / 0.8275); gpt-oss per-task speed-ups 1.13× and per-call 1.5× (1 / 0.8831, 1 / 0.6789).
