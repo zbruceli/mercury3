@@ -6,7 +6,7 @@ name: r4b-uc2-strict
 description: UC2 strict response_format sub-run - 150 BIRD Mini-Dev questions, 1 repeat
 seed: 4
 repeats: 1
-budget_usd: 20.0
+budget_usd: 5.0  # pilot r1-pilot-uc2-strict-20261021T163232Z scales to ~$0.6
 max_concurrency_per_provider: 8
 warmup_calls_per_arm: 1
 network_probe_interval_s: 600

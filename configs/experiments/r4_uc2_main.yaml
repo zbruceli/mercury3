@@ -5,7 +5,7 @@ name: r4-uc2-main
 description: UC2 main - 150 BIRD Mini-Dev questions (45 simple, 75 moderate, 30 challenging), 3 repeats
 seed: 4
 repeats: 3
-budget_usd: 80.0
+budget_usd: 20.0  # pilot r1-pilot-uc2-20261021T162056Z scales to ~$6.8 (BUDGET_ESTIMATE §8.2)
 max_concurrency_per_provider: 8
 warmup_calls_per_arm: 1
 network_probe_interval_s: 600

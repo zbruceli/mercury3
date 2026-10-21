@@ -130,3 +130,10 @@ What drives it:
 
 The pilot had only 3 LiveCodeBench problems, so the projection is rough. Details: [M2_UC1_RESULTS.md](M2_UC1_RESULTS.md) §9. **Actual R2: $23.37.** R2's `budget_usd` stays at $80.
 
+### 8.2 R4 projection from the UC2 pilot (2026-10-21)
+
+The UC2 pilot (`r1-pilot-uc2-20261021T162056Z`, 300 tasks) cost **$0.45** against a $1.18 dry-run estimate, using 1.28M Mercury tokens. R4 is 15× the pilot (150 questions instead of 10), so:
+- **R4: about $6.8**, of which about $5.3 is paid baselines and about 19M Mercury tokens (≈ $1.45 at promo, covered by the free credit). This is well below §3's 33M guess for Mercury 3, because tasks average 3–6 turns of short tool calls and runaway reasoning was rare in the pilot.
+- **R4b (strict sub-run): about $0.6** (pilot `r1-pilot-uc2-strict-20261021T163232Z`, $0.04 for 40 tasks).
+- Guards: R4 `budget_usd` $20, R4b $5. Mercury 3 `medium`/`high` runaways (M2-F1) are the main upside risk.
+

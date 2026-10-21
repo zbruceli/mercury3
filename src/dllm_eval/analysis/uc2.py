@@ -364,7 +364,7 @@ def plot_speedup(points: list[SpeedupPoint], out_png: Path, *, title: str, subti
     xmax = max([max(p.call_ci[1], p.task_ci[1]) for p in pts] + [1.0])
     ax.set_xlim(0, xmax * 1.22)
     fig.suptitle(title, x=0.02, y=0.985, ha="left", fontsize=13, color=TEXT, fontweight="bold")
-    ax.set_title(textwrap.fill(subtitle, 150), loc="left", fontsize=8, color=TEXT_2, pad=8)
+    ax.set_title(textwrap.fill(subtitle, 120), loc="left", fontsize=8, color=TEXT_2, pad=8)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, facecolor=SURFACE)
