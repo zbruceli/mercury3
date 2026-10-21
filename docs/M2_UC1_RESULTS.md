@@ -3,10 +3,11 @@
 | | |
 |---|---|
 | Milestone | M2: UC1 code generation (see [ROADMAP_AND_PLAN.md](ROADMAP_AND_PLAN.md) §1) |
-| Date | 2026-10-21 (in progress) |
+| Date | 2026-10-21 |
 | Commit | `446e61b` (the R1 pilot ran on this) |
-| Gate verdict | **Not yet run.** R1 pilot done and reviewed; R2 and R3 pending |
-| Tokens / spend | R1: $0.29; R1b cap probe: $0.29; OpenAI Fast-mode test: $0.002 |
+| Gate verdict | **Passed with one open item:** R3 (length sweep) still to run |
+| Tokens / spend | R1: $0.29; R1b cap probe: $0.29; OpenAI Fast-mode test: $0.002; **R2: $23.37** |
+| R2 answer | **At matched quality the Cerebras AR control is faster than Mercury 3** (84.9% at 0.35 s vs 86.0% at 0.83 s), and **Mercury 3 gets worse above `low` reasoning** (budget-out on up to 8.6% of calls) (§6) |
 | Cap probe answer | **A bigger budget barely helps Mercury 3:** at 131,072 tokens, 1 of 12 failures was rescued (§4) |
 | OpenAI latency answer | **Not your usage tier:** OpenAI adds ~0.45–0.6 s server-side per request; paid Fast mode trims ~0.15 s at the median (§5) |
 
@@ -16,10 +17,11 @@ The exit gate from ROADMAP_AND_PLAN §1:
 
 | Criterion | Result | Evidence |
 |---|---|---|
-| Pilot reviewed | ✅ | §3 (pilot), §4 (cap probe), §5 (OpenAI Fast-mode test), §6 (findings) |
-| R2 and R3 complete | ⏳ | — |
-| Pareto chart regenerates offline | ⏳ | F6.4 not built yet |
-| CI targets met (PRD UC1) | ⏳ | — |
+| Pilot reviewed | ✅ | §3 (pilot), §4 (cap probe), §5 (OpenAI Fast-mode test), §7 (findings) |
+| R2 complete | ✅ | §6: 41,405/41,405 ok, 0 harness errors |
+| R3 complete | ⏳ | length sweep not run yet |
+| Pareto chart regenerates offline | ✅ | `dllm-eval charts` → [figures/m2_r2_pareto_uc1.png](figures/m2_r2_pareto_uc1.png) |
+| CI targets met (PRD UC1) | ✅ | pass@1 ≤ 2.6 pp, median latency ≤ 4.5% (§6.1) |
 
 ## 2. Offline verification (before R1)
 
@@ -114,17 +116,85 @@ One oddity: several runaways stopped at identical token counts (128,982 twice, 1
 
 **Implication for the study:** keep `default` for Luna, as for every model (PRD R1: no provider gets a paid speed tier the others lack). Report Luna's latency next to the network baseline and mention that Fast mode exists. One more factor I can't rule out: account age or undocumented per-account routing. Re-probing in R2 and later runs will show whether the gateway overhead shrinks as the account ages.
 
-## 6. Findings
+## 6. R2 main run
+
+**Answer: at matched quality, the fast-hardware autoregressive control is faster than Mercury 3, and Mercury 3 gets *worse* above `low` reasoning.**
+- **Mercury 3's best setting (`low`) reaches 86.0% pass@1 at 0.83 s median.** That ties Claude Haiku 5.5 with thinking off (86.1%, 0.97 s).
+- **gpt-oss-120b on Cerebras gets within about a point (84.9%) in 0.35 s.**
+- **Above `low`, Mercury 3 runs out of budget on 7.5–8.6% of calls,** which drags `medium` and `high` below `low`.
+
+| | |
+|---|---|
+| Run id | `r2-uc1-main-20261021T034053Z` (local only), commit `446e61b`, resumed on `48b35cc` |
+| Config | [configs/experiments/r2_uc1_main.yaml](../configs/experiments/r2_uc1_main.yaml): all 164 HumanEval+, 378 MBPP+, 95 LiveCodeBench v6 easy+medium (pre-cutoff) × 5 repeats × 13 arms |
+| Jobs / result | **41,405/41,405 ok**, 0 errors at the end, no abort. 5 Cerebras 429s failed after retries on the first pass and succeeded on resume |
+| Spend | **$23.37** (pilot projection ~$22; budget $80) |
+| Scoring | 41,405 answers graded in Docker, **0 harness errors** |
+| Wall time | 03:40–07:09 UTC, including a stop/resume and an 18-minute machine sleep |
+
+![UC1 speed vs correctness](figures/m2_r2_pareto_uc1.png)
+
+Figure data: [figures/m2_r2_pareto_uc1.csv](figures/m2_r2_pareto_uc1.csv). Regenerate with `dllm-eval charts r2-uc1-main-20261021T034053Z`.
+
+### 6.1 All arms, ranked by pass@1
+
+pass@1 is over all 637 problems (mean of per-problem pass rates), with a bootstrap 95% CI over problems. Latency is end-to-end per call and excludes warm-up, retried, and pause-spanning calls (§6.3). Cost is per 1,000 solved problems; Mercury is shown at the promo / regular price.
+
+| Arm | pass@1 | Latency p50 / p95 | Budget-out | $ / 1k solved |
+|---|---:|---:|---:|---:|
+| GPT-6 Luna `medium` | **88.4%** (85.9–90.7) | 2.42 / 10.6 s | 0% | 0.19 |
+| Claude Haiku 5.5 `medium` | 87.9% (85.4–90.3) | 1.35 / 6.3 s | 0% | 0.26 |
+| Claude Haiku 5.5 thinking off | 86.1% (83.5–88.6) | 0.97 / 3.4 s | 0% | 0.14 |
+| **Mercury 3 `low`** | **86.0%** (83.5–88.5) | **0.83** / 10.4 s | 1.4% | 0.59 / 1.19 |
+| **gpt-oss-120b (Cerebras) `medium`** | 84.9% (82.3–87.4) | **0.35** / 1.7 s | 0% | 0.78 |
+| GPT-6 Luna `none` | 83.2% (80.6–86.0) | 1.28 / 9.9 s | 0% | **0.07** |
+| Mercury 2.5 `medium` | 83.1% (80.4–85.8) | 3.82 / 9.4 s | 0% | 1.34 |
+| Gemini 3.5 Flash-Lite `minimal` | 82.4% (79.5–85.2) | 0.76 / 2.0 s | 0% | 1.03 |
+| gpt-oss-120b (Cerebras) `low` | 82.4% (79.6–85.1) | **0.28** / 1.1 s | 0% | 0.49 |
+| Mercury 3 `medium` | 82.3% (79.6–84.9) | 1.02 / **51.9 s** | **7.5%** | 1.59 / 3.18 |
+| Mercury 3 `high` | 81.4% (78.6–84.0) | 1.13 / **53.6 s** | **8.6%** | 1.75 / 3.50 |
+| Mercury 3 `instant` | 80.6% (77.9–83.4) | 0.31 / 0.85 s | 0.3% | 0.17 / 0.34 |
+| Mercury 2.5 `low` | 76.9% (73.9–79.8) | 1.36 / 3.2 s | 0% | 0.45 |
+
+**Precision (PRD UC1 targets): met.** The pass@1 CI half-width is ≤ 2.6 points everywhere (target ≤ 3). Bootstrapped, the CI half-width of median latency is ≤ 4.5% (target ≤ 10%; widest is Mercury 3 `high`).
+
+### 6.2 Per dataset (pass@1)
+
+| Arm | HumanEval+ | MBPP+ | LiveCodeBench v6 |
+|---|---:|---:|---:|
+| Mercury 3 `instant` / `low` / `medium` / `high` | 88.9 / 92.4 / 90.4 / 88.4 | 77.3 / 81.9 / 82.5 / 82.1 | 79.4 / **91.4** / 67.4 / 66.1 |
+| Mercury 2.5 `low` / `medium` | 89.6 / 93.3 | 74.8 / 81.0 | 63.2 / 74.1 |
+| Claude Haiku 5.5 off / `medium` | 91.5 / 94.0 | 83.8 / 84.7 | 86.1 / 90.5 |
+| GPT-6 Luna `none` / `medium` | 90.2 / 94.0 | 80.4 / 84.3 | 82.1 / 94.5 |
+| Gemini 3.5 Flash-Lite `minimal` | 92.2 | 79.0 | 79.2 |
+| gpt-oss-120b (Cerebras) `low` / `medium` | 91.8 / 92.8 | 79.1 / 81.2 | 78.9 / 86.3 |
+
+The `medium`/`high` drop is concentrated on LiveCodeBench: Mercury 3 `high` ran out of budget on 155 of 475 calls, but only **6** of its LiveCodeBench answers were actually wrong. When it answers, it is nearly always right; it often doesn't answer.
+
+### 6.3 Data handling during the run
+
+- **Mid-run rate-limit change.** For the first ~50 minutes our client-side limiter held Mercury at the free tier's 100k output tok/min, though the account is pay-as-you-go (300k). After fixing `models.yaml` (`48b35cc`), stopping, and resuming, Mercury reached ~228k tok/min, now bound by concurrency 8. Throughput only: the limiter waits before each request's timer starts.
+- **Pauses.** Three gaps over 60 s between call starts:
+  - 9.5 min: the stop/resume.
+  - 1.1 min: a stall right after resume.
+  - 18.1 min: machine sleep.
+
+  17 calls were in flight across a gap; they keep their correctness result but are excluded from latency (`analysis/load.py`, `PAUSE_GAP_S`).
+- **Retries.** 921 calls needed retries, 765 of them Cerebras 429s, even though our client stayed under its documented 1,000 RPM. Retried calls are excluded from latency stats, which leaves ~2,800 of 3,185 Cerebras calls per arm; Cerebras's latency is measured on the calls that weren't throttled.
+
+## 7. Findings
 
 | # | Finding | Impact | Where handled |
 |---|---|---|---|
-| M2-F1 | **Mercury 3 sometimes reasons until it hits the output cap.** 7 calls (3 at `medium`, 4 at `high`) spent the whole 32,768-token budget on hidden reasoning and returned no answer (`finish=length`, 0 characters). 6 of them were LiveCodeBench `abc388_d` (every medium and high sample) and 1 was HumanEval/146. Its median latency stays low (0.70 s / 1.17 s), but these calls set its p95 at 52–58 s (worst 76 s). No other arm hit the cap | Lowers Mercury's pass@1 at the efforts meant to be most accurate, and dominates its tail latency. Mercury's own defaults are higher (65,536 at medium, 131,072 at high), but the R1b probe (§4) shows that 4× the room rescues only 1 of 12 calls | Scoring reports `budget out` separately from `no code`; both still fail. **Decided: keep the uniform 32,768 cap and report budget-out as a failure mode (§8).** A candidate blog point: a failure mode specific to reasoning effort |
-| M2-F2 | **The fast-hardware AR control is the fastest arm here.** gpt-oss-120b on Cerebras: 0.23 s TTFT and 912–1,155 output tok/s at the median, against Mercury 3's 0.25–0.75 s and 375–479 tok/s | If R2/R3 confirm it, speed comes from serving hardware, not architecture: exactly the PRD R13 question | R2/R3 with full n; the length sweep (R3) tests longer outputs |
+| M2-F1 | **Mercury 3 sometimes reasons until it hits the output cap.** 7 calls (3 at `medium`, 4 at `high`) spent the whole 32,768-token budget on hidden reasoning and returned no answer (`finish=length`, 0 characters). 6 of them were LiveCodeBench `abc388_d` (every medium and high sample) and 1 was HumanEval/146. Its median latency stays low (0.70 s / 1.17 s), but these calls set its p95 at 52–58 s (worst 76 s). No other arm hit the cap | Lowers Mercury's pass@1 at the efforts meant to be most accurate, and dominates its tail latency. Mercury's own defaults are higher (65,536 at medium, 131,072 at high), but the R1b probe (§4) shows that 4× the room rescues only 1 of 12 calls | Scoring reports `budget out` separately from `no code`; both still fail. **Decided: keep the uniform 32,768 cap and report budget-out as a failure mode (§9).** A candidate blog point: a failure mode specific to reasoning effort |
+| M2-F2 | **The fast-hardware AR control is the fastest arm here.** gpt-oss-120b on Cerebras: 0.23 s TTFT and 912–1,155 output tok/s at the median, against Mercury 3's 0.25–0.75 s and 375–479 tok/s | If R2/R3 confirm it, speed comes from serving hardware, not architecture: exactly the PRD R13 question | **Confirmed at full scale in R2 (§6):** gpt-oss `medium` 84.9% at 0.35 s vs Mercury 3 `low` 86.0% at 0.83 s, and ~2.5× the throughput. R3 tests longer outputs |
 | M2-F3 | **OpenAI is slow at the network/gateway level.** `GET /models` TTFB was 1.8 s (others 22–177 ms), and one Luna call took 120 s | Part of Luna's latency is OpenAI's API front door, not the model | **Side test (§5): mostly fixed overhead, not the usage tier.** Fast mode trims TTFT p50 by ~0.15 s and fixes the tail, but ~450 ms server time remains. Keep `default` (PRD R1); report Luna next to the network baseline |
 | M2-F4 | **Extraction is clean.** 383 of 390 responses were fenced; the 7 empty ones are exactly the budget-out calls. All 17 real failures had extracted code and ran: 15 on `abc388_d` and 2 on Mbpp/84 | No grader or extraction problems found | Hardened anyway for R2: stdin extraction now prefers a block that reads input or prints. 0 pilot results changed |
-| M2-F5 | **Medians are below the token guesses, but rare runaways dominate the means.** Pilot spend was $0.29 against $0.31 expected | Cost depends on how often runaways happen, so R2 cost is uncertain | BUDGET_ESTIMATE §8 recalibrated from the pilot |
+| M2-F5 | **Medians are below the token guesses, but rare runaways dominate the means.** Pilot spend was $0.29 against $0.31 expected | Cost depends on how often runaways happen, so R2 cost is uncertain | BUDGET_ESTIMATE §8 recalibrated from the pilot. R2 actual: $23.37 (§8) |
+| M2-F6 | **Mercury 3 gets worse above `low` reasoning.** pass@1 86.0% (`low`) → 82.3% (`medium`) → 81.4% (`high`), because budget-out rises from 1.4% to 7.5% to 8.6% of calls. On LiveCodeBench, `high` ran out of budget on 155 of 475 calls but answered only 6 wrong. Runaway calls consumed **61% of all Mercury 3 output tokens** in R2. At `instant` the same failure appears as visible think-aloud text (17 calls) | The best Mercury 3 setting for code is `low`. Higher effort costs more and is slower (p95 ≈ 52 s) for lower accuracy. A strong, specific blog point | Reported as budget-out (PRD R1). Blog: frame as a reasoning-effort failure mode, not a general accuracy gap |
+| M2-F7 | **Mercury 3 is a large step up from Mercury 2.5.** At `low`: 86.0% vs 76.9% pass@1 (+9.1 points) and 0.83 s vs 1.36 s median | Generation-over-generation progress for the "what changed since 2025" section | Lineage chart (M4) |
 
-## 7. R2 recalibration (BUDGET_ESTIMATE §8)
+## 8. R2 cost: projection vs actual (BUDGET_ESTIMATE §8)
 
 Projected from the pilot's mean cost per call, scaled to R2 (2,710 EvalPlus and 475 LiveCodeBench calls per arm):
 - **Total: about $21.70**, against an $80 budget and a $50 dry-run estimate.
@@ -133,17 +203,26 @@ Projected from the pilot's mean cost per call, scaled to R2 (2,710 EvalPlus and 
 
 The pilot sampled only 3 LiveCodeBench problems, one of which (`abc388_d`) caused every runaway, so this projection is rough in both directions. The `budget_usd` guard stays at $80.
 
-## 8. Open items
+**Actual R2:** $23.37 in total.
+- Paid baselines: $7.96 (projected $9.30).
+- Mercury: $15.41 at promo prices, covered by the free credit.
+- Mercury tokens: **39.6M** (36.0M output), above the projected 31M because runaways were more common at full scale than in the pilot. That's 40% of the 100M free credit for R2 alone.
+
+## 9. Open items
 
 - **Output-cap policy (M2-F1): decided 2026-10-21.** R2 keeps the uniform 32,768 cap (PRD R1), and "budget out" is reported as its own failure mode. The R1b probe (§4) confirmed it: 131,072 rescued 1 of 12 calls.
-- R2 and R3, then the Pareto chart (F6.4).
+- **R3 (length sweep)**: the last M2 run (630 calls, ~$1.67 expected).
+- Chart polish for the blog (M4): a few labels touch neighbouring error bars in the R2 Pareto chart.
 
-## 9. Where the evidence lives
+## 10. Where the evidence lives
 
 | What | Where | In git? |
 |---|---|---|
 | This write-up | `docs/M2_UC1_RESULTS.md` | ✅ |
 | R1 raw run | `results/runs/r1-pilot-uc1-20261021T020019Z/` | ❌ local only |
+| R2 raw run | `results/runs/r2-uc1-main-20261021T034053Z/` (`calls.jsonl` 41,405 + resume records, `probes.jsonl`) | ❌ local only |
+| R2 scores + analysis | `results/analysis/r2-uc1-main-20261021T034053Z/` (`scores.jsonl`, `calls.parquet`, chart) | ❌ local only (regenerate with `score` / `analyze` / `charts`) |
+| R2 Pareto chart + data | `docs/figures/m2_r2_pareto_uc1.png`, `.csv` | ✅ |
 | R1b raw run + scores | `results/runs/r1b-cap-probe-20261021T021543Z/`, `results/analysis/r1b-cap-probe-20261021T021543Z/` | ❌ local only |
 | OpenAI Fast-mode test rows | `results/analysis/oai-priority-ab-20261021T033428Z/calls.jsonl` | ❌ local only (rerun: `scripts/oai_priority_ab.py`) |
 | R1 scores + analysis | `results/analysis/r1-pilot-uc1-20261021T020019Z/` (`scores.jsonl`, `calls.parquet`) | ❌ local only (regenerate with `score` / `analyze`) |

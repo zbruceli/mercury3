@@ -1,0 +1,14 @@
+arm,model,setting,latency_p50_s,pass1,ci_low,ci_high,problems
+claude-haiku-5-5:medium,claude-haiku-5-5,medium,1.3520,0.8794,0.8537,0.9030,637
+claude-haiku-5-5:thinking-off,claude-haiku-5-5,thinking-off,0.9710,0.8609,0.8345,0.8860,637
+gemini-3.5-flash-lite:minimal,gemini-3.5-flash-lite,minimal,0.7644,0.8242,0.7953,0.8521,637
+gpt-6-luna:medium,gpt-6-luna,medium,2.4179,0.8835,0.8590,0.9068,637
+gpt-6-luna:none,gpt-6-luna,none,1.2801,0.8320,0.8057,0.8600,637
+gpt-oss-120b-cerebras:low,gpt-oss-120b-cerebras,low,0.2802,0.8235,0.7956,0.8512,637
+gpt-oss-120b-cerebras:medium,gpt-oss-120b-cerebras,medium,0.3449,0.8493,0.8226,0.8744,637
+mercury-2.5:low,mercury-2.5,low,1.3643,0.7689,0.7385,0.7984,637
+mercury-2.5:medium,mercury-2.5,medium,3.8181,0.8311,0.8041,0.8581,637
+mercury-3:high,mercury-3,high,1.1305,0.8135,0.7862,0.8405,637
+mercury-3:instant,mercury-3,instant,0.3106,0.8060,0.7790,0.8342,637
+mercury-3:low,mercury-3,low,0.8275,0.8603,0.8352,0.8848,637
+mercury-3:medium,mercury-3,medium,1.0216,0.8226,0.7956,0.8493,637
