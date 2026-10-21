@@ -5,7 +5,7 @@
 | Milestone | M5: Blog article (see [ROADMAP_AND_PLAN.md](ROADMAP_AND_PLAN.md) §1) |
 | Date | 2026-10-21 |
 | Commit | `7e18ef6` (the docs and assets the draft was checked against) |
-| Gate verdict | **Draft done, gate not yet passed**: every number is checked against a run id (§3), but the repo is private and the clean-clone reproducibility check has not run (§5) |
+| Gate verdict | **Draft done, gate not yet passed**: every number is checked against a run id (§3), and the repo is public (2026-10-21), but the clean-clone reproducibility check has not run (§5) |
 | Tokens / spend | None (offline only). One web lookup for Inception's announcement |
 | Answer | The draft answers the title question with "fast and good, but not the only speed demon": Mercury 3 beats the frontier labs' fast models on speed, ties them with reasoning off, and loses on speed to gpt-oss-120b on Cerebras |
 
@@ -20,7 +20,7 @@ The exit gate from ROADMAP_AND_PLAN §1: every number in the draft is footnoted 
 | Figures copied with dated captions | ✅ | fig1, fig2, fig4 and `diffusion_2026.gif` copied unchanged from `reports/assets/`; each caption names the run and "as of 2026-10-21" |
 | Caveats from the results docs | ✅ | "Caveats, honestly": products not architectures (PRD R13), LiveCodeBench pre-cutoff, UC2 EX CIs, promo vs regular price, single host and region |
 | Reproducibility check from a clean clone | ❌ | Not run. Raw runs are local only, and `results/published/` is not populated (§5) |
-| Repo public | ❌ | `zbruceli/mercury3` is private; the draft's two repo links fail until it is made public (§5) |
+| Repo public | ✅ | `zbruceli/mercury3` made public by the user; confirmed 2026-10-21 (GitHub API and the README hero image return 200 without auth) |
 
 ## 2. The draft
 
@@ -150,7 +150,7 @@ Note: Gemini's mean turns are 6.6 in fig2 (latency-eligible tasks) and 6.7 in M3
 
 ## 5. Open items
 
-1. **Make `zbruceli/mercury3` public, or drop the two repo links,** before publishing. Not changed by this milestone.
+1. ~~**Make `zbruceli/mercury3` public.**~~ Done by the user, confirmed 2026-10-21.
 2. **Reproducibility check from a clean clone (ROADMAP gate).** Raw runs and score files are local only; copy the source runs to `results/published/` (or publish them elsewhere) and run `dllm-eval report` from a fresh clone.
 3. **Carried from M4:** UC2 EX precision (the draft publishes the paired difference with its CI), and the harness hardening for non-API exceptions. The client region was confirmed on 2026-10-21.
 4. **Editorial review by the user.** Title, tone, and the editor note at the top of the draft.

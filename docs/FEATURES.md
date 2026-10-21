@@ -6,7 +6,7 @@ Priority: **P0** = required for the blog's headline results, **P1** = strongly w
 
 IDs are stable. Reference them in commits, tests, and the implementation plan.
 
-**Status (2026-10-21):** 41 of 44 done. M2 (UC1) and M3 (UC2 SQL agent) complete. M4 (analysis and assets) complete: `dllm-eval report` builds every blog asset, including the R5 diffusion GIF. M5 (blog): draft written and fact-checked (docs/M5_BLOG_RESULTS.md); publishing waits on the repo going public and the clean-clone check.
+**Status (2026-10-21):** 41 of 44 done. M2 (UC1) and M3 (UC2 SQL agent) complete. M4 (analysis and assets) complete: `dllm-eval report` builds every blog asset, including the R5 diffusion GIF. M5 (blog): draft written and fact-checked (docs/M5_BLOG_RESULTS.md); the repo is public; the clean-clone check is still open.
 
 ## F1 Provider layer
 | ID | Feature | Pri | Done |
