@@ -17,7 +17,7 @@ Read these first, in order:
 4. [docs/FEATURES.md](docs/FEATURES.md): feature IDs and their Done status
 5. [docs/BLOG_ALIGNMENT.md](docs/BLOG_ALIGNMENT.md): how results map onto the article
 
-Current phase: **M2 (UC1 code generation) in progress (2026-10-20):** datasets, prompts, Docker sandbox, and scoring are built and validated (542/542 canonical solutions pass); the R1 pilot ran 2026-10-21 (390/390, $0.29; docs/M2_UC1_RESULTS.md); R2 keeps the uniform 32,768 cap and reports budget-out as a failure (M2-F1); the R1b cap probe runs first. Previously: **M1 complete.** The harness core passes 135 offline tests and its live smoke (`r0_smoke.yaml`, 24/24). F2.5 (network baseline probe) and the clean-tree guard are in. Feature status lives in the **Done** column of docs/FEATURES.md. See ROADMAP_AND_PLAN §7 for what was built and how it differs from the plan.
+Current phase: **M2 (UC1 code generation) in progress (2026-10-20):** datasets, prompts, Docker sandbox, and scoring are built and validated (542/542 canonical solutions pass); the R1 pilot ran 2026-10-21 (390/390, $0.29; docs/M2_UC1_RESULTS.md); R2 keeps the uniform 32,768 cap and reports budget-out as a failure (M2-F1); the R1b cap probe confirmed it (131,072 rescued 1 of 12 calls). R2 (~$22 projected) is next and needs the user's go-ahead. Previously: **M1 complete.** The harness core passes 135 offline tests and its live smoke (`r0_smoke.yaml`, 24/24). F2.5 (network baseline probe) and the clean-tree guard are in. Feature status lives in the **Done** column of docs/FEATURES.md. See ROADMAP_AND_PLAN §7 for what was built and how it differs from the plan.
 
 ## Commands
 
