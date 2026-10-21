@@ -2,8 +2,9 @@
 frames F2.6 stores in calls.jsonl (`result.frames`, each the full current text at time t).
 
 The GIF shows one frame per diffusion step with the text overwritten in place, like the
-original article's animation. Characters that already match the final answer are drawn in
-the text colour and the rest in the accent colour, so the noise visibly resolves. Frame
+original article's animation, on a 16:9 canvas (blog lead images are cropped to it).
+Characters that already match the final answer are drawn in the text colour and the rest
+in the accent colour, so the noise visibly resolves. Frame
 durations follow the real arrival times, slowed down by a stated factor.
 
 Diffusing mode is for visualization only: its timings are never used for latency numbers
@@ -115,49 +116,61 @@ def render_gif(
     *,
     title: str,
     footnote: str,
+    size: tuple[int, int] = (1600, 900),
+    columns: int = 2,
+    font_px: int = 13,
     slowdown: float = 4.0,
-    cols: int = 92,
-    max_lines: int = 48,
     min_ms: int = 160,
     hold_ms: int = 3000,
 ) -> Path:
-    """One GIF frame per diffusion step. Duration of step i = (t[i+1] - t[i]) * slowdown,
+    """One GIF frame per diffusion step on a fixed canvas (16:9 by default, the shape blog
+    platforms expect for a lead image). The text flows down `columns` columns so a long
+    answer still fits a landscape frame. Duration of step i = (t[i+1] - t[i]) * slowdown,
     at least `min_ms`; the final frame is held for `hold_ms`."""
     if not frames:
         raise ValueError("no frames")
     final = frames[-1].text
-    font, small, bold = _font(14), _font(11), _font(17)
+    width, height = size
+    font, small, bold = _font(font_px), _font(round(font_px * 0.85)), _font(round(font_px * 1.4))
     cw = font.getbbox("M")[2]
-    lh = 18
-    pad = 18
-    width = pad * 2 + cw * cols
+    lh = round(font_px * 1.3)
+    pad, gutter, head_h = 28, 36, 70
+    col_w = (width - 2 * pad - gutter * (columns - 1)) // columns
+    cols = col_w // cw
     foot = textwrap.wrap(footnote, int((width - 2 * pad) / small.getbbox("M")[2]))
-    head_h = 58
-    height = head_h + lh * max_lines + 16 + 14 * len(foot) + pad
+    foot_h = 12 + 15 * len(foot)
+    rows = (height - head_h - foot_h - pad) // lh
+    capacity = rows * columns
     images = []
     t0 = frames[0].t
     for k, f in enumerate(frames):
         img = Image.new("RGB", (width, height), SURFACE)
         d = ImageDraw.Draw(img)
-        d.text((pad, 14), title, font=bold, fill=TEXT)
+        d.text((pad, 18), title, font=bold, fill=TEXT)
         status = (
             f"step {k + 1} of {len(frames)} · t = {f.t - t0:+.3f} s after the first frame · "
             f"replayed {slowdown:g}x slower"
         )
-        d.text((pad, 38), status, font=small, fill=TEXT_2)
+        d.text((pad, 46), status, font=small, fill=TEXT_2)
         lines = _wrap_with_mask(f.text, final_mask(f.text, final), cols)
-        cut = len(lines) > max_lines
-        for row, line in enumerate(lines[: max_lines - 1] if cut else lines):
-            y = head_h + row * lh
+        cut = len(lines) > capacity
+        shown = lines[: capacity - 1] if cut else lines
+        for i, line in enumerate(shown):
+            x = pad + (i // rows) * (col_w + gutter)
+            y = head_h + (i % rows) * lh
             for col, (ch, ok) in enumerate(line):
-                d.text((pad + col * cw, y), ch, font=font, fill=TEXT if ok else ACCENT)
+                d.text((x + col * cw, y), ch, font=font, fill=TEXT if ok else ACCENT)
         if cut:
-            d.text((pad, head_h + (max_lines - 1) * lh), f"… {len(lines) - max_lines + 1} more "
-                   "lines", font=small, fill=TEXT_2)  # fmt: skip
-        y = head_h + lh * max_lines + 10
+            i = capacity - 1
+            d.text((pad + (i // rows) * (col_w + gutter), head_h + (i % rows) * lh),
+                   f"… {len(lines) - len(shown)} more lines", font=small, fill=TEXT_2)  # fmt: skip
+        for c in range(1, columns):  # a faint rule between columns
+            x = pad + c * (col_w + gutter) - gutter // 2
+            d.line([(x, head_h), (x, head_h + rows * lh)], fill=TEXT_2, width=1)
+        y = height - foot_h - pad + 12
         for note in foot:
             d.text((pad, y), note, font=small, fill=TEXT_2)
-            y += 14
+            y += 15
         images.append(img.convert("P", palette=Image.Palette.ADAPTIVE, colors=32))
     durations = [
         max(min_ms, int(1000 * (b.t - a.t) * slowdown)) for a, b in itertools.pairwise(frames)

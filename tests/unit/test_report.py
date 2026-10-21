@@ -382,11 +382,15 @@ def test_dynamics_and_gif_from_r0_recording(tmp_path: Path) -> None:
     assert dyn["frames"] == 10 and dyn["final_chars"] == 3127
     assert dyn["length_steps"] == 6  # the text grows in blocks
     assert dyn["regressions"] == 3 and dyn["similarity_trace"][-1] == 1.0
-    gif = diffusion.render_gif(frames, tmp_path / "d.gif", title="t", footnote="f", max_lines=20)
+    gif = diffusion.render_gif(frames, tmp_path / "d.gif", title="t", footnote="f")
     with Image.open(gif) as im:
-        assert im.n_frames == 10
+        assert im.n_frames == 10 and im.size == (1600, 900)  # 16:9 for blog lead images
         im.seek(9)
         assert im.info["duration"] == 3000  # final frame held
+    small = diffusion.render_gif(frames, tmp_path / "s.gif", title="t", footnote="f",
+                                 size=(800, 450), columns=1)  # fmt: skip
+    with Image.open(small) as im:
+        assert im.size == (800, 450)  # long text is cut with a "more lines" note
     rows = diffusion.dynamics_rows([rec, {**rec, "status": "error"}, {**rec, "result": {}}])
     assert len(rows) == 1 and rows[0]["similarity_trace"].endswith("1.000")
     with pytest.raises(ValueError, match="no frames"):
