@@ -291,3 +291,38 @@ def analyze(
     df.to_parquet(dest / "calls.parquet", index=False)
     (dest / "arm_summary.json").write_text(json.dumps(rows, indent=2))
     typer.echo(f"\nwrote {dest}/calls.parquet and arm_summary.json")
+
+
+@app.command()
+def charts(
+    run_id: Annotated[str, typer.Argument(help="Scored UC1 run id")],
+    runs_dir: Annotated[Path, typer.Option()] = DEFAULT_RUNS_DIR,
+    out_dir: Annotated[Path, typer.Option()] = DEFAULT_ANALYSIS_DIR,
+) -> None:
+    """UC1 speed-quality Pareto chart (F6.4) from logs + scores.jsonl. Offline only."""
+    from dllm_eval.analysis.charts import pareto_points, plot_pareto, write_points_csv
+    from dllm_eval.analysis.load import load_calls
+
+    store = RunStore(runs_dir / run_id)
+    scores_path = out_dir / run_id / "scores.jsonl"
+    if not store.exists() or not scores_path.exists():
+        typer.echo(
+            f"need {runs_dir / run_id} and {scores_path} (run `dllm-eval score` first)", err=True
+        )
+        raise typer.Exit(1)
+    scores = [json.loads(line) for line in scores_path.read_text().splitlines() if line.strip()]
+    manifest = store.read_manifest()
+    points = pareto_points(load_calls(store), scores, seed=manifest["experiment"].get("seed", 0))
+    n_problems = max((p.problems for p in points), default=0)
+    date = manifest.get("created_at", "")[:10]
+    png = plot_pareto(
+        points,
+        out_dir / run_id / "fig1_pareto_uc1.png",
+        title="Speed vs. correctness on code generation",
+        subtitle=(
+            f"{n_problems} problems (HumanEval+, MBPP+, LiveCodeBench v6 pre-cutoff); one point "
+            f"per model and reasoning setting; bars = 95% CI · run {run_id} · as of {date}"
+        ),
+    )
+    csv = write_points_csv(points, out_dir / run_id / "fig1_pareto_uc1.csv")
+    typer.echo(f"wrote {png} and {csv}")

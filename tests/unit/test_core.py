@@ -124,3 +124,48 @@ def test_store_is_append_only_and_resumable(tmp_path) -> None:  # type: ignore[n
     assert store.completed_job_ids() == {"a", "b"}
     assert len(list(store.iter_calls())) == 3  # nothing rewritten
     assert "sk-secret-value" not in store.manifest_path.read_text()
+
+
+def test_pause_spanning_calls_are_flagged() -> None:
+    from dllm_eval.analysis.load import mark_pause_spanning
+
+    rows = [
+        {"started_at": "2026-10-21T04:00:00+00:00", "wall_s": 5},     # before the pause
+        {"started_at": "2026-10-21T04:00:30+00:00", "wall_s": 120},   # in flight across it
+        {"started_at": "2026-10-21T04:20:00+00:00", "wall_s": 3},     # after it
+    ]  # fmt: skip
+    gaps = mark_pause_spanning(rows, gap_s=60)
+    assert len(gaps) == 1
+    assert [r["spans_pause"] for r in rows] == [False, True, False]
+
+
+def test_pareto_chart_from_scores(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    import pandas as pd
+
+    from dllm_eval.analysis.charts import pareto_points, plot_pareto, write_points_csv
+
+    calls = pd.DataFrame(
+        [
+            {
+                "arm": a,
+                "status": "ok",
+                "warmup": False,
+                "retries": 0,
+                "spans_pause": False,
+                "total_s": t,
+            }
+            for a, t in [("mercury-3:low", 0.5), ("mercury-3:low", 0.7), ("gpt-6-luna:none", 1.2)]
+        ]
+    )
+    scores = [
+        {"arm": "mercury-3:low", "item_id": "p1", "status": "pass"},
+        {"arm": "mercury-3:low", "item_id": "p2", "status": "fail"},
+        {"arm": "gpt-6-luna:none", "item_id": "p1", "status": "pass"},
+        {"arm": "gpt-6-luna:none", "item_id": "p2", "status": "harness_error"},  # excluded
+    ]
+    pts = {p.arm: p for p in pareto_points(calls, scores)}
+    assert pts["mercury-3:low"].pass1 == 0.5 and pts["mercury-3:low"].latency_p50_s == 0.6
+    assert pts["gpt-6-luna:none"].problems == 1
+    png = plot_pareto(list(pts.values()), tmp_path / "f.png", title="t", subtitle="s")
+    assert png.stat().st_size > 10_000
+    assert "pass1" in write_points_csv(list(pts.values()), tmp_path / "f.csv").read_text()

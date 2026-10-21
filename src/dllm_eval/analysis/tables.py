@@ -10,8 +10,14 @@ from dllm_eval.stats import summarize
 
 
 def latency_sample(df: pd.DataFrame) -> pd.DataFrame:
-    """Rows eligible for latency stats: ok, not warm-up, not retried (CLAUDE.md)."""
-    return df[(df["status"] == "ok") & (~df["warmup"].astype(bool)) & (df["retries"] == 0)]
+    """Rows eligible for latency stats: ok, not warm-up, not retried (CLAUDE.md), and not
+    in flight across a run pause (load.PAUSE_GAP_S)."""
+    return df[
+        (df["status"] == "ok")
+        & (~df["warmup"].astype(bool))
+        & (df["retries"] == 0)
+        & (~df["spans_pause"].astype(bool))
+    ]
 
 
 def _fmt(s: Any, digits: int = 3) -> str:

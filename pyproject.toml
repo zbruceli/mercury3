@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "anthropic>=1.17.0",
+    "matplotlib>=3.11.2",
     "openai>=3.35.1",
     "pandas>=3.0.6",
     "pyarrow>=26.0.0",

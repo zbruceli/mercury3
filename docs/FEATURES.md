@@ -68,7 +68,7 @@ IDs are stable. Reference them in commits, tests, and the implementation plan.
 | F6.1 | Offline loader: calls.jsonl → pandas/Parquet tables | P0 | true |
 | F6.2 | Statistics: mean, p50, p95, bootstrap 95% CI | P0 | true |
 | F6.3 | Cost engine: tokens × frozen price table (promo and regular), $ per item and per success | P0 | true |
-| F6.4 | Charts: Pareto (UC1), task-vs-call speed-up (UC2), latency CDF, cost-per-success | P0 | false |
+| F6.4 | Charts: Pareto (UC1), task-vs-call speed-up (UC2), latency CDF, cost-per-success. *UC1 Pareto built (`dllm-eval charts`); the others are pending, so Done stays false* | P0 | false |
 | F6.5 | Diffusion GIF renderer from F2.6 frames | P1 | false |
 | F6.6 | Failure-mode tagging (manual tag file + aggregation) and failure gallery export | P1 | false |
 | F6.7 | Markdown report generator with dated "as of" footnotes | P1 | false |
