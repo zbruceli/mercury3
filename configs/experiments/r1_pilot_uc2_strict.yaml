@@ -1,0 +1,28 @@
+# R1 pilot, UC2 strict-schema sub-run (F5.6): the pilot's 10 questions x 1 repeat x 4 arms.
+# The final answer is the reply itself under response_format json_schema (strict) instead of
+# a submit_answer tool call, to measure schema adherence.
+#   uv run dllm-eval run configs/experiments/r1_pilot_uc2_strict.yaml --dry-run
+name: r1-pilot-uc2-strict
+description: UC2 pilot, strict response_format sub-run - 10 BIRD Mini-Dev questions, 1 repeat
+seed: 1
+repeats: 1
+budget_usd: 2.0
+max_concurrency_per_provider: 4
+warmup_calls_per_arm: 1
+workload:
+  kind: sql_agent
+  prompt_version: uc2-v1
+  ids_file: configs/uc2/bird_pilot_10.txt
+  answer_mode: response_format
+  max_turns: 8
+  sql_timeout_s: 5
+  row_cap: 50
+
+# --- arms: the lowest setting per model (BUDGET_ESTIMATE §2.3). gpt-oss-120b on Cerebras is
+# left out: its API refuses tools + response_format in one request, so it cannot run this
+# sub-run as designed (PRD OQ5, decided 2026-10-21; models.yaml tools_with_structured_outputs).
+arms:
+  - {name: instant, model: mercury-3, reasoning_effort: instant, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 150}
+  - {name: thinking-off, model: claude-haiku-5-5, reasoning_effort: low, max_completion_tokens: 32768, expected_output_tokens: 150, provider_extras: {thinking: {type: disabled}}}
+  - {name: none, model: gpt-6-luna, reasoning_effort: none, max_completion_tokens: 32768, expected_output_tokens: 150}
+  - {name: minimal, model: gemini-3.5-flash-lite, reasoning_effort: minimal, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 150}

@@ -1,4 +1,4 @@
-.PHONY: install fmt lint typecheck test test-live check validate-config budget smoke-live test-sandbox
+.PHONY: install fmt lint typecheck test test-live check validate-config budget smoke-live test-sandbox test-bird
 
 install:
 	uv sync
@@ -24,6 +24,10 @@ test-live:
 # Grades every EvalPlus canonical solution in Docker; all must pass (harness validation).
 test-sandbox:
 	uv run pytest -m sandbox -v
+
+# UC2 data check: every sampled BIRD gold query runs read-only and matches itself (no API calls).
+test-bird:
+	uv run pytest -m bird -v
 
 validate-config:
 	uv run dllm-eval validate-config

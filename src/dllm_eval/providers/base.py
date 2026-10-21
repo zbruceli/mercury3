@@ -207,6 +207,8 @@ class BaseProvider(ABC):
             raise ValueError(f"{self.model_key}: tools not supported")
         if req.response_format and not m.supports.structured_outputs:
             raise ValueError(f"{self.model_key}: structured outputs not supported")
+        if req.tools and req.response_format and not m.supports.tools_with_structured_outputs:
+            raise ValueError(f"{self.model_key}: tools with response_format not supported")
 
     def to_provider_error(self, exc: BaseException) -> ProviderError:
         if isinstance(exc, ProviderError):

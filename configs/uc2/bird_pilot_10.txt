@@ -1,0 +1,13 @@
+# BIRD Mini-Dev UC2 sample: 10 questions, seed 1, stratified by difficulty
+# (challenging 2, moderate 5, simple 3), drawn from configs/uc2/bird_r4_150.txt
+# Regenerate: uv run dllm-eval sample-bird --n 10 --seed 1 --out configs/uc2/bird_pilot_10.txt --within configs/uc2/bird_r4_150.txt
+bird/40
+bird/186
+bird/200
+bird/227
+bird/347
+bird/402
+bird/782
+bird/945
+bird/1114
+bird/1457

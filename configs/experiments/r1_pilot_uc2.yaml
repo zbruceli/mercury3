@@ -1,0 +1,37 @@
+# R1 pilot, UC2 part (TEST_PLAN B2): 10 BIRD Mini-Dev questions x 3 repeats x 11 arms = 330
+# agent tasks. Purpose: check the loop on every provider (tool-call formats, echoed
+# thinking/signatures, preambles), audit traces, and measure turns and tokens to size R4.
+#   uv run dllm-eval run configs/experiments/r1_pilot_uc2.yaml --dry-run
+name: r1-pilot-uc2
+description: UC2 pilot - 10 BIRD Mini-Dev questions (3 simple, 5 moderate, 2 challenging), 3 repeats
+seed: 1
+repeats: 3
+budget_usd: 10.0
+max_concurrency_per_provider: 4
+warmup_calls_per_arm: 1
+network_probe_interval_s: 600
+workload:
+  kind: sql_agent
+  prompt_version: uc2-v1
+  ids_file: configs/uc2/bird_pilot_10.txt
+  max_turns: 8
+  sql_timeout_s: 5
+  row_cap: 50
+
+# --- arms: UC1 arms minus Mercury 2.5 (PRD R3; BUDGET_ESTIMATE §2.1) --------------------
+# One output budget per turn for every arm (PRD R1; 32,768 as in UC1). Temperature 0.5 where
+# the provider accepts it (PRD R2); Claude Haiku 5.5 and GPT-6 Luna run at provider default.
+# Default service tier everywhere. expected_output_tokens is per TURN (BUDGET_ESTIMATE §2.2:
+# 150 visible + 0/150/600/1500 reasoning), used only for dry-run cost.
+arms:
+  - {name: instant, model: mercury-3, reasoning_effort: instant, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 150}
+  - {name: low, model: mercury-3, reasoning_effort: low, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 300}
+  - {name: medium, model: mercury-3, reasoning_effort: medium, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 750}
+  - {name: high, model: mercury-3, reasoning_effort: high, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 1650}
+  - {name: thinking-off, model: claude-haiku-5-5, reasoning_effort: low, max_completion_tokens: 32768, expected_output_tokens: 150, provider_extras: {thinking: {type: disabled}}}
+  - {name: medium, model: claude-haiku-5-5, reasoning_effort: medium, max_completion_tokens: 32768, expected_output_tokens: 750}
+  - {name: none, model: gpt-6-luna, reasoning_effort: none, max_completion_tokens: 32768, expected_output_tokens: 150}
+  - {name: medium, model: gpt-6-luna, reasoning_effort: medium, max_completion_tokens: 32768, expected_output_tokens: 750}
+  - {name: minimal, model: gemini-3.5-flash-lite, reasoning_effort: minimal, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 150}
+  - {name: low, model: gpt-oss-120b-cerebras, reasoning_effort: low, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 300}
+  - {name: medium, model: gpt-oss-120b-cerebras, reasoning_effort: medium, temperature: 0.5, max_completion_tokens: 32768, expected_output_tokens: 750}

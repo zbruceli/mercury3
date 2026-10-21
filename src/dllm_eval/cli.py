@@ -14,7 +14,7 @@ import typer
 from pydantic import ValidationError
 
 from dllm_eval.config import DEFAULT_MODELS_PATH, ProviderKind, load_registry
-from dllm_eval.experiment import CodegenWorkload, Experiment, load_experiment
+from dllm_eval.experiment import CodegenWorkload, Experiment, SqlAgentWorkload, load_experiment
 from dllm_eval.logging_store import RunStore, build_manifest, git_state, secret_values
 from dllm_eval.probe import probe_all
 from dllm_eval.runner import dry_run, resolve_items, run_experiment
@@ -61,7 +61,20 @@ def validate_config(
 
 
 def workload_provenance(exp: Experiment) -> dict[str, Any]:
-    """For UC1 runs: the exact dataset bytes and prompt version (PRD R10/R11)."""
+    """For UC1/UC2 runs: the exact dataset bytes and prompt version (PRD R10/R11)."""
+    if isinstance(exp.workload, SqlAgentWorkload):
+        import sqlite3
+
+        from dllm_eval.usecases.codegen.datasets import load_dataset_registry as load_reg
+        from dllm_eval.usecases.sql_agent import prompts as uc2_prompts
+        from dllm_eval.usecases.sql_agent.datasets import DATASET, GOLD_EXCLUDED
+
+        return {
+            "prompt_version": uc2_prompts.PROMPT_VERSION,
+            "datasets": {DATASET: load_reg().datasets[DATASET].model_dump(mode="json")},
+            "sqlite_version": sqlite3.sqlite_version,
+            "gold_excluded": sorted(GOLD_EXCLUDED),
+        }
     if not isinstance(exp.workload, CodegenWorkload):
         return {}
     from dllm_eval.usecases.codegen import prompts
@@ -81,17 +94,55 @@ def fetch_data(
         "configs/datasets.yaml"
     ),
 ) -> None:
-    """Download any missing UC1 dataset and verify every file against its pinned sha256."""
+    """Download any missing dataset and verify every file against its pinned sha256.
+    BIRD Mini-Dev is then extracted (questions + SQLite files only) to data/bird-minidev/."""
     from dllm_eval.usecases.codegen.datasets import fetch, load_dataset_registry
+    from dllm_eval.usecases.sql_agent.datasets import DATASET, extract
 
     reg = load_dataset_registry(datasets)
     for name, spec in reg.datasets.items():
         try:
             path = fetch(spec)
+            if name == DATASET:
+                extract(spec)
         except (OSError, ValueError) as e:
             typer.echo(f"{name}: FAILED: {e}", err=True)
             raise typer.Exit(1) from e
         typer.echo(f"{name} {spec.version}: OK ({path}, {spec.bytes} bytes, sha256 verified)")
+
+
+@app.command("sample-bird")
+def sample_bird(
+    n: Annotated[int, typer.Option(help="Questions to draw")],
+    seed: Annotated[int, typer.Option(help="Sampler seed")],
+    out: Annotated[Path, typer.Option(help="Id list to write (commit it)")],
+    within: Annotated[
+        Path | None, typer.Option(help="Draw from this id list instead of all questions")
+    ] = None,
+) -> None:
+    """Write a difficulty-stratified BIRD Mini-Dev id list (F5.1). Deterministic."""
+    from collections import Counter
+
+    from dllm_eval.usecases.codegen.datasets import load_dataset_registry
+    from dllm_eval.usecases.sql_agent.datasets import DATASET, load_questions, stratified_sample
+    from dllm_eval.usecases.sql_agent.workload import read_ids, write_ids
+
+    questions = load_questions(load_dataset_registry().datasets[DATASET])
+    if within is not None:
+        keep = set(read_ids(within))
+        questions = [q for q in questions if q.id in keep]
+    chosen = stratified_sample(questions, n, seed)
+    mix = Counter(q.difficulty for q in chosen)
+    header = (
+        f"BIRD Mini-Dev UC2 sample: {n} questions, seed {seed}, stratified by difficulty\n"
+        f"({', '.join(f'{k} {v}' for k, v in sorted(mix.items()))})"
+        + (f", drawn from {within}" if within else "")
+        + "\nRegenerate: uv run dllm-eval sample-bird "
+        + f"--n {n} --seed {seed} --out {out}"
+        + (f" --within {within}" if within else "")
+    )
+    write_ids(out, chosen, header)
+    typer.echo(f"wrote {out}: {n} ids ({dict(mix)})")
 
 
 @app.command()
@@ -112,8 +163,11 @@ def score(
         typer.echo(f"no run {run_id} under {runs_dir}", err=True)
         raise typer.Exit(1)
     exp = Experiment.model_validate(store.read_manifest()["experiment"])
+    if isinstance(exp.workload, SqlAgentWorkload):
+        _score_uc2(store, exp, exp.workload, out_dir / run_id)
+        return
     if not isinstance(exp.workload, CodegenWorkload):
-        typer.echo("not a UC1 (codegen) run", err=True)
+        typer.echo("not a UC1 (codegen) or UC2 (sql_agent) run", err=True)
         raise typer.Exit(1)
     try:
         cfg = load_sandbox_config(sandbox)
@@ -134,6 +188,83 @@ def score(
         else:
             finish[rec["job_id"]] = rec["result"].get("finish_reason")
     typer.echo(scores_markdown(summarize(rows, api_errors, finish)))
+
+
+def _score_uc2(store: RunStore, exp: Experiment, wl: SqlAgentWorkload, dest: Path) -> None:
+    from dllm_eval.analysis import uc2
+    from dllm_eval.usecases.sql_agent.scoring import score_run
+    from dllm_eval.usecases.sql_agent.workload import db_paths, select_questions
+
+    questions = select_questions(wl)
+    rows = score_run(
+        store, {q.id: q for q in questions}, db_paths(questions), dest / "uc2_scores.jsonl",
+        log=typer.echo,
+    )  # fmt: skip
+    tasks, turns = uc2.task_rows(store)
+    table = uc2.arm_table(pd_frame(tasks), pd_frame(turns), rows, seed=exp.seed)
+    typer.echo("\n" + uc2.accuracy_markdown(table))
+    typer.echo("\nReliability:\n" + uc2.reliability_markdown(table))
+    (dest / "uc2_arm_table.json").write_text(json.dumps(table, indent=2, default=str))
+    typer.echo(f"\nwrote {dest}/uc2_scores.jsonl and uc2_arm_table.json")
+
+
+def pd_frame(rows: list[dict[str, Any]]) -> Any:
+    import pandas as pd
+
+    return pd.DataFrame(rows)
+
+
+@app.command()
+def trace(
+    run_id: Annotated[str, typer.Argument(help="UC2 run id")],
+    job_id: Annotated[str | None, typer.Argument(help="Job id (default: list jobs)")] = None,
+    runs_dir: Annotated[Path, typer.Option()] = DEFAULT_RUNS_DIR,
+    verify: Annotated[
+        bool, typer.Option(help="Re-run the recorded tool calls and check the results match")
+    ] = False,
+    all_jobs: Annotated[
+        bool, typer.Option("--all", help="With --verify: check every task")
+    ] = False,
+) -> None:
+    """Pretty-print a UC2 task trace (F5.7), or check that traces replay. Offline only."""
+    from dllm_eval.usecases.sql_agent.tools import ReadOnlyDB
+    from dllm_eval.usecases.sql_agent.trace import format_trace, replay
+    from dllm_eval.usecases.sql_agent.workload import db_paths, select_questions
+
+    store = RunStore(runs_dir / run_id)
+    if not store.exists():
+        typer.echo(f"no run {run_id} under {runs_dir}", err=True)
+        raise typer.Exit(1)
+    exp = Experiment.model_validate(store.read_manifest()["experiment"])
+    if not isinstance(exp.workload, SqlAgentWorkload):
+        typer.echo("not a UC2 (sql_agent) run", err=True)
+        raise typer.Exit(1)
+    recs = store.latest_by_job()
+    if verify:
+        paths = db_paths(select_questions(exp.workload))
+        dbs = {i: ReadOnlyDB(p) for i, p in paths.items()}
+        targets = list(recs.values()) if all_jobs else [recs[job_id]] if job_id else []
+        if not targets:
+            typer.echo("give a job id or --all", err=True)
+            raise typer.Exit(1)
+        bad = 0
+        for rec in targets:
+            problems = replay(rec, exp.workload, dbs[rec["item_id"]])
+            if problems:
+                bad += 1
+                typer.echo(f"{rec['job_id']}: " + "; ".join(problems))
+        typer.echo(f"replayed {len(targets)} traces: {len(targets) - bad} match, {bad} differ")
+        if bad:
+            raise typer.Exit(1)
+        return
+    if job_id is None:
+        for j, rec in sorted(recs.items()):
+            typer.echo(f"{j}\t{rec['status']}\t{(rec.get('task') or {}).get('outcome')}")
+        return
+    if job_id not in recs:
+        typer.echo(f"no job {job_id!r} in {run_id}", err=True)
+        raise typer.Exit(1)
+    typer.echo(format_trace(recs[job_id]))
 
 
 @app.command()
@@ -280,8 +411,12 @@ def analyze(
     if not store.exists():
         typer.echo(f"no run {run_id} under {runs_dir}", err=True)
         raise typer.Exit(1)
+    exp_dict = store.read_manifest()["experiment"]
+    if (exp_dict.get("workload") or {}).get("kind") == "sql_agent":
+        _analyze_uc2(store, out_dir / run_id, exp_dict.get("seed", 0))
+        return
     df = load_calls(store)
-    rows = arm_summary(df, seed=store.read_manifest()["experiment"].get("seed", 0))
+    rows = arm_summary(df, seed=exp_dict.get("seed", 0))
     typer.echo(to_markdown(rows))
     probes = list(store.iter_probes())
     if probes:
@@ -293,17 +428,52 @@ def analyze(
     typer.echo(f"\nwrote {dest}/calls.parquet and arm_summary.json")
 
 
+def _analyze_uc2(store: RunStore, dest: Path, seed: int) -> None:
+    """UC2: task and turn tables; accuracy columns appear once `score` has run."""
+    from dllm_eval.analysis import uc2
+    from dllm_eval.analysis.tables import probe_markdown
+
+    tasks, turns = uc2.task_rows(store)
+    scores_path = dest / "uc2_scores.jsonl"
+    scores = (
+        [json.loads(x) for x in scores_path.read_text().splitlines() if x.strip()]
+        if scores_path.exists()
+        else []
+    )
+    tdf, udf = pd_frame(tasks), pd_frame(turns)
+    table = uc2.arm_table(tdf, udf, scores, seed=seed)
+    if not scores:
+        typer.echo("(not scored yet: run `dllm-eval score` for EX)")
+    typer.echo(uc2.accuracy_markdown(table))
+    typer.echo("\nReliability:\n" + uc2.reliability_markdown(table))
+    probes = list(store.iter_probes())
+    if probes:
+        typer.echo("\nNetwork baseline (median of samples, ms):\n" + probe_markdown(probes))
+    dest.mkdir(parents=True, exist_ok=True)
+    tdf.to_parquet(dest / "tasks.parquet", index=False)
+    udf.to_parquet(dest / "turns.parquet", index=False)
+    typer.echo(f"\nwrote {dest}/tasks.parquet and turns.parquet")
+
+
 @app.command()
 def charts(
-    run_id: Annotated[str, typer.Argument(help="Scored UC1 run id")],
+    run_id: Annotated[str, typer.Argument(help="Scored UC1 run id, or a UC2 run id")],
     runs_dir: Annotated[Path, typer.Option()] = DEFAULT_RUNS_DIR,
     out_dir: Annotated[Path, typer.Option()] = DEFAULT_ANALYSIS_DIR,
+    reference: Annotated[str, typer.Option(help="UC2: arm the ratios are relative to")] = (
+        "mercury-3:low"
+    ),
 ) -> None:
-    """UC1 speed-quality Pareto chart (F6.4) from logs + scores.jsonl. Offline only."""
+    """UC1 Pareto chart, or the UC2 task-vs-call speed-up chart (F6.4). Offline only."""
     from dllm_eval.analysis.charts import pareto_points, plot_pareto, write_points_csv
     from dllm_eval.analysis.load import load_calls
 
     store = RunStore(runs_dir / run_id)
+    if store.exists() and store.read_manifest()["experiment"]["workload"].get("kind") == (
+        "sql_agent"
+    ):
+        _charts_uc2(store, out_dir / run_id, reference)
+        return
     scores_path = out_dir / run_id / "scores.jsonl"
     if not store.exists() or not scores_path.exists():
         typer.echo(
@@ -325,4 +495,29 @@ def charts(
         ),
     )
     csv = write_points_csv(points, out_dir / run_id / "fig1_pareto_uc1.csv")
+    typer.echo(f"wrote {png} and {csv}")
+
+
+def _charts_uc2(store: RunStore, dest: Path, reference: str) -> None:
+    from dllm_eval.analysis import uc2
+
+    manifest = store.read_manifest()
+    tasks, turns = uc2.task_rows(store)
+    tdf = pd_frame(tasks)
+    points = uc2.speedup_points(
+        tdf, pd_frame(turns), reference=reference, seed=manifest["experiment"].get("seed", 0)
+    )
+    n_q = tdf["item_id"].nunique()
+    date = manifest.get("created_at", "")[:10]
+    png = uc2.plot_speedup(
+        points,
+        dest / "fig_uc2_speedup.png",
+        title="Does per-call speed carry through to whole agent tasks?",
+        subtitle=(
+            f"SQL agent on {n_q} BIRD Mini-Dev questions (max 8 turns). Median latency per model "
+            f"call and per task, relative to {reference}; bars = 95% bootstrap CI · "
+            f"run {store.dir.name} · as of {date}"
+        ),
+    )
+    csv = uc2.write_speedup_csv(points, dest / "fig_uc2_speedup.csv")
     typer.echo(f"wrote {png} and {csv}")

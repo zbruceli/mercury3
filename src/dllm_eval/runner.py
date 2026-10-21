@@ -14,7 +14,7 @@ from typing import Any
 
 from dllm_eval.config import ModelRegistry
 from dllm_eval.cost import call_cost, estimate_tokens, tokens_cost
-from dllm_eval.experiment import Arm, Experiment, PromptItem, PromptWorkload
+from dllm_eval.experiment import Arm, Experiment, PromptItem, PromptWorkload, SqlAgentWorkload
 from dllm_eval.logging_store import RunStore
 from dllm_eval.providers import BaseProvider, ErrorKind, ProviderError, RateLimiter, build_provider
 from dllm_eval.schemas import ChatRequest
@@ -38,6 +38,10 @@ def resolve_items(exp: Experiment, root: Path = Path(".")) -> list[PromptItem]:
     prompt template (which loads and checksum-verifies the datasets)."""
     if isinstance(exp.workload, PromptWorkload):
         return list(exp.workload.items)
+    if isinstance(exp.workload, SqlAgentWorkload):
+        from dllm_eval.usecases.sql_agent import workload as uc2
+
+        return uc2.build_items(uc2.select_questions(exp.workload, root=root), exp.workload)
     from dllm_eval.usecases.codegen.workload import build_items, select_problems
 
     return build_items(select_problems(exp.workload, exp.seed, root=root))
@@ -69,6 +73,10 @@ def expand_jobs(exp: Experiment, items: list[PromptItem] | None = None) -> list[
 
 
 def build_request(job: Job, exp: Experiment) -> ChatRequest:
+    if isinstance(exp.workload, SqlAgentWorkload):  # the first turn's request
+        from dllm_eval.usecases.sql_agent.agent import build_request as agent_request
+
+        return agent_request(job.arm, exp.workload, list(job.item.messages), stream=exp.stream)
     a = job.arm
     return ChatRequest(
         model_key=a.model,
@@ -79,6 +87,13 @@ def build_request(job: Job, exp: Experiment) -> ChatRequest:
         stream=exp.stream,
         provider_extras=dict(a.provider_extras),
     )
+
+
+def _task_input(first_turn: int, turns: float, growth: int) -> int:
+    """Input tokens of one agent task: every turn resends the history, which grows by
+    `growth` tokens per turn."""
+    k = max(1, round(turns))
+    return sum(first_turn + t * growth for t in range(k))
 
 
 @dataclass
@@ -98,6 +113,7 @@ def dry_run(
     """Job counts and token/cost estimates per arm (F3.5). No API calls."""
     exp.check_against(registry)
     items = items if items is not None else resolve_items(exp)
+    wl = exp.workload
     rows = []
     for arm in exp.arms:
         model = registry.models[arm.model]
@@ -108,6 +124,30 @@ def dry_run(
         inp = sum(per_item_in) * exp.repeats
         worst = arm.max_completion_tokens * n
         expected = (arm.expected_output_tokens or arm.max_completion_tokens) * n
+        if isinstance(wl, SqlAgentWorkload):
+            # A task resends its growing history every turn. expected_output_tokens is per
+            # turn; the worst case is max_turns turns that each use the whole budget.
+            # Prompt caching is ignored, so input cost is an upper bound.
+            first = inp // max(n, 1)
+            inp_expected = _task_input(first, wl.expected_turns, wl.expected_turn_growth_tokens) * n
+            expected = round(
+                (arm.expected_output_tokens or arm.max_completion_tokens) * wl.expected_turns * n
+            )
+            worst = arm.max_completion_tokens * wl.max_turns * n
+            worst_growth = wl.expected_turn_growth_tokens + arm.max_completion_tokens
+            inp_worst = _task_input(first, wl.max_turns, worst_growth) * n
+            rows.append(
+                DryRunRow(
+                    arm_id=arm.id,
+                    jobs=n,
+                    input_tokens=inp_expected,
+                    output_tokens_expected=expected,
+                    output_tokens_worst=worst,
+                    cost_expected=tokens_cost(model, inp_expected, 0, expected),
+                    cost_worst=tokens_cost(model, inp_worst, 0, worst),
+                )
+            )
+            continue
         rows.append(
             DryRunRow(
                 arm_id=arm.id,
@@ -144,8 +184,11 @@ async def run_experiment(
     provider_factory: ProviderFactory = build_provider,
     prober: Prober | None = None,
     items: list[PromptItem] | None = None,
+    task_dbs: dict[str, Path] | None = None,
     log: Callable[[str], None] = print,
 ) -> RunSummary:
+    """Run every job not yet done. For sql_agent workloads `task_dbs` maps item id to its
+    database (default: resolved from the dataset registry)."""
     exp.check_against(registry)
     done = store.completed_job_ids()
     all_jobs = expand_jobs(exp, items)
@@ -169,6 +212,14 @@ async def run_experiment(
         for pk in {registry.models[a.model].provider for a in exp.arms}
     }
     abort = asyncio.Event()
+    agent_dbs: dict[str, Any] = {}
+    if isinstance(exp.workload, SqlAgentWorkload):
+        from dllm_eval.usecases.sql_agent import workload as uc2
+        from dllm_eval.usecases.sql_agent.tools import ReadOnlyDB
+
+        if task_dbs is None:
+            task_dbs = uc2.db_paths(uc2.select_questions(exp.workload))
+        agent_dbs = {item_id: ReadOnlyDB(p) for item_id, p in task_dbs.items()}
 
     def stop(reason: str) -> None:
         if not abort.is_set():
@@ -197,6 +248,9 @@ async def run_experiment(
                 "started_at": dt.datetime.now(dt.UTC).isoformat(timespec="milliseconds"),
                 "request": req.model_dump(mode="json", by_alias=True),
             }
+            if isinstance(exp.workload, SqlAgentWorkload):
+                await agent_job(job, exp.workload, base)
+                return
             t0 = time.perf_counter()
             try:
                 result = await providers[job.arm.model].chat(req)
@@ -252,6 +306,66 @@ async def run_experiment(
                     "cost_usd_regular": call_cost(result.usage, model, regular=True),
                 }
             )
+
+    async def agent_job(job: Job, wl: SqlAgentWorkload, base: dict[str, Any]) -> None:
+        """One UC2 task: the whole agent loop, logged as a single record with its trace."""
+        from dllm_eval.usecases.sql_agent.agent import run_task
+
+        model = registry.models[job.arm.model]
+        t0 = time.perf_counter()
+        try:
+            task = await run_task(
+                providers[job.arm.model], job.arm, job.item, agent_dbs[job.item.id], wl,
+                stream=exp.stream,
+            )  # fmt: skip
+        except ValueError as e:  # request validation: a config bug, not a model failure
+            summary.errors += 1
+            store.append_call({**base, "status": "config_error", "error": {"message": str(e)}})
+            stop(f"config error on {job.arm.id}: {e}")
+            return
+        except Exception as e:  # harness bug: stop rather than burn budget on it
+            summary.errors += 1
+            store.append_call(
+                {
+                    **base,
+                    "status": "internal_error",
+                    "error": {"message": f"{type(e).__name__}: {e}"},
+                }
+            )
+            stop(f"internal error on {job.arm.id}: {type(e).__name__}: {e}")
+            return
+
+        costs = [call_cost(t.result.usage, model) for t in task.turns]
+        regular = [call_cost(t.result.usage, model, regular=True) for t in task.turns]
+        cost = sum(c or 0.0 for c in costs)
+        summary.spent_usd += cost
+        warnings = [w for t in task.turns for w in t.result.warnings]
+        status = "ok"
+        if task.error is not None:
+            status = "error"
+            summary.errors += 1
+            if len(summary.error_samples) < 5:
+                summary.error_samples.append(task.error.to_record())
+            if task.error.kind is ErrorKind.RUN_FATAL:
+                stop(f"run-fatal error on {job.arm.id}: {task.error}")
+        elif warnings and exp.fail_on_warning:
+            status = "warning"
+            stop(f"provider warning on {job.arm.id}: {warnings}")
+        else:
+            summary.ok += 1
+        store.append_call(
+            {
+                **base,
+                "status": status,
+                "task": task.to_record(record_raw=exp.record_raw),
+                "error": task.error.to_record() if task.error else None,
+                "wall_s": time.perf_counter() - t0,
+                "cost_usd": None if any(c is None for c in costs) else cost,
+                "cost_usd_regular": (
+                    None if any(c is None for c in regular) else sum(c or 0.0 for c in regular)
+                ),
+            }
+        )
 
     async def reprobe(interval: float) -> None:
         assert prober is not None

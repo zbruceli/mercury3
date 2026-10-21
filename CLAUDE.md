@@ -17,7 +17,7 @@ Read these first, in order:
 4. [docs/FEATURES.md](docs/FEATURES.md): feature IDs and their Done status
 5. [docs/BLOG_ALIGNMENT.md](docs/BLOG_ALIGNMENT.md): how results map onto the article
 
-Current phase: **M2 (UC1 code generation) in progress (2026-10-20):** datasets, prompts, Docker sandbox, and scoring are built and validated (542/542 canonical solutions pass); the R1 pilot ran 2026-10-21 (390/390, $0.29; docs/M2_UC1_RESULTS.md); R2 keeps the uniform 32,768 cap and reports budget-out as a failure (M2-F1); the R1b cap probe confirmed it (131,072 rescued 1 of 12 calls). R2 ran 2026-10-21: 41,405/41,405, $23.37, scored and charted (docs/M2_UC1_RESULTS.md §6). R3 (length sweep) ran 2026-10-21 (630/630, $2.03). **M2 complete; M3 (UC2 SQL agent) is next.** Previously: **M1 complete.** The harness core passes 135 offline tests and its live smoke (`r0_smoke.yaml`, 24/24). F2.5 (network baseline probe) and the clean-tree guard are in. Feature status lives in the **Done** column of docs/FEATURES.md. See ROADMAP_AND_PLAN §7 for what was built and how it differs from the plan.
+Current phase: **M2 (UC1 code generation) in progress (2026-10-20):** datasets, prompts, Docker sandbox, and scoring are built and validated (542/542 canonical solutions pass); the R1 pilot ran 2026-10-21 (390/390, $0.29; docs/M2_UC1_RESULTS.md); R2 keeps the uniform 32,768 cap and reports budget-out as a failure (M2-F1); the R1b cap probe confirmed it (131,072 rescued 1 of 12 calls). R2 ran 2026-10-21: 41,405/41,405, $23.37, scored and charted (docs/M2_UC1_RESULTS.md §6). R3 (length sweep) ran 2026-10-21 (630/630, $2.03). **M2 complete. M3 (UC2 SQL agent) in progress:** BIRD Mini-Dev downloaded and pinned, tools, agent loop, scorer, strict-schema sub-run, trace replay, and UC2 analysis are built and tested offline (ROADMAP_AND_PLAN §9); the UC2 pilot and R4 are next. Previously: **M1 complete.** The harness core passes 135 offline tests and its live smoke (`r0_smoke.yaml`, 24/24). F2.5 (network baseline probe) and the clean-tree guard are in. Feature status lives in the **Done** column of docs/FEATURES.md. See ROADMAP_AND_PLAN §7 for what was built and how it differs from the plan.
 
 ## Commands
 
@@ -34,8 +34,12 @@ uv run --env-file .env dllm-eval run <cfg> --live --resume <run_id>  # finish an
 # --live refuses uncommitted changes (TEST_PLAN B1); --allow-dirty overrides and is recorded in the manifest
 uv run dllm-eval analyze <run_id>                                    # offline: arm table + calls.parquet
 uv run dllm-eval fetch-data                                          # download + sha256-verify UC1 datasets
-uv run dllm-eval score <run_id>                                      # UC1: grade code in Docker -> pass@k
+uv run dllm-eval score <run_id>                                      # UC1: grade code in Docker -> pass@k; UC2: EX + reliability
+uv run dllm-eval charts <run_id>                                     # UC1 Pareto / UC2 task-vs-call speed-up chart
+uv run dllm-eval trace <run_id> [<job_id>] [--verify --all]          # UC2: print a task trace / check traces replay
+uv run dllm-eval sample-bird --n 150 --seed 2026 --out <ids.txt>     # UC2: stratified BIRD id list (commit it)
 make test-sandbox                                                    # grader validation in Docker (no API calls)
+make test-bird                                                       # UC2 gold-query check on the real BIRD data (no API calls)
 ```
 
 Without `--live`, `run` prints the estimate and exits 2. Every live run first probes each provider's network (free `GET .../models`; F2.5). Start probes go in `manifest.json` and all probes in `probes.jsonl`; `analyze` prints them. Tests use the fake provider (`kind: fake`) and never touch the network.
@@ -82,7 +86,7 @@ Without `--live`, `run` prints the estimate and exits 2. Every live run first pr
 - Model-generated code runs **only** inside the Docker sandbox (no network, resource limits, non-root). Never `exec` or `subprocess` it on the host. Downloaded dataset code, including canonical solutions, is treated the same way. `HostExecutor` is only for our own test fixtures.
 - After any change to `sandbox/` or `usecases/codegen/`, run `make test-sandbox`. Every EvalPlus canonical solution must still pass, and the pinned input drops must not change.
 - Docker Desktop puts its CLI (and `docker-credential-osxkeychain`) in `~/.docker/bin`. Add that to `PATH` for `docker pull`; the executor finds the CLI on its own.
-- SQL tools use a read-only SQLite connection (`mode=ro`) with a timeout and a row cap.
+- SQL tools use a read-only SQLite connection (`mode=ro`) with a timeout and a row cap. Model SQL goes through `sql_agent.tools.ReadOnlyDB` only (authorizer, `query_only`, no ATTACH). After any change to `usecases/sql_agent/`, run `make test-bird` too.
 - Tests: unit tests for every scorer, parser, and cost function, using recorded fixtures. Live tests use `@pytest.mark.live` and are excluded by default.
 - Reference feature IDs (e.g. `F2.6`) in commit messages and PR descriptions.
 

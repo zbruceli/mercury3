@@ -63,8 +63,9 @@ venv = ".venv"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers -m 'not live and not sandbox'"
+addopts = "-ra --strict-markers -m 'not live and not sandbox and not bird'"
 markers = [
     "live: calls real provider APIs and spends tokens; run only with explicit approval",
     "sandbox: needs the Docker daemon and a digest-pinned sandbox image (make test-sandbox)",
+    "bird: needs the extracted BIRD Mini-Dev data from `dllm-eval fetch-data` (make test-bird)",
 ]

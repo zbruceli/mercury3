@@ -6,7 +6,7 @@ Priority: **P0** = required for the blog's headline results, **P1** = strongly w
 
 IDs are stable. Reference them in commits, tests, and the implementation plan.
 
-**Status (2026-10-21):** 29 of 44 done. M2 (UC1) complete. M3 (UC2 SQL agent) is next.
+**Status (2026-10-21):** 36 of 44 done. M2 (UC1) complete. M3 (UC2 SQL agent): F5.x built and tested offline; the pilot and R4 are next.
 
 ## F1 Provider layer
 | ID | Feature | Pri | Done |
@@ -54,13 +54,13 @@ IDs are stable. Reference them in commits, tests, and the implementation plan.
 ## F5 UC2: SQL tool-calling agent
 | ID | Feature | Pri | Done |
 |---|---|---|---|
-| F5.1 | BIRD Mini-Dev SQLite loader plus a stratified subset sampler | P0 | false |
-| F5.2 | Tools: `list_tables`, `describe_table`, `run_sql` (read-only connection, timeout, row cap), `submit_answer` | P0 | false |
-| F5.3 | Model-agnostic agent loop (max 8 turns), with per-turn timing and full trace | P0 | false |
-| F5.4 | Execution-accuracy scorer (result-set comparison, order-insensitive unless ORDER BY) | P0 | false |
-| F5.5 | Tool-call validity checker (JSON parse + JSON Schema validation) | P0 | false |
-| F5.6 | Strict `response_format: json_schema` sub-run for `submit_answer` | P1 | false |
-| F5.7 | Trace replay viewer (CLI pretty-print of a task trace) | P1 | false |
+| F5.1 | BIRD Mini-Dev SQLite loader plus a stratified subset sampler (`dllm-eval sample-bird`; committed id lists in `configs/uc2/`) | P0 | true |
+| F5.2 | Tools: `list_tables`, `describe_table`, `run_sql` (read-only connection, timeout, row cap), `submit_answer` | P0 | true |
+| F5.3 | Model-agnostic agent loop (max 8 turns), with per-turn timing and full trace | P0 | true |
+| F5.4 | Execution-accuracy scorer (result-set comparison, order-insensitive unless ORDER BY) | P0 | true |
+| F5.5 | Tool-call validity checker (JSON parse + JSON Schema validation) | P0 | true |
+| F5.6 | Strict `response_format: json_schema` sub-run for `submit_answer` | P1 | true |
+| F5.7 | Trace replay viewer (CLI pretty-print of a task trace; `dllm-eval trace --verify` re-runs the recorded tool calls) | P1 | true |
 
 ## F6 Analysis and reporting
 | ID | Feature | Pri | Done |
@@ -68,7 +68,7 @@ IDs are stable. Reference them in commits, tests, and the implementation plan.
 | F6.1 | Offline loader: calls.jsonl → pandas/Parquet tables | P0 | true |
 | F6.2 | Statistics: mean, p50, p95, bootstrap 95% CI | P0 | true |
 | F6.3 | Cost engine: tokens × frozen price table (promo and regular), $ per item and per success | P0 | true |
-| F6.4 | Charts: Pareto (UC1), task-vs-call speed-up (UC2), latency CDF, cost-per-success. *UC1 Pareto built (`dllm-eval charts`); the others are pending, so Done stays false* | P0 | false |
+| F6.4 | Charts: Pareto (UC1), task-vs-call speed-up (UC2), latency CDF, cost-per-success. *UC1 Pareto and the UC2 task-vs-call speed-up chart are built (`dllm-eval charts`); the latency CDF and cost-per-success charts are pending (M4), so Done stays false* | P0 | false |
 | F6.5 | Diffusion GIF renderer from F2.6 frames | P1 | false |
 | F6.6 | Failure-mode tagging (manual tag file + aggregation) and failure gallery export | P1 | false |
 | F6.7 | Markdown report generator with dated "as of" footnotes | P1 | false |

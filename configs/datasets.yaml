@@ -1,4 +1,4 @@
-# UC1 benchmark datasets (F4.1). Files live under data/raw/ (gitignored); this registry
+# Benchmark datasets (UC1: F4.1, UC2: F5.1). Files live under data/raw/ (gitignored); this registry
 # pins exactly which bytes were used. `dllm-eval fetch-data` downloads and verifies them.
 # Downloaded 2026-10-20 with the user's approval.
 
@@ -29,3 +29,17 @@ datasets:
     bytes: 134303240
     sha256: bb4c364f71921c4495a6ad15abe1a927350b720009f4933e2e71f8af0f6fd1f5
     problems: 175  # 95 easy+medium are used (PRD UC1)
+
+  bird-minidev:
+    # UC2 (F5.1): BIRD Mini-Dev, SQLite flavour. The official archive from
+    # github.com/bird-bench/mini_dev (README download link). Also holds MySQL/PostgreSQL
+    # dumps we never extract: `fetch-data` pulls out only mini_dev_sqlite.json and the
+    # 11 dev_databases/<db>/<db>.sqlite files into data/bird-minidev/.
+    # Downloaded 2026-10-21 with the user's approval. 500 rows, 498 unique questions
+    # (question_id 137 and 138 are listed twice with identical content).
+    version: minidev.zip (Last-Modified 2024-06-20)
+    url: https://bird-bench.oss-cn-beijing.aliyuncs.com/minidev.zip
+    path: data/raw/bird-minidev/minidev.zip
+    bytes: 800943648
+    sha256: cc48ba16838204e4e214512030cb572eeb5f7bcdd999bae4b9b6ff12ec13b92f
+    problems: 500

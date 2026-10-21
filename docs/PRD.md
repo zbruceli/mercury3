@@ -87,7 +87,7 @@ We chose these two use cases because each one targets a different claimed advant
 **Question.** In an agent loop, does Mercury 3's per-call speed turn into proportionally faster *task completion* without losing accuracy or tool-call reliability?
 
 **Workload.**
-- **BIRD Mini-Dev (SQLite, 500 questions)**, stratified by difficulty (simple/moderate/challenging). Start with a 150-question stratified subset and expand if budget allows.
+- **BIRD Mini-Dev (SQLite, 500 questions)**, stratified by difficulty (simple/moderate/challenging). Start with a 150-question stratified subset and expand if budget allows. The release has 498 unique questions (two are listed twice); two more have gold SQL that can't be scored in 60 s and are excluded (ROADMAP_AND_PLAN §9).
 - One fixed agent loop shared by all models. Tools: `list_tables`, `describe_table(name)`, `run_sql(query)` (read-only, 5 s timeout, row cap), and `submit_answer(sql)`. Maximum 8 turns.
 - The same system prompt and tool JSON schemas for every model. Tool calls use OpenAI-format function calling, plus native Anthropic tools for Claude.
 
@@ -148,7 +148,7 @@ We chose these two use cases because each one targets a different claimed advant
 ## 10. Open questions
 
 - ~~OQ1. Which exact OpenAI and Google model IDs belong in the speed tier on run day?~~ Resolved 2026-10-20: `gpt-6-luna` and `gemini-3.5-flash-lite` (Section 4). Re-verify them before the main runs.
-- OQ5. gpt-oss-120b on Cerebras rejects requests that combine `tools` and `response_format`. For the UC2 strict-schema sub-run, should the control model skip that sub-run, or enforce the `submit_answer` schema through a strict tool definition instead? Decide in M3.
+- ~~OQ5. gpt-oss-120b on Cerebras rejects requests that combine `tools` and `response_format`. For the UC2 strict-schema sub-run, should the control model skip that sub-run, or enforce the `submit_answer` schema through a strict tool definition instead?~~ Resolved 2026-10-21: it **skips** the sub-run. A strict tool definition would measure a different mechanism, so its number wouldn't be comparable (ROADMAP_AND_PLAN §9).
 - OQ2. Should Mercury 2.5 be included for a lineage chart (more tokens, a stronger story)? Default is yes for UC1 only.
 - OQ3. What does `realtime: true` (described as lower TTFT) trade off? Test it as an extra Mercury arm in UC1. ~~Open.~~ Resolved 2026-10-21 by R3: no measurable TTFT or decode gain for code generation (M2_UC1_RESULTS §7).
 - ~~OQ4. Does the docs' FAQ statement that the MCP/agent setup uses `mercury-2.5` mean Mercury 3 has tool-calling caveats?~~ Resolved 2026-10-20: `mercury-3` tool calling and strict JSON schema both work (see [M0_SMOKE_RESULTS.md](M0_SMOKE_RESULTS.md)).

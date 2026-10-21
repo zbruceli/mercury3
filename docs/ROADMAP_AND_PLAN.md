@@ -1,6 +1,6 @@
 # Roadmap and implementation plan
 
-**Status (2026-10-21):** M0 ✅ · M1 ✅ · M2 ✅ · **M3 (UC2 SQL agent) is next.** Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
+**Status (2026-10-21):** M0 ✅ · M1 ✅ · M2 ✅ · **M3 (UC2 SQL agent) in progress:** F5.x built and tested offline; the UC2 pilot and R4 are next. Per-feature status: the Done column in [FEATURES.md](FEATURES.md).
 
 This doc covers *when* (§1, the roadmap) and *how* (§2–§7, the implementation plan) to build what [FEATURES.md](FEATURES.md) lists.
 
@@ -14,6 +14,7 @@ This doc covers *when* (§1, the roadmap) and *how* (§2–§7, the implementati
 | 6 | Mercury API notes and cross-provider findings |
 | 7 | M1 as built, and how it differs from the plan |
 | 8 | M2 as built so far: UC1 data, prompts, sandbox, scoring |
+| 9 | M3 as built: UC2 data, tools, agent loop, scoring, analysis |
 
 ## 1. Roadmap
 
@@ -289,4 +290,29 @@ Result: **542/542 canonical solutions pass in Docker**. All 3,866 LiveCodeBench 
 - **Docker Desktop's CLI lives in `~/.docker/bin`.** The executor finds it there when it isn't on the PATH.
 
 **Not done yet:** R1 pilot → review → recalibrate BUDGET_ESTIMATE → R2 and R3 → Pareto chart (F6.4). That's the M2 gate, recorded in `docs/M2_UC1_RESULTS.md` when it runs.
+
+## 9. M3 as built (2026-10-21)
+
+**Modules** (under `src/dllm_eval/usecases/sql_agent/` unless noted)
+
+| Module | What it does |
+|---|---|
+| `configs/datasets.yaml` (`bird-minidev`) + `datasets.py` | The official `minidev.zip` (801 MB) pinned by size and sha256. `fetch-data` extracts only `mini_dev_sqlite.json` and the 11 `.sqlite` files, to paths we build ourselves (crafted member names can't escape). The release lists question_id 137 and 138 twice, verbatim, so 500 rows give **498 questions** |
+| `datasets.GOLD_EXCLUDED` | `bird/518` and `bird/701`: their gold SQL doesn't finish in 60 s on the read-only connection (the other 496 take ≤ 2.1 s), so they can't be scored and are never sampled |
+| `dllm-eval sample-bird` | Difficulty-stratified sample, proportional with largest remainder, seeded per stratum. Committed lists: [configs/uc2/bird_r4_150.txt](../configs/uc2/bird_r4_150.txt) (45 simple, 75 moderate, 30 challenging; seed 2026) and [bird_pilot_10.txt](../configs/uc2/bird_pilot_10.txt) (3/5/2, drawn from the 150) |
+| `tools.py` | `list_tables`, `describe_table` (CREATE statement + 3 example rows), `run_sql` (5 s, 50 rows shown), `submit_answer`. `ReadOnlyDB` stacks `mode=ro`, `PRAGMA query_only`, an authorizer (no ATTACH/DETACH, no writes, only read-only PRAGMAs), no attached databases, and a progress-handler deadline. Tool-call validity (F5.5): known tool, arguments parse as JSON, and match the schema (a small JSON Schema subset, so no new dependency) |
+| `prompts.py` | Frozen `uc2-v1` system/user prompt and tool schemas; a test pins their sha256. BIRD's `evidence` goes in the user message as "Hint" (standard BIRD setting) |
+| `agent.py` | One loop for every model, max 8 model calls. Appends `ChatResult.as_message(provider_key)` each turn. Tool calls run in worker threads so SQL never blocks the event loop timing other streams. Text next to tool calls is kept (Mercury preambles). A reply with no tool call gets one fixed nudge. Outcomes: submitted, turn_cap, budget_out (any turn stopping at the cap; PRD R1), empty_response, invalid_answer (strict sub-run), error |
+| `runner.py` | A `sql_agent` job is a whole task: one `calls.jsonl` record with the full trace (every turn's result, tool calls, validity, tool results, and the final message history). The provider semaphore is held for the task. Budget is checked between tasks |
+| `scoring.py` + `compare.py` (`dllm-eval score`) | Runs gold (60 s) and predicted (30 s, BIRD's limit) SQL read-only. **EX** (primary): multiset of rows, ordered when the gold query has a top-level ORDER BY, floats rounded to 6 decimals, NULL = NULL. **EX (BIRD rule)**: `set(pred) == set(gold)`, reported for comparability |
+| `trace.py` (`dllm-eval trace`) | Pretty-prints a task. `--verify [--all]` rebuilds each turn's history and re-runs every recorded tool call on the database; the results must match byte for byte |
+| `analysis/uc2.py` (`analyze`, `score`, `charts`) | Task and turn tables, accuracy and reliability tables, $ per correct answer (promo and regular), and the speed-up chart: median per-call and per-task latency of each arm relative to `mercury-3:low`, with bootstrap CIs |
+
+**Decisions**
+- **Strict-schema sub-run (PRD OQ5): Cerebras skips it.** gpt-oss-120b on Cerebras refuses `tools` + `response_format` in one request, and a strict tool definition would measure something else. `models.yaml` records it as `tools_with_structured_outputs: false`, and the experiment check refuses such an arm.
+- **Same per-turn output cap as UC1 (32,768)** for every arm (PRD R1). A turn that stops at the cap ends the task as budget-out.
+- **Latency eligibility per task:** finished, not warm-up, no retried turn, not across a pause. Per-call latency uses the turns of those same tasks, so both ratios cover the same work.
+- **Tool time is part of task time.** Local SQL execution is the same for every model, which dilutes the task-level ratio toward 1. The task record keeps `model_s` and `tool_s` separately.
+
+**Checks:** `make check` (offline: fake provider, scripted multi-turn turns, a SQLite fixture, a crafted archive) and `make test-bird` (real data: all 150 sampled gold queries return rows and score EX = 1 against themselves; 38 of them are order-sensitive).
 

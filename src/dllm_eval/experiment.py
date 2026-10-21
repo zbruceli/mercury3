@@ -72,6 +72,22 @@ class CodegenWorkload(_Strict):
     prompt_version: str  # must equal prompts.PROMPT_VERSION (prompts are frozen)
 
 
+class SqlAgentWorkload(_Strict):
+    """UC2 BIRD questions run through the agent loop (usecases/sql_agent). Each job is a
+    whole task (up to max_turns model calls), logged as one record with its full trace."""
+
+    kind: Literal["sql_agent"]
+    prompt_version: str  # must equal sql_agent.prompts.PROMPT_VERSION
+    ids_file: Path  # committed question list (`dllm-eval sample-bird`), one id per line
+    answer_mode: Literal["tool", "response_format"] = "tool"  # response_format = F5.6
+    max_turns: int = Field(default=8, gt=0)
+    sql_timeout_s: float = Field(default=5.0, gt=0)  # run_sql statement timeout
+    row_cap: int = Field(default=50, gt=0)  # rows shown per run_sql result
+    # Dry-run estimate only: turns per task, and history growth per turn in tokens.
+    expected_turns: float = Field(default=5.0, gt=0)
+    expected_turn_growth_tokens: int = Field(default=600, ge=0)
+
+
 class Experiment(_Strict):
     name: str
     description: str = ""
@@ -89,7 +105,7 @@ class Experiment(_Strict):
     network_probe_interval_s: float | None = Field(default=None, gt=0)
     stream: bool = True
     arms: list[Arm]
-    workload: PromptWorkload | CodegenWorkload
+    workload: PromptWorkload | CodegenWorkload | SqlAgentWorkload
 
     @model_validator(mode="after")
     def _unique_arms(self) -> Self:
@@ -118,6 +134,15 @@ class Experiment(_Strict):
                     raise ValueError(
                         f"arm {arm.id}: temperature {arm.temperature} outside [{lo}, {hi}]"
                     )
+            if (
+                isinstance(self.workload, SqlAgentWorkload)
+                and self.workload.answer_mode == "response_format"
+                and not model.supports.tools_with_structured_outputs
+            ):
+                raise ValueError(
+                    f"arm {arm.id}: {arm.model} can't combine tools with response_format "
+                    "(PRD OQ5), so it can't run the strict-schema sub-run"
+                )
             if model.max_output_tokens and arm.max_completion_tokens > model.max_output_tokens:
                 raise ValueError(
                     f"arm {arm.id}: max_completion_tokens {arm.max_completion_tokens} > "

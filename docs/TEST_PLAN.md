@@ -46,6 +46,11 @@ Coverage target: ≥85% on `providers/`, `timing`, `metrics`, `cost`, and `scori
 - Lockdown: candidate code cannot reach the network, resolve DNS, or write outside `/tmp`.
 - Run it after any change to `sandbox/` or `usecases/codegen/`, and before R1/R2 scoring.
 
+### A3c. BIRD data check (`tests/data`, marker `@pytest.mark.bird`, `make test-bird`)
+- Needs the extracted BIRD Mini-Dev data (`dllm-eval fetch-data`). Makes no API calls.
+- The release has 498 unique questions. Every gold query in the R4 and pilot samples runs on its read-only database, returns rows, and scores EX = 1 against itself. A failure means the scorer or the sample is wrong.
+- Run it after any change to `usecases/sql_agent/` scoring and before scoring R4.
+
 ### A4. Pipeline (end-to-end dry) tests
 - `dllm-eval run --dry-run` on each experiment config produces the expected job count and cost estimate.
 - A mini run (3 items × 1 model, fake provider) → analyze → charts render without error.

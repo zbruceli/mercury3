@@ -86,6 +86,8 @@ class Supports(_Strict):
     streaming: bool = True
     tools: bool = False
     structured_outputs: bool = False
+    # tools and response_format in one request (gpt-oss on Cerebras refuses: PRD OQ5)
+    tools_with_structured_outputs: bool = True
     diffusing: bool = False
 
 

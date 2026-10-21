@@ -186,7 +186,7 @@ models:
     context_window: 131000            # developer tier ("131k"); 65k on the free trial
     max_output_tokens: 40000          # developer tier ("40k"); 32k on the free trial
     reasoning_efforts: [low, medium, high]
-    supports: {streaming: true, tools: true, structured_outputs: true}
+    supports: {streaming: true, tools: true, structured_outputs: true, tools_with_structured_outputs: false}
     pricing:                          # no cache discount: cached tokens bill at the input rate
       input: 0.35
       cached_input: 0.35
