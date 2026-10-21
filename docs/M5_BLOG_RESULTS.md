@@ -27,7 +27,7 @@ The exit gate from ROADMAP_AND_PLAN §1: every number in the draft is footnoted 
 | | |
 |---|---|
 | Path | `draft.md` in the author's blog folder (outside the repo, at the user's request; ROADMAP_AND_PLAN §5 had planned `reports/blog/draft.md`) |
-| Images | `images/fig1_pareto_uc1.png`, `images/fig2_task_vs_call_speedup_uc2.png`, `images/fig4_cost_per_success.png`, `images/diffusion_2026.gif` |
+| Images | `images/hero_drag_race.png` (hero, §3), `images/fig1_pareto_uc1.png`, `images/fig2_task_vs_call_speedup_uc2.png`, `images/fig4_cost_per_success.png`, `images/diffusion_2026.gif` |
 | Length | ~2,400 words including captions and the editor note (`wc -w`) |
 | Not used | fig3 (latency CDF), the reliability table and decision matrix as tables (their key numbers are in the text) |
 
@@ -36,6 +36,18 @@ The exit gate from ROADMAP_AND_PLAN §1: every number in the draft is footnoted 
 ## 3. Fact-check table
 
 Sources: M2 = [M2_UC1_RESULTS.md](M2_UC1_RESULTS.md), M3 = [M3_UC2_RESULTS.md](M3_UC2_RESULTS.md), M4 = [M4_ANALYSIS_RESULTS.md](M4_ANALYSIS_RESULTS.md), R = `reports/` (CSV next to each figure). Run ids: R1 `r1-pilot-uc1-20261021T020019Z`, R1b `r1b-cap-probe-20261021T021543Z`, OAI `oai-priority-ab-20261021T033428Z`, R2 `r2-uc1-main-20261021T034053Z`, R3 `r3-uc1-length-20261021T152238Z`, R4 `r4-uc2-main-20261021T165313Z`, R4b `r4b-uc2-strict-20261021T170547Z`, R5 `r5-diffusion-capture-20261021T181518Z`.
+
+### Hero image (`images/hero_drag_race.png`)
+
+Built by `images/hero_drag_race.py` (in the blog folder) from `reports/assets/fig1_pareto_uc1.csv` only. Each car sits at the fraction of the track it covers by the time the fastest model finishes (0.345 s ÷ its own median), assuming constant speed.
+
+| Draft claim | Value in source | Source | Run | ✔ |
+|---|---|---|---|---|
+| gpt-oss-120b `medium` 0.34 s, 84.9% | 0.3449 s, 0.8493 | fig1 CSV | R2 | ✅ |
+| Gemini 3.5 Flash-Lite `minimal` 0.76 s, 82.4% | 0.7644 s, 0.8242 | fig1 CSV | R2 | ✅ |
+| Mercury 3 `low` 0.83 s, 86.0% | 0.8275 s, 0.8603 | fig1 CSV | R2 | ✅ |
+| Claude Haiku 5.5 thinking off 0.97 s, 86.1% | 0.9710 s, 0.8609 | fig1 CSV | R2 | ✅ |
+| GPT-6 Luna `none` 1.28 s, 83.2% | 1.2801 s, 0.8320 | fig1 CSV | R2 | ✅ |
 
 ### Intro and diffusion section
 
