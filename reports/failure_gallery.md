@@ -30,7 +30,7 @@ On a certain planet, there are N aliens, all of whom a
 
 `mercury-3:medium/mbpp+/Mbpp/430/0` in run `r2-uc1-main-20261021T034053Z` · tag `budget_out_hidden` (hit the output cap on hidden reasoning; no visible answer)
 
-**What happened.** The task says 'find the directrix of a parabola', but its one example (5, 3, 2 → −198) matches no textbook formula; the hidden reference uses an unusual one. Most AR arms write the standard formula and fail the tests (Claude Haiku `medium` reverse-engineers the example and passes 5 of 5). Mercury 3 reasons until the cap on all 10 samples at `medium` and `high`, and on 4 of 5 at `low`, apparently trying to reconcile the example with the math. Same score as a wrong guess, but ~32k tokens and close to a minute per call.
+**What happened.** The task says 'find the directrix of a parabola', but its one example (5, 3, 2 → −198) matches no textbook formula; the hidden reference uses an unusual one. Most AR arms write the standard formula and fail the tests. Claude Haiku `medium` passes 5 of 5 by recognising the benchmark's own reference formula (it names "the MBPP reference" in 2 of 5 answers). Mercury 3 reasons until the cap on all 10 samples at `medium` and `high`, and on 4 of 5 at `low`, apparently trying to reconcile the example with the math. Same score as a wrong guess, but ~32k tokens and close to a minute per call. A follow-up probe (P1, `p1-directrix-probe-20261022T155049Z`) confirms the example is the trigger: with it corrected to the textbook 1.5, Mercury 3 writes the textbook formula in about 1 s at every effort, with 0 budget-outs in 20 samples.
 
 **Facts.** finish: length · output tokens: 32204 · of which reasoning: 32204 · visible characters: 0 · time: 53.8 s · grade: no_code
 

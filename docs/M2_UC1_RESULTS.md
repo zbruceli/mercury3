@@ -253,6 +253,44 @@ The pilot sampled only 3 LiveCodeBench problems, one of which (`abc388_d`) cause
 - **Output-cap policy (M2-F1): decided 2026-10-21.** R2 keeps the uniform 32,768 cap (PRD R1), and "budget out" is reported as its own failure mode. The R1b probe (§4) confirmed it: 131,072 rescued 1 of 12 calls.
 - Chart polish for the blog (M4): a few labels touch neighbouring error bars in the R2 Pareto chart.
 
+## 12. P1 directrix probe: is Mercury 3 stuck on a contradictory example? (2026-10-22)
+
+**Answer: yes. The contradictory example is what makes Mercury 3 run away.** Corrected to the textbook value, the same problem takes Mercury 3 about 1 s at every effort, with no budget-outs.
+
+A reviewer asked about MBPP+ `Mbpp/430` ("find the directrix of a parabola"). Its only example, `parabola_directrix(5,3,2) == -198`, follows MBPP's buggy reference `c − (b²+1)·4a`. The textbook directrix of y = ax² + bx + c is `c − (b²+1)/(4a)`, which is 1.5 here. In R2, Mercury 3 ran out of budget on 4/5 samples at `low` and 10/10 at `medium`/`high` (M4 gallery case 2).
+
+| | |
+|---|---|
+| Run id | `p1-directrix-probe-20261022T155049Z` (local only), commit `c72ddab` |
+| Config | [configs/experiments/p1_directrix_probe.yaml](../configs/experiments/p1_directrix_probe.yaml): 3 prompt variants × Mercury 3 `instant`/`low`/`medium`/`high` + Claude Haiku 5.5 `medium` × 5 samples. The variants are R2's prompt byte for byte (`original`), the example removed, and the example corrected to 1.5. Same uc1-v1 template, 32,768-token cap and temperature 0.5 as R2. A separately labelled probe, not a primary arm |
+| Grading | [scripts/directrix_probe.py](../scripts/directrix_probe.py): each answer is graded in the Docker sandbox against both formulas on MBPP+'s 105 inputs (15 dropped for the textbook check: a = 0) |
+| Result | 75/75 ok, **$0.23** |
+
+| Variant | Arm | Budget-out | Output tokens p50 | Time p50 | Textbook formula | MBPP reference |
+|---|---|---:|---:|---:|---:|---:|
+| original | Mercury 3 `instant` | 1/5 | 149 | 0.4 s | 4/5 | 0/5 |
+| original | Mercury 3 `low` | **5/5** | 32,091 | 45.0 s | 0/5 | 0/5 |
+| original | Mercury 3 `medium` | **5/5** | 32,091 | 58.1 s | 0/5 | 0/5 |
+| original | Mercury 3 `high` | **5/5** | 31,735 | 41.2 s | 0/5 | 0/5 |
+| original | Claude Haiku `medium` | 0/5 | 724 | 4.0 s | 0/5 | **5/5** |
+| corrected | Mercury 3 `instant` | 0/5 | 166 | 0.6 s | **5/5** | 0/5 |
+| corrected | Mercury 3 `low` | 0/5 | 594 | 1.2 s | **5/5** | 0/5 |
+| corrected | Mercury 3 `medium` | 0/5 | 437 | 0.9 s | **5/5** | 0/5 |
+| corrected | Mercury 3 `high` | 0/5 | 486 | 1.2 s | **5/5** | 0/5 |
+| corrected | Claude Haiku `medium` | 0/5 | 842 | 4.2 s | 5/5 | 0/5 |
+| no example | Mercury 3 `instant` | 0/5 | 352 | 0.8 s | 1/5 | 0/5 |
+| no example | Mercury 3 `low` | 0/5 | 1,719 | 2.7 s | 1/5 | 0/5 |
+| no example | Mercury 3 `medium` | 0/5 | 10,607 | 21.3 s | 4/5 | 0/5 |
+| no example | Mercury 3 `high` | 0/5 | 6,185 | 12.8 s | 4/5 | 0/5 |
+| no example | Claude Haiku `medium` | 0/5 | 680 | 4.3 s | 4/5 | 1/5 |
+
+**What this shows:**
+- **R2 reproduces.** On the original prompt, Mercury 3 runs out of budget on 15/15 samples at `low`/`medium`/`high`.
+- **The math isn't the problem.** In R2's one visible runaway (`instant`, plain-text reasoning), Mercury 3 derives the textbook formula and gets 1.5 in its first lines. It then spends the remaining 82,000 characters trying formulas to reach −198 ("198" appears 495 times) and never finds the buggy one.
+- **Correcting the example removes the runaway entirely.** 0/20 budget-outs, 166–594 output tokens, and about 1 s, with the textbook formula every time. M2-F1/M4-F4's "hard or ill-posed problems" is, here, specifically **an instruction that contradicts the example**.
+- **Removing the example is a milder case.** There are no runaways, but `medium`/`high` think longer (6–11k tokens, 13–21 s). `instant`/`low` often pick another reading of "directrix", such as a tuple, a string, or the vertex/focus form, so the task is underspecified without it.
+- **Claude Haiku "solves" the original by recognising the benchmark.** It writes MBPP's buggy formula and names it: "the MBPP reference" in 2 of 5 R2 answers and "the known reference solution" in the probe. Without the example it once still writes the buggy formula. So its 5/5 on the original is benchmark recall, not reverse-engineering, and the M4 gallery note was corrected to say so. Mercury 3 never produced the MBPP formula.
+
 ## 11. Where the evidence lives
 
 | What | Where | In git? |
@@ -265,4 +303,5 @@ The pilot sampled only 3 LiveCodeBench problems, one of which (`abc388_d`) cause
 | R2 Pareto chart + data | `docs/figures/m2_r2_pareto_uc1.png`, `.csv` | ✅ |
 | R1b raw run + scores | `results/runs/r1b-cap-probe-20261021T021543Z/`, `results/analysis/r1b-cap-probe-20261021T021543Z/` | ❌ local only |
 | OpenAI Fast-mode test rows | `results/analysis/oai-priority-ab-20261021T033428Z/calls.jsonl` | ❌ local only (rerun: `scripts/oai_priority_ab.py`) |
+| P1 directrix probe | `results/runs/p1-directrix-probe-20261022T155049Z/`, `results/analysis/p1-directrix-probe-20261022T155049Z/directrix.jsonl` | ❌ local only (regrade: `scripts/directrix_probe.py`) |
 | R1 scores + analysis | `results/analysis/r1-pilot-uc1-20261021T020019Z/` (`scores.jsonl`, `calls.parquet`) | ❌ local only (regenerate with `score` / `analyze`) |
