@@ -115,6 +115,8 @@ Note: Gemini's mean turns are 6.6 in fig2 (latency-eligible tasks) and 6.7 in M3
 | 4× cap: 1 of 12 probe calls extra finished | 1 of 12 | M2 §4 | R1b | ✅ |
 | No other model ran away in the code test | all other arms 0.0% | table_reliability §3 | R2 | ✅ |
 | Directrix (Mbpp/430): Mercury `medium`/`high` hit the cap on all 10 samples; ~32k tokens, close to a minute | 10/10; 32,204 tokens, 53.8 s in the gallery example | failure_gallery case 2, M4-F4 | R2 | ✅ |
+| Claude Haiku passes the directrix problem by recognising the benchmark and reciting its buggy reference | names "the MBPP reference" in 2 of 5 R2 answers; writes MBPP's formula 5/5 on the original prompt in P1 | M2 §12; failure_gallery case 2 (corrected 2026-10-22) | R2, P1 | ✅ |
+| Fix the example to the textbook value and Mercury 3 answers correctly in about a second, every time | corrected variant: 0/20 budget-outs, textbook formula 20/20, time p50 0.6–1.2 s | M2 §12 | P1 | ✅ |
 | Mercury 3 `low` vs Mercury 2.5 `low`: 86.0 vs 76.9% (+9), 0.83 vs 1.36 s | as stated | M2-F7 | R2 | ✅ |
 
 ### Surprises
@@ -217,3 +219,11 @@ Derived numbers in the report that don't appear verbatim in a source: gpt-oss `m
 ## 8. UC2 numbers moved to R4c (2026-10-21)
 
 The M3 session ran R4c (`r4c-uc2-full-20261021T214456Z`, all 496 usable BIRD questions, 14,880 tasks, \$21.78) and regenerated `reports/` from it (commit `9b550f7`). The draft, the technical report, and the README now quote R4c for every UC2 number; fig2, fig3 and fig4 were re-copied into the blog `images/` (scaled to 1,600 px). R4b (strict JSON, on R4's 150 questions) and every UC1 number are unchanged; the report compares R4b's Haiku 53.3\% against R4's 58.9\% because both use the same 150 questions. The rows in §3 and the map in §7 above point at R4c. What changed in the story: Claude Haiku's agent accuracy lead is now clear (+4–5 points), gpt-oss on Cerebras is clearly behind (−6 to −8), and at Mercury's regular price Claude Haiku thinking off is cheaper per correct task than every Mercury setting. The speed story is unchanged.
+
+## 9. Directrix probe and the Claude Haiku correction (2026-10-22)
+
+The M3 session ran P1 (`p1-directrix-probe-20261022T155049Z`, 75 calls, \$0.23; M2 §12, commit `db53f30`). It shows that Mercury 3's runaway on `Mbpp/430` is triggered by the example contradicting the instruction: corrected to the textbook value, 0/20 budget-outs and about 1 s per answer. It also corrected an earlier claim: Claude Haiku `medium` passes the original prompt by recalling MBPP's buggy reference, not by reverse-engineering the example. Changes:
+
+- **Draft:** the directrix paragraph now says Haiku passes by benchmark recall and adds the probe's one-line result.
+- **Technical report:** gallery case 2 rewritten; a probe table and the "math isn't the problem" finding added to §5.5; P1 added to the run inventory (totals now 63,050 jobs, still about \$56) and to the data notes.
+- Nothing in the draft or report had claimed Haiku derived −198 except the report's case 2, now fixed.
