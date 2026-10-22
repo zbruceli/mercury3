@@ -1,0 +1,87 @@
+# P1 directrix probe (a reviewer's question, 2026-10-22). NOT a primary arm: a separately
+# labelled probe on one UC1 problem. MBPP+ Mbpp/430 asks for "the directrix of a parabola", but
+# its one example (5, 3, 2 -> -198) follows the buggy MBPP reference c - (b^2+1)*4a, not the
+# textbook c - (b^2+1)/(4a) = 1.5. In R2, Mercury 3 ran out of budget on 4/5 `low` and 10/10
+# `medium`/`high` samples. Question: is it stuck on the contradictory example?
+# Items: the R2 prompt byte for byte (`original`), the example removed, the example corrected
+# to 1.5. Same UC1 template (uc1-v1 wording), cap 32,768 and temperature 0.5 as R2; Claude
+# Haiku `medium` as the AR control. Grade with scripts/directrix_probe.py (Docker sandbox).
+#   uv run dllm-eval run configs/experiments/p1_directrix_probe.yaml --dry-run
+name: p1-directrix-probe
+description: 'Mbpp/430 directrix: does Mercury 3 still run away when the contradictory example is removed
+  or corrected?'
+seed: 11
+repeats: 5
+budget_usd: 3.0
+max_concurrency_per_provider: 4
+warmup_calls_per_arm: 0
+arms:
+- name: instant
+  model: mercury-3
+  reasoning_effort: instant
+  temperature: 0.5
+  max_completion_tokens: 32768
+  expected_output_tokens: 2000
+- name: low
+  model: mercury-3
+  reasoning_effort: low
+  temperature: 0.5
+  max_completion_tokens: 32768
+  expected_output_tokens: 8000
+- name: medium
+  model: mercury-3
+  reasoning_effort: medium
+  temperature: 0.5
+  max_completion_tokens: 32768
+  expected_output_tokens: 16000
+- name: high
+  model: mercury-3
+  reasoning_effort: high
+  temperature: 0.5
+  max_completion_tokens: 32768
+  expected_output_tokens: 16000
+- name: medium
+  model: claude-haiku-5-5
+  reasoning_effort: medium
+  max_completion_tokens: 32768
+  expected_output_tokens: 700
+workload:
+  kind: prompts
+  items:
+  - id: directrix-original
+    messages:
+    - role: system
+      content: You are an expert Python programmer.
+    - role: user
+      content: 'Write a Python function named `parabola_directrix` that solves the task below. Respond
+        with the complete function and any imports it needs in a single ```python code block. Do not include
+        tests or example usage.
+
+
+        Write a function to find the directrix of a parabola.
+
+        assert parabola_directrix(5,3,2)==-198'
+  - id: directrix-no-example
+    messages:
+    - role: system
+      content: You are an expert Python programmer.
+    - role: user
+      content: 'Write a Python function named `parabola_directrix` that solves the task below. Respond
+        with the complete function and any imports it needs in a single ```python code block. Do not include
+        tests or example usage.
+
+
+        Write a function to find the directrix of a parabola.'
+  - id: directrix-corrected
+    messages:
+    - role: system
+      content: You are an expert Python programmer.
+    - role: user
+      content: 'Write a Python function named `parabola_directrix` that solves the task below. Respond
+        with the complete function and any imports it needs in a single ```python code block. Do not include
+        tests or example usage.
+
+
+        Write a function to find the directrix of a parabola.
+
+        assert parabola_directrix(5,3,2)==1.5'
