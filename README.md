@@ -1,5 +1,7 @@
 # mercury3: Diffusion vs. autoregressive LLM evaluation
 
+> 📄 **Read the full technical report:** [Mercury 3 vs. the Fast Autoregressive Models](https://zbruceli.org/blog/mercury-3-vs-the-fast-autoregressive-models/): methods, every table and chart, failure analysis, and vendor observations.
+
 A harness for benchmarking Inception Labs **Mercury 3** (a diffusion LLM) against the fast tiers of autoregressive LLMs: Claude Haiku 5.5, GPT-6 Luna, Gemini 3.5 Flash-Lite, and gpt-oss-120b on Cerebras as a fast-hardware control. It covers two use cases:
 - **UC1:** code-generation speed and quality (HumanEval+, MBPP+, LiveCodeBench v6; 637 problems × 5 samples).
 - **UC2:** latency in a multi-step SQL tool-calling agent (BIRD Mini-Dev; 150 questions × 3 repeats, up to 8 turns).
@@ -80,3 +82,7 @@ Live runs need API keys in `.env` (see the variable names in `configs/models.yam
 ## License
 
 Code: [MIT](LICENSE). Benchmark datasets (HumanEval+, MBPP+, LiveCodeBench, BIRD) are not redistributed here and stay under their owners' licenses; see the sources in [configs/datasets.yaml](configs/datasets.yaml).
+
+## Full technical report
+
+The complete write-up of this study, with methods, all results tables, failure cases, and the claims scorecard: **[Mercury 3 vs. the Fast Autoregressive Models: A Technical Report](https://zbruceli.org/blog/mercury-3-vs-the-fast-autoregressive-models/)**.
